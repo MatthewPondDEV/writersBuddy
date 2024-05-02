@@ -147,7 +147,7 @@ export default function ProjectSidebar({
                                               {...country}
                                               key={country._id}
                                               variant="none"
-                                              className="border-top w-100 text-start p-3"
+                                              className="w-100 text-start p-3"
                                               onClick={() => {
                                                 setCurrentCountryId(
                                                   country._id
@@ -207,7 +207,7 @@ export default function ProjectSidebar({
                                   </Accordion.Body>
                                 </Accordion.Item>
                                 <Accordion.Item eventKey="8">
-                                  <Accordion.Header className="border-bottom">
+                                  <Accordion.Header>
                                     Bodies of Water
                                   </Accordion.Header>
                                   <Accordion.Body>
@@ -249,7 +249,7 @@ export default function ProjectSidebar({
                               <Accordion.Header>Characters</Accordion.Header>
                               <Accordion.Body>
                                 <Accordion.Item eventKey="6">
-                                  <Accordion.Header className="border-top">
+                                  <Accordion.Header>
                                     Protagonists
                                   </Accordion.Header>
                                   <Accordion.Body>
@@ -271,7 +271,7 @@ export default function ProjectSidebar({
                                                       {...character}
                                                       key={character._id}
                                                       variant="none"
-                                                      className="border-top w-100 text-start p-3"
+                                                      className="w-100 text-start p-3"
                                                       onClick={() => {
                                                         setCurrentCharacterId(
                                                           character._id
@@ -445,7 +445,7 @@ export default function ProjectSidebar({
                                 </Button>
                               </Accordion.Body>
                             </Accordion.Item>
-                            <Accordion.Item eventKey="14">
+                            <Accordion.Item eventKey="20">
                               <Accordion.Header>
                                 Groups/Organizations
                               </Accordion.Header>
@@ -498,7 +498,7 @@ export default function ProjectSidebar({
                                   Overview
                                 </Button>
                                 <Accordion.Item eventKey="16">
-                                  <Accordion.Header className="border-bottom">
+                                  <Accordion.Header>
                                     Arcs/Books
                                   </Accordion.Header>
                                   <Accordion.Body>
@@ -551,8 +551,8 @@ export default function ProjectSidebar({
                                 >
                                   Epilogue
                                 </Button>
-                                <Accordion.Item eventKey="16">
-                                  <Accordion.Header className="border-bottom">
+                                <Accordion.Item eventKey="17">
+                                  <Accordion.Header>
                                     Chapters
                                   </Accordion.Header>
                                   <Accordion.Body>

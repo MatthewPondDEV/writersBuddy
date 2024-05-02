@@ -40,6 +40,11 @@
   background: none;
 }
 
+#project-sidebar .accordion-item {
+  border-right: none;
+  border-left:none;
+}
+
 
 #project-sidebar .accordion button,#project-sidebar .accordion-body {
   background-color:#f8f9fa;
