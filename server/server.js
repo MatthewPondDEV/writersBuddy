@@ -5,15 +5,17 @@ const bcrypt = require("bcryptjs");
 const cors = require("cors");
 const User = require("./models/User");
 const Project = require("./models/Project");
-const Note = require("./models/Note")
+const Note = require("./models/Note");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
+require("dotenv").config();
 
 const salt = bcrypt.genSaltSync(10);
-const secret = "hjkfbhdsf9y8dfh4";
+const secret = process.env.JWT_SECRET;
+const key = process.env.MDB_API_KEY;
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
@@ -21,7 +23,7 @@ app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
 
 mongoose.connect(
-  "mongodb+srv://mattypond00:Jzyi6EOj9txVH7xg@cluster0.32pnilj.mongodb.net/WritersBuddy?retryWrites=true&w=majority"
+  `mongodb+srv://mattypond00:${key}@cluster0.32pnilj.mongodb.net/WritersBuddy?retryWrites=true&w=majority`
 );
 
 app.post("/register", async (req, res) => {
@@ -69,20 +71,20 @@ app.post("/logout", (req, res) => {
   res.cookie("token", "").json();
 });
 
-app.get('/getProjects', async (req,res) => {
-  const {token} = req.cookies
+app.get("/getProjects", async (req, res) => {
+  const { token } = req.cookies;
 
-  jwt.verify(token,secret, {}, async (err, info) => {
+  jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-    const projects = await Project.find({ createdBy: info.id})
+    const projects = await Project.find({ createdBy: info.id });
     const userProjects = projects.map((project) => ({
       _id: project._id,
       title: project.title,
       createdBy: project.createdBy,
-    }))
-    res.json(userProjects)
-  } )
-})
+    }));
+    res.json(userProjects);
+  });
+});
 
 app.post("/createProject", async (req, res) => {
   const { token } = req.cookies;
@@ -114,18 +116,18 @@ app.post("/createProject", async (req, res) => {
       },
       themes: {
         primary: {
-          name: 'Primary Theme',
-          description: '',
-          plan:'',
+          name: "Primary Theme",
+          description: "",
+          plan: "",
         },
         secondary: [
           {
-            name: 'Secondary Theme',
-            description:'',
-            plan: '',
-          }
-        ]
-      }
+            name: "Secondary Theme",
+            description: "",
+            plan: "",
+          },
+        ],
+      },
     });
     console.log(projectDoc);
     res.json(projectDoc);
@@ -854,17 +856,17 @@ app.put("/updateGroup", uploadMiddleware.single("files"), async (req, res) => {
   });
 });
 
-app.delete('/deleteGroup', async (req,res) => {
-  const {token} = req.cookies
-  const {id, currentGroupId} = req.body
+app.delete("/deleteGroup", async (req, res) => {
+  const { token } = req.cookies;
+  const { id, currentGroupId } = req.body;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
     const project = await Project.findById(id);
     project.groups.pull({ _id: currentGroupId });
     await project.save();
     res.json({ message: "Group deleted successfully", project });
-  })
-})
+  });
+});
 
 app.put("/updateThemes", uploadMiddleware.single("files"), async (req, res) => {
   const { token } = req.cookies;
@@ -1120,12 +1122,12 @@ app.delete("/deleteChapter", async (req, res) => {
   });
 });
 
-app.put('/updateEpilogue', uploadMiddleware.single(''), async (req,res) => {
-  const {token} = req.cookies
-   jwt.verify(token, secret, {}, async (err, info) => {
+app.put("/updateEpilogue", uploadMiddleware.single(""), async (req, res) => {
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-    console.log(req.body)
-    const {epilogue, id} = req.body
+    console.log(req.body);
+    const { epilogue, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
       JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
@@ -1135,13 +1137,13 @@ app.put('/updateEpilogue', uploadMiddleware.single(''), async (req,res) => {
 
     await projectDoc.updateOne({
       $set: {
-        'write.epilogue': epilogue
-      }
-    })
-    console.log(projectDoc.write.epilogue)
-    res.json(projectDoc)
-   })
-})
+        "write.epilogue": epilogue,
+      },
+    });
+    console.log(projectDoc.write.epilogue);
+    res.json(projectDoc);
+  });
+});
 
 app.put("/updatePrologue", uploadMiddleware.single(""), async (req, res) => {
   const { token } = req.cookies;
@@ -1165,30 +1167,30 @@ app.put("/updatePrologue", uploadMiddleware.single(""), async (req, res) => {
   });
 });
 
-app.post('/createNewNote', async (req,res) => {
-  const {token} = req.cookies
+app.post("/createNewNote", async (req, res) => {
+  const { token } = req.cookies;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-    const { title } = req.body
+    const { title } = req.body;
     const noteDoc = await Note.create({
       title,
       createdBy: info.id,
-    })
-    console.log(noteDoc)
-    res.json(noteDoc)
-  })
-})
+    });
+    console.log(noteDoc);
+    res.json(noteDoc);
+  });
+});
 
-app.get('/getUserNotes', async (req,res) => {
+app.get("/getUserNotes", async (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, secret, {}, async (err, info) => {
-    const notes = await Note.find({createdBy: info.id})
-    res.json(notes)
-  })
-})
+    const notes = await Note.find({ createdBy: info.id });
+    res.json(notes);
+  });
+});
 
-app.put('/updateNote', async (req,res) => {
-  const {token} = req.cookies;
+app.put("/updateNote", async (req, res) => {
+  const { token } = req.cookies;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
     const { title, content, currentNoteId } = req.body;
@@ -1196,10 +1198,10 @@ app.put('/updateNote', async (req,res) => {
     await noteDoc.updateOne({
       title,
       content,
-    })
-    res.json(noteDoc)
-  })
-})
+    });
+    res.json(noteDoc);
+  });
+});
 
 app.delete("/deleteNote", async (req, res) => {
   const { token } = req.cookies;
