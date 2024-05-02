@@ -87,16 +87,16 @@ useEffect(() => {
                     </Button>
                     </div>
                     {loadLogin && <><Login />
-                                    <Button className='btn-link' 
+                                    <Button variant='link'
                                         onClick={() => {
                                             setLoadLogin(false)
                                             setLogOrReg(true)
-                                    }}>Go Back
+                                    }}> Go Back
                                 </Button>
                             </>}
                     {loadRegister && <><Register setLoadRegister={setLoadRegister}
                                                 setLogOrReg={setLogOrReg}/>
-                                    <Button className='btn-link' onClick={() => {
+                                    <Button variant='link' onClick={() => {
                                     setLoadRegister(false)
                                     setLogOrReg(true)
                                 }}>Go Back

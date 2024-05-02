@@ -11,6 +11,7 @@ export default function Register({setLoadRegister, setLogOrReg}) {
     const [redirect, setRedirect] = useState(false);
 
     async function register(event) {
+        console.log('hey')
         event.preventDefault();
         const response = await fetch('http://localhost:5000/register', {
             method: 'POST',
@@ -30,7 +31,7 @@ export default function Register({setLoadRegister, setLogOrReg}) {
     return (
         <Form className='p-5 pb-3' onSubmit={register}>
 
-            <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Group className="mb-3">
                 <Form.Label>Username:</Form.Label>
                 <Form.Control name="username"
                     type="username" 

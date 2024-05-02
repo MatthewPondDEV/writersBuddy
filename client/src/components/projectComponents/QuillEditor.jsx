@@ -53,7 +53,7 @@ export default function QuillEditor({ value, onChange }) {
     "underline",
     "strike",
     "blockquote",
-    'size',
+    "size",
     "list",
     "bullet",
     "indent",
@@ -63,8 +63,10 @@ export default function QuillEditor({ value, onChange }) {
   ];
 
   return (
-    <div id="editor-container" className="d-flex flex-column justify-content-between">
-      
+    <div
+      id="editor-container"
+      className="d-flex flex-column justify-content-between"
+    >
       <ReactQuill
         ref={quillRef}
         modules={modules}
@@ -74,10 +76,10 @@ export default function QuillEditor({ value, onChange }) {
         placeholder="Write something epic..."
         theme="snow"
       />
-      <div className='d-flex' style={{ marginTop: "20px" }}>
+      <div className="d-flex" style={{ marginTop: "20px" }}>
         <p className="ms-5">Word Count: {wordCount}</p>
         <p className="ms-5">Page Count: {pageCount}</p>
       </div>
     </div>
-  )
+  );
 }

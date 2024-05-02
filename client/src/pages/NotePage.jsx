@@ -1,40 +1,41 @@
-import Row from "react-bootstrap/esm/Row";
-import Col from "react-bootstrap/esm/Col";
-import Container from "react-bootstrap/esm/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
 import NoteSidebar from "../components/NoteSidebar";
 import Header from "../components/Header";
 import { useState, useEffect } from "react";
-import QuillEditor from '../components/projectComponents/QuillEditor'
-import Form from 'react-bootstrap/Form'
-import Button from "react-bootstrap/esm/Button";
+import QuillEditor from "../components/projectComponents/QuillEditor";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
 
 export default function NotePage() {
-  const [notes, setNotes] = useState([{
-    title: 'New Note',
-    content: '',
-  }]);
-  const [title, setTitle] = useState('')
+  const [notes, setNotes] = useState([
+    {
+      title: "New Note",
+      content: "",
+    },
+  ]);
+  const [title, setTitle] = useState("");
   const [showEditTitle, setShowEditTitle] = useState(false);
-  const [content, setContent] = useState('')
+  const [content, setContent] = useState("");
   const [updated, setUpdated] = useState(false);
   const [currentNoteId, setCurrentNoteId] = useState(
     window.sessionStorage.getItem("currentNoteId")
   );
 
-    const createNote = async () => {
-        const create = await fetch("http://localhost:5000/createNewNote", {
-          method: "Post",
-          body: JSON.stringify({ title: "New Note" }),
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        });
+  const createNote = async () => {
+    const create = await fetch("http://localhost:5000/createNewNote", {
+      method: "Post",
+      body: JSON.stringify({ title: "New Note" }),
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
 
-        if (create.ok) {
-          setCurrentNoteId(null);
-          setUpdated(false);
-        }
+    if (create.ok) {
+      setCurrentNoteId(null);
+      setUpdated(false);
     }
-  
+  };
 
   useEffect(() => {
     const retrieveNotes = async () => {
@@ -46,62 +47,60 @@ export default function NotePage() {
       const noteArray = await response.json();
       if (noteArray.length > 0) {
         setNotes(noteArray);
-        setUpdated(true)
-        console.log(notes)
+        setUpdated(true);
+        console.log(notes);
       } else {
-        createNote()
+        createNote();
       }
       if (!currentNoteId) {
         setCurrentNoteId(notes[notes.length - 1]._id);
       }
     };
-    retrieveNotes()
+    retrieveNotes();
     if (updated === false) {
-        retrieveNotes()
-        
+      retrieveNotes();
     }
-
-  },[updated]);
+  }, [updated]);
 
   useEffect(() => {
-    window.sessionStorage.setItem('currentNoteId', currentNoteId)
+    window.sessionStorage.setItem("currentNoteId", currentNoteId);
     if (!currentNoteId) {
       setCurrentNoteId(notes[0]._id);
     }
     notes.forEach((note) => {
-        if (note._id === currentNoteId) {
-          if (!note.title) {}
-            setTitle(note.title)
-            setContent(note.content)
+      if (note._id === currentNoteId) {
+        if (!note.title) {
         }
-    })
-  }, [currentNoteId, notes, updated])
+        setTitle(note.title);
+        setContent(note.content);
+      }
+    });
+  }, [currentNoteId, notes, updated]);
 
   async function updateNote(ev) {
     ev.preventDefault();
     const response = await fetch("http://localhost:5000/updateNote", {
       method: "Put",
-      body: JSON.stringify({ title,content, currentNoteId }),
+      body: JSON.stringify({ title, content, currentNoteId }),
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
 
     if (response.ok) {
-        window.location.reload()
+      window.location.reload();
     }
   }
 
   async function deleteNote() {
-    const deleteFunction = await fetch('http://localhost:5000/deleteNote', {
-      method: 'Delete',
+    const deleteFunction = await fetch("http://localhost:5000/deleteNote", {
+      method: "Delete",
       body: JSON.stringify({ currentNoteId }),
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-    })
+    });
     setCurrentNoteId(null);
     if (deleteFunction.ok) {
-      setUpdated(false)
-
+      setUpdated(false);
     }
   }
   return (

@@ -17,7 +17,7 @@ const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
 const key = process.env.MDB_API_KEY;
 
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
@@ -41,7 +41,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-//dhfuodhfg
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
