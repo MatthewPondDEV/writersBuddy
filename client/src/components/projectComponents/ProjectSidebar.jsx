@@ -117,8 +117,9 @@ export default function ProjectSidebar({
                             variant="none"
                             className="border-top border-bottom w-100 text-start p-3"
                             onClick={() => {
-                                            setViewNumber(0) 
-                                            handleClose()}}
+                              setViewNumber(0);
+                              handleClose();
+                            }}
                           >
                             Overview
                           </Button>
@@ -129,8 +130,10 @@ export default function ProjectSidebar({
                                 <Button
                                   variant="none"
                                   className="border-top w-100 text-start p-3"
-                                  onClick={() => {setViewNumber(3)
-                                                handleClose()}}
+                                  onClick={() => {
+                                    setViewNumber(3);
+                                    handleClose();
+                                  }}
                                 >
                                   General
                                 </Button>
@@ -153,7 +156,7 @@ export default function ProjectSidebar({
                                                   country._id
                                                 );
                                                 setViewNumber("5");
-                                                handleClose()
+                                                handleClose();
                                               }}
                                             >
                                               {country.name}
@@ -188,7 +191,7 @@ export default function ProjectSidebar({
                                               onClick={() => {
                                                 setCurrentLandId(land._id);
                                                 setViewNumber("7");
-                                                handleClose('')
+                                                handleClose("");
                                               }}
                                             >
                                               {land.name}
@@ -225,7 +228,7 @@ export default function ProjectSidebar({
                                                   body._id
                                                 );
                                                 setViewNumber("9");
-                                                handleClose()
+                                                handleClose();
                                               }}
                                             >
                                               {body.name}
@@ -277,7 +280,7 @@ export default function ProjectSidebar({
                                                           character._id
                                                         );
                                                         setViewNumber("11");
-                                                        handleClose()
+                                                        handleClose();
                                                       }}
                                                     >
                                                       {character.name}
@@ -311,7 +314,7 @@ export default function ProjectSidebar({
                                                           character._id
                                                         );
                                                         setViewNumber("11");
-                                                        handleClose()
+                                                        handleClose();
                                                       }}
                                                     >
                                                       {character.name}
@@ -352,7 +355,7 @@ export default function ProjectSidebar({
                                                           character._id
                                                         );
                                                         setViewNumber("11");
-                                                        handleClose()
+                                                        handleClose();
                                                       }}
                                                     >
                                                       {character.name}
@@ -386,7 +389,7 @@ export default function ProjectSidebar({
                                                           character._id
                                                         );
                                                         setViewNumber("11");
-                                                        handleClose()
+                                                        handleClose();
                                                       }}
                                                     >
                                                       {character.name}
@@ -481,8 +484,10 @@ export default function ProjectSidebar({
                             <Button
                               variant="none"
                               className="border-bottom w-100 text-start p-3"
-                              onClick={() => {setViewNumber("15")
-                                              handleClose()}}
+                              onClick={() => {
+                                setViewNumber("15");
+                                handleClose();
+                              }}
                             >
                               Themes
                             </Button>
@@ -492,8 +497,10 @@ export default function ProjectSidebar({
                                 <Button
                                   variant="none"
                                   className="border-top w-100 text-start p-3"
-                                  onClick={() => {setViewNumber("17")
-                                                handleClose()}}
+                                  onClick={() => {
+                                    setViewNumber("17");
+                                    handleClose();
+                                  }}
                                 >
                                   Overview
                                 </Button>
@@ -512,7 +519,7 @@ export default function ProjectSidebar({
                                             className="border-top w-100 text-start p-3"
                                             onClick={() => {
                                               setCurrentArcId(arc._id);
-                                              setViewNumber("19")
+                                              setViewNumber("19");
                                               handleClose();
                                             }}
                                           >
@@ -538,23 +545,25 @@ export default function ProjectSidebar({
                                 <Button
                                   variant="none"
                                   className="border-top w-100 text-start p-3"
-                                  onClick={() => {setViewNumber("21")
-                                                handleClose()}}
+                                  onClick={() => {
+                                    setViewNumber("21");
+                                    handleClose();
+                                  }}
                                 >
                                   Prologue
                                 </Button>
                                 <Button
                                   variant="none"
                                   className="border-top w-100 text-start p-3"
-                                  onClick={() => {setViewNumber("23")
-                                                  handleClose()}}
+                                  onClick={() => {
+                                    setViewNumber("23");
+                                    handleClose();
+                                  }}
                                 >
                                   Epilogue
                                 </Button>
                                 <Accordion.Item eventKey="17">
-                                  <Accordion.Header>
-                                    Chapters
-                                  </Accordion.Header>
+                                  <Accordion.Header>Chapters</Accordion.Header>
                                   <Accordion.Body>
                                     <>
                                       {projectInfo._id &&
@@ -604,7 +613,10 @@ export default function ProjectSidebar({
                           </Nav.Link>
                         </Col>
                         <Col xs={12}>
-                          <Nav.Link href='/notes' className="py-4 mx-2 text-start">
+                          <Nav.Link
+                            href="/notes"
+                            className="py-4 mx-2 text-start"
+                          >
                             {" "}
                             <i className="bi bi-pencil-square mx-2"></i> Notes
                           </Nav.Link>

@@ -11,7 +11,7 @@ import Button from "react-bootstrap/Button";
 export default function NotePage() {
   const [notes, setNotes] = useState([
     {
-      title: "New Note",
+      title: "",
       content: "",
     },
   ]);
@@ -20,7 +20,7 @@ export default function NotePage() {
   const [content, setContent] = useState("");
   const [updated, setUpdated] = useState(false);
   const [currentNoteId, setCurrentNoteId] = useState(
-    window.sessionStorage.getItem("currentNoteId")
+    window.localStorage.getItem("currentNoteId")
   );
 
   const createNote = async () => {
@@ -32,8 +32,9 @@ export default function NotePage() {
     });
 
     if (create.ok) {
-      setCurrentNoteId(null);
       setUpdated(false);
+      setCurrentNoteId(notes[notes.length - 1]._id);
+      window.localStorage.setItem("currentNoteId", currentNoteId)
     }
   };
 
@@ -45,37 +46,26 @@ export default function NotePage() {
       });
 
       const noteArray = await response.json();
-      if (noteArray.length > 0) {
+      if (noteArray.length) {
         setNotes(noteArray);
         setUpdated(true);
-        console.log(notes);
       } else {
         createNote();
       }
-      if (!currentNoteId) {
-        setCurrentNoteId(notes[notes.length - 1]._id);
-      }
     };
     retrieveNotes();
-    if (updated === false) {
-      retrieveNotes();
-    }
   }, [updated]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("currentNoteId", currentNoteId);
-    if (!currentNoteId) {
-      setCurrentNoteId(notes[0]._id);
-    }
+    window.localStorage.setItem("currentNoteId", currentNoteId)
+    if (notes.length) {
     notes.forEach((note) => {
       if (note._id === currentNoteId) {
-        if (!note.title) {
-        }
         setTitle(note.title);
         setContent(note.content);
       }
-    });
-  }, [currentNoteId, notes, updated]);
+    }) }
+  }, [currentNoteId, updated]);
 
   async function updateNote(ev) {
     ev.preventDefault();
@@ -87,7 +77,7 @@ export default function NotePage() {
     });
 
     if (response.ok) {
-      window.location.reload();
+      setUpdated(false);
     }
   }
 
@@ -98,9 +88,9 @@ export default function NotePage() {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
-    setCurrentNoteId(null);
     if (deleteFunction.ok) {
       setUpdated(false);
+      setCurrentNoteId(notes[0]._id);
     }
   }
   return (

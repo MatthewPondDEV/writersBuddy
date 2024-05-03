@@ -41,7 +41,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const userDoc = await User.findOne({ username });
@@ -62,10 +61,17 @@ app.post("/login", async (req, res) => {
 
 app.get("/profile", (req, res) => {
   const { token } = req.cookies;
-  jwt.verify(token, secret, {}, (err, info) => {
-    if (err) res.json(null);
-    res.json(info);
-  });
+  if (token) {
+    jwt.verify(token, secret, {}, (err, info) => {
+      if (err) {
+        res.json(null);
+      } else {
+        res.json(info);
+      }
+    });
+  } else {
+    res.json(null);
+  }
 });
 
 app.post("/logout", (req, res) => {
@@ -74,17 +80,18 @@ app.post("/logout", (req, res) => {
 
 app.get("/getProjects", async (req, res) => {
   const { token } = req.cookies;
-
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const projects = await Project.find({ createdBy: info.id });
-    const userProjects = projects.map((project) => ({
-      _id: project._id,
-      title: project.title,
-      createdBy: project.createdBy,
-    }));
-    res.json(userProjects);
-  });
+  if (token) {
+    jwt.verify(token, secret, {}, async (err, info) => {
+      if (err) throw err;
+      const projects = await Project.find({ createdBy: info.id });
+      const userProjects = projects.map((project) => ({
+        _id: project._id,
+        title: project.title,
+        createdBy: project.createdBy,
+      }));
+      res.json(userProjects);
+    });
+  }
 });
 
 app.post("/createProject", async (req, res) => {
@@ -1170,24 +1177,28 @@ app.put("/updatePrologue", uploadMiddleware.single(""), async (req, res) => {
 
 app.post("/createNewNote", async (req, res) => {
   const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const { title } = req.body;
-    const noteDoc = await Note.create({
-      title,
-      createdBy: info.id,
+  if (token) {
+    jwt.verify(token, secret, {}, async (err, info) => {
+      if (err) throw err;
+      const { title } = req.body;
+      const noteDoc = await Note.create({
+        title,
+        createdBy: info.id,
+      });
+      res.json(noteDoc);
     });
-    console.log(noteDoc);
-    res.json(noteDoc);
-  });
+  }
 });
 
 app.get("/getUserNotes", async (req, res) => {
   const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    const notes = await Note.find({ createdBy: info.id });
-    res.json(notes);
-  });
+  if (token) {
+    jwt.verify(token, secret, {}, async (err, info) => {
+      const notes = await Note.find({ createdBy: info.id });
+      console.log(notes);
+      res.json(notes);
+    });
+  }
 });
 
 app.put("/updateNote", async (req, res) => {
@@ -1209,7 +1220,7 @@ app.delete("/deleteNote", async (req, res) => {
   const { currentNoteId } = req.body;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-    const note = await Note.findByIdAndRemove(currentNoteId);
+    await Note.findByIdAndRemove(currentNoteId);
     res.json({ message: "Note deleted successfully" });
   });
 });
