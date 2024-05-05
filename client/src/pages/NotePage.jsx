@@ -34,7 +34,7 @@ export default function NotePage() {
     if (create.ok) {
       setUpdated(false);
       setCurrentNoteId(notes[notes.length - 1]._id);
-      window.localStorage.setItem("currentNoteId", currentNoteId)
+      window.localStorage.setItem("currentNoteId", currentNoteId);
     }
   };
 
@@ -57,14 +57,15 @@ export default function NotePage() {
   }, [updated]);
 
   useEffect(() => {
-    window.localStorage.setItem("currentNoteId", currentNoteId)
+    window.localStorage.setItem("currentNoteId", currentNoteId);
     if (notes.length) {
-    notes.forEach((note) => {
-      if (note._id === currentNoteId) {
-        setTitle(note.title);
-        setContent(note.content);
-      }
-    }) }
+      notes.forEach((note) => {
+        if (note._id === currentNoteId) {
+          setTitle(note.title);
+          setContent(note.content);
+        }
+      });
+    }
   }, [currentNoteId, updated]);
 
   async function updateNote(ev) {
