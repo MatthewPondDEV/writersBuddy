@@ -165,3 +165,10 @@ table tr th {
   z-index: 1000; /* Set a higher z-index if needed */
 }
 
+.ProseMirror {
+  font-size: 1.5rem;
+  background: none;
+  border: 2px solid black;
+  border-radius: 3%;
+  padding: 10px;
+}

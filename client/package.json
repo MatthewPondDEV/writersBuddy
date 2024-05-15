@@ -10,7 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tiptap/core": "^2.4.0",
+    "@tiptap/extension-color": "^2.4.0",
+    "@tiptap/extension-text-style": "^2.4.0",
+    "@tiptap/pm": "^2.4.0",
     "@tiptap/react": "^2.4.0",
+    "@tiptap/starter-kit": "^2.4.0",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "dayjs": "^1.11.11",
@@ -29,6 +34,7 @@
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "sass": "^1.77.1",
     "vite": "^5.2.0"
   }
 }

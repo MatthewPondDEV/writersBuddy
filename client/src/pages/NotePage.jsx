@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import QuillEditor from "../components/projectComponents/QuillEditor";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import Tiptap from "../components/Tiptap";
 
 export default function NotePage() {
   const [notes, setNotes] = useState([
@@ -143,7 +144,7 @@ export default function NotePage() {
                       </Form.Group>
                     )}
                   </div>
-                  <QuillEditor value={content} onChange={setContent} />
+                  <Tiptap />
                   <div className="text-center my-3">
                     <Button variant="primary w-75 mt-4" size="lg" type="submit">
                       Save Changes
