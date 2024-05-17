@@ -80,7 +80,8 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
                             {notes[0]._id &&
                               notes.map((note) => {
                                 return (
-                                  <div className="border-bottom">
+                                  <div key= {note._id}
+                                    className="border-bottom">
                                     <Button
                                       variant="none pe-2"
                                       onClick={() => setCurrentNoteId(note._id)}

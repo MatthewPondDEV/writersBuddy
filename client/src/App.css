@@ -169,6 +169,35 @@ table tr th {
   font-size: 1.5rem;
   background: none;
   border: 2px solid black;
-  border-radius: 3%;
+  border-radius: 1%;
   padding: 10px;
+  min-height: 500px;
+  max-height: 750px;
+  overflow-y: auto;
+}
+
+#tiptap-nav > div > button, #dropdown-button {
+  border: none;
+  background-color: wheat;
+  height: 30px;
+  border-radius: 7%;
+  margin-top: 5px;
+}
+
+#font-size-dropdown button{
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.editor-status span {
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+#tiptap-nav span {
+  margin-top: 6px;
+}
+
+#tiptap-nav {
+  border-radius: 2%;
 }

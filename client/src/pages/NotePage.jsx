@@ -108,14 +108,14 @@ export default function NotePage() {
           <div className="d-flex justify-content-between mt-4">
             <h5 className="mx-2">Notes</h5>
             <Button variant="primary" onClick={deleteNote}>
-              <i class="bi bi-trash"></i> Delete Note
+              <i className="bi bi-trash"></i> Delete Note
             </Button>
           </div>
           <Container>
             <Row>
               <Col className="my-5 py-5">
                 <Form onSubmit={updateNote}>
-                  <div className="mb-5 d-flex align-items-center flex-column text-center">
+                  <div className="mb-3 d-flex align-items-center flex-column text-center">
                     <h1 className="text-center">{title}</h1>
                     <Button
                       variant="primary"
@@ -144,7 +144,7 @@ export default function NotePage() {
                       </Form.Group>
                     )}
                   </div>
-                  <Tiptap />
+                  <Tiptap content = {content} onChange={setContent} />
                   <div className="text-center my-3">
                     <Button variant="primary w-75 mt-4" size="lg" type="submit">
                       Save Changes
