@@ -144,7 +144,7 @@ export default function NotePage() {
                       </Form.Group>
                     )}
                   </div>
-                  <Tiptap content = {content} onChange={setContent} />
+                  <Tiptap content = {content} id = {currentNoteId} onChange={setContent} />
                   <div className="text-center my-3">
                     <Button variant="primary w-75 mt-4" size="lg" type="submit">
                       Save Changes
