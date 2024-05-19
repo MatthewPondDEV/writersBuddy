@@ -13,7 +13,10 @@ import Col from "react-bootstrap/esm/Col";
 import { Editor } from "@tiptap/core";
 
 export default function TipTap({ content, onChange, id}) {
-  const { editor } = useCurrentEditor();
+
+    const editor = useCurrentEditor({
+        content: content,
+    })
 
   const FooterBar = () => {
     const { editor } = useCurrentEditor();
@@ -354,10 +357,15 @@ export default function TipTap({ content, onChange, id}) {
   const [contentLoaded, setContentLoaded] = useState(false)
 
   useEffect(() => {
-    if (content) {
+    setContentLoaded(false)
+  }, [id])
+
+  useEffect(() => {
+    if (content && editor) {
     setContentLoaded(true)
+    editor.content = content
     }
-  }, [content])
+  }, [content, editor])
 
   return (
     <>
