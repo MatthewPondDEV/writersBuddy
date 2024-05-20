@@ -5,7 +5,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import 'react-quill/dist/quill.snow.css'
-import QuillEditor from "../QuillEditor";
+import TipTap from "../../Tiptap";
 
 export default function EditEpilogue({projectInfo, setViewNumber, id}) {
 const [epilogue, setEpilogue] = useState("");
@@ -36,8 +36,8 @@ async function update() {
             <Col xs={12}>
               <h1 className="text-center my-5">{projectInfo.title} Epilogue</h1>
               <Form onSubmit={update}>
-                <div className="d-flex justify-content-center">
-                  <QuillEditor value={epilogue} onChange={setEpilogue} />
+                <div>
+                  <TipTap content = {epilogue} onChange={setEpilogue} id = {id} />
                 </div>
                 <div className="text-center my-5">
                   <Button variant="primary w-75 mt-4" size="lg" type="submit">

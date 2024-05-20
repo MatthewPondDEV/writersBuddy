@@ -5,7 +5,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import "react-quill/dist/quill.snow.css";
-import QuillEditor from "../QuillEditor";
+import TipTap from "../../Tiptap";
 
 export default function EditPrologue({projectInfo, setViewNumber, id}) {
   const [prologue, setPrologue] = useState('')
@@ -35,8 +35,8 @@ export default function EditPrologue({projectInfo, setViewNumber, id}) {
           <Col xs={12}>
             <h1 className="text-center my-5">{projectInfo.title} Prologue</h1>
             <Form onSubmit={update}>
-              <div className="d-flex justify-content-center">
-                <QuillEditor value={prologue} onChange={setPrologue} />
+              <div>
+                <TipTap content = {prologue} onChange={setPrologue} id = {id}/>
               </div>
               <div className="text-center my-5">
                 <Button variant="primary w-75 mt-4" size="lg" type="submit">

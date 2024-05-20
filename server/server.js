@@ -1045,6 +1045,7 @@ app.put("/createChapter", async (req, res) => {
             {
               title,
               chapterNumber: chapterNumber,
+              content: 'And the story continues...',
               timestamp: new Date(),
             },
           ],

@@ -25,9 +25,10 @@ export default function NotePage() {
   );
 
   const createNote = async () => {
+    const nextNote = notes.length + 1
     const create = await fetch("http://localhost:5000/createNewNote", {
       method: "Post",
-      body: JSON.stringify({ title: "New Note" }),
+      body: JSON.stringify({ title: "New Note " + nextNote }),
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });

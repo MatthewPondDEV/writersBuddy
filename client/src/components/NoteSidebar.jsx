@@ -4,7 +4,7 @@ import Navbar from "react-bootstrap/Navbar";
 import Image from "react-bootstrap/Image";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../cssImages/logo.png";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { UserContext } from "../UserContext";
 import { useContext } from "react";
 import Col from "react-bootstrap/Col";
@@ -36,6 +36,11 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
     setUserInfo(null);
   }
 
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
   return (
     <Col xs={12} xxl={2} className="bg-light">
       <Container fluid>
@@ -54,11 +59,14 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
               <Navbar.Toggle
                 aria-controls={`offcanvasNavbar-expand-true`}
                 className="mt-4"
+                onClick={handleShow}
               />
               <Navbar.Offcanvas
                 id={`offcanvasNavbar-expand-xxl`}
                 aria-labelledby={`offcanvasNavbarLabel-expand-xxl`}
                 placement="start"
+                show={show}
+                onHide={handleClose}
               >
                 <Offcanvas.Header closeButton>
                   <Offcanvas.Title id={`offcanvasNavbarLabel-expand-xxl`}>
@@ -84,7 +92,10 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
                                     className="border-bottom">
                                     <Button
                                       variant="none pe-2"
-                                      onClick={() => setCurrentNoteId(note._id)}
+                                      onClick={() => {setCurrentNoteId(note._id)
+                                      handleClose()
+                                      }
+                                      }
                                     >
                                       {note.title}
                                     </Button>
@@ -93,7 +104,8 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
                               })}
                             <Button
                               variant="outline-primary"
-                              onClick={createNote}
+                              onClick={() => {createNote()
+                                              handleClose()}}
                             >
                               + Create New Note
                             </Button>

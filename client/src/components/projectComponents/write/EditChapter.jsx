@@ -5,7 +5,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import "react-quill/dist/quill.snow.css";
-import QuillEditor from "../QuillEditor";
+import TipTap from "../../Tiptap";
 import DeleteChapterModal from "./DeleteChapterModal";
 
 export default function EditChapter({
@@ -115,8 +115,8 @@ export default function EditChapter({
                   </Form.Group>
                 )}
               </div>
-              <div className="d-flex justify-content-center mt-5">
-                <QuillEditor value={content} onChange={setContent} />
+              <div>
+                <TipTap content = {content} onChange={setContent} id={currentChapterId} />
               </div>
               <div className="text-center my-5">
                 <Button variant="primary w-75 mt-4" size="lg" type="submit">

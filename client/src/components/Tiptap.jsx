@@ -3,6 +3,7 @@ import ListItem from "@tiptap/extension-list-item";
 import TextStyle from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { EditorProvider, useCurrentEditor } from "@tiptap/react";
+import FontFamily from "@tiptap/extension-font-family";
 import TextAlign from "@tiptap/extension-text-align";
 import StarterKit from "@tiptap/starter-kit";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -12,11 +13,10 @@ import Row from "react-bootstrap/esm/Row";
 import Col from "react-bootstrap/esm/Col";
 import { Editor } from "@tiptap/core";
 
-export default function TipTap({ content, onChange, id}) {
-
-    const editor = useCurrentEditor({
-        content: content,
-    })
+export default function TipTap({ content, onChange, id }) {
+  const editor = useCurrentEditor({
+    content: content,
+  });
 
   const FooterBar = () => {
     const { editor } = useCurrentEditor();
@@ -33,7 +33,7 @@ export default function TipTap({ content, onChange, id}) {
       if (editor) {
         const calculatePageCount = () => {
           const wordCount = editor.getHTML().split(/\s+/).length; // Count words
-          const pages = Math.ceil(wordCount / 200);
+          const pages = Math.ceil(wordCount / 250);
           setPageCount(pageCount);
         };
 
@@ -53,7 +53,7 @@ export default function TipTap({ content, onChange, id}) {
               " "
             ); // Count words before cursor
             const currentPage = Math.ceil(
-              wordsBeforeCursor.split(/\s+/).length / 200
+              wordsBeforeCursor.split(/\s+/).length / 250
             ); // Calculate current page
             setCurrentPage(currentPage);
           }
@@ -121,7 +121,7 @@ export default function TipTap({ content, onChange, id}) {
       <>
         <Row
           id="tiptap-nav"
-          className="flex-row px-3 mx-1 border-top border-dark"
+          className="flex-row mx-1 my-4 border-top border-bottom border-dark"
         >
           <Col className="d-flex my-2 justify-content-center flex-wrap">
             <button
@@ -241,6 +241,167 @@ export default function TipTap({ content, onChange, id}) {
             <span className="mx-1">|</span>
             <Dropdown>
               <Dropdown.Toggle variant="pb-1 none" id="dropdown-button">
+                Font
+              </Dropdown.Toggle>
+              <Dropdown.Menu id="font-size-dropdown">
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setFontFamily("Inter").run()
+                    }
+                    className={
+                      editor.isActive("textStyle", { fontFamily: "Inter" })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "Inter" }}
+                  >
+                    Inter
+                  </button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setFontFamily("Courier New").run()
+                    }
+                    className={
+                      editor.isActive("textStyle", { fontFamily: "Courier New" })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "Courier New" }}
+                  >
+                    Courier New
+                  </button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor
+                        .chain()
+                        .focus()
+                        .setFontFamily("Brush Script MT")
+                        .run()
+                    }
+                    className={
+                      editor.isActive("textStyle", {
+                        fontFamily: "Brush Script MT",
+                      })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "Brush Script MT" }}
+                  >
+                    Brush Script MT
+                  </button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setFontFamily("Futura").run()
+                    }
+                    className={
+                      editor.isActive("textStyle", { fontFamily: "Futura" })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "Futura" }}
+                  >
+                    Futura
+                  </button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setFontFamily("Marker Felt").run()
+                    }
+                    className={
+                      editor.isActive("textStyle", { fontFamily: "Marker Felt" })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "Marker Felt" }}
+                  >
+                    Marker Felt
+                  </button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor
+                        .chain()
+                        .focus()
+                        .setFontFamily("Comic Sans MS, Comic Sans")
+                        .run()
+                    }
+                    className={
+                      editor.isActive("textStyle", {
+                        fontFamily: "Comic Sans MS, Comic Sans",
+                      })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "Comic Sans MS" }}
+                  >
+                    Comic Sans
+                  </button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setFontFamily("monospace").run()
+                    }
+                    className={
+                      editor.isActive("textStyle", { fontFamily: "monospace" })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "monospace" }}
+                  >
+                    Monospace
+                  </button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor
+                        .chain()
+                        .focus()
+                        .setFontFamily("Snell Roundhand")
+                        .run()
+                    }
+                    className={
+                      editor.isActive("textStyle", {
+                        fontFamily: "Snell Roundhand",
+                      })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "Snell Roundhand" }}
+                  >
+                    Snell Roundhand
+                  </button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <button
+                    onClick={() =>
+                      editor.chain().focus().setFontFamily("Arial Narrow").run()
+                    }
+                    className={
+                      editor.isActive("textStyle", { fontFamily: "Arial Narrow" })
+                        ? "is-active pt-2 w-100 bg-dark text-white"
+                        : ""
+                    }
+                    style={{ fontFamily: "Arial Narrow" }}
+                  >
+                    Arial Narrow                  
+                    </button>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+            <span className="mx-1">|</span>
+            <Dropdown>
+              <Dropdown.Toggle variant="pb-1 none" id="dropdown-button">
                 Font size
               </Dropdown.Toggle>
               <Dropdown.Menu id="font-size-dropdown">
@@ -275,7 +436,7 @@ export default function TipTap({ content, onChange, id}) {
                 <Dropdown.Item>
                   <button
                     onClick={() =>
-                      editor.chain().focus().toggleHeading({ level: 4 }).run()
+                      editor.chain().focus().setParagraph({ level: 4 }).run()
                     }
                     className={
                       editor.isActive("heading", { level: 4 })
@@ -341,6 +502,9 @@ export default function TipTap({ content, onChange, id}) {
     TextAlign.configure({
       types: ["heading", "paragraph"],
     }),
+    FontFamily.configure({
+      types: ["textStyle"],
+    }),
     Highlight.configure({ multicolor: true }),
     StarterKit.configure({
       bulletList: {
@@ -354,34 +518,34 @@ export default function TipTap({ content, onChange, id}) {
     }),
   ];
 
-  const [contentLoaded, setContentLoaded] = useState(false)
+  const [contentLoaded, setContentLoaded] = useState(false);
 
   useEffect(() => {
-    setContentLoaded(false)
-  }, [id])
+    setContentLoaded(false);
+  }, [id]);
 
   useEffect(() => {
     if (content && editor) {
-    setContentLoaded(true)
-    editor.content = content
+      setContentLoaded(true);
+      editor.content = content;
     }
-  }, [content, editor])
+  }, [content, editor, contentLoaded]);
 
   return (
     <>
-    {contentLoaded &&
-    <EditorProvider
-      slotBefore={<MenuBar />}
-      extensions={extensions}
-      content={content}
-      onUpdate={({ editor }) => {
-        const html = editor.getHTML();
-        onChange(html);
-      }}
-      placeholder="Start typing here..."
-      slotAfter={<FooterBar />}
-    ></EditorProvider>
-    }
+      {contentLoaded && (
+        <EditorProvider
+          slotBefore={<MenuBar />}
+          extensions={extensions}
+          content={content}
+          onUpdate={({ editor }) => {
+            const html = editor.getHTML();
+            onChange(html);
+          }}
+          placeholder="Start typing here..."
+          slotAfter={<FooterBar />}
+        ></EditorProvider>
+      )}
     </>
   );
 }
