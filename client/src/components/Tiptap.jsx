@@ -11,6 +11,7 @@ import Highlight from "@tiptap/extension-highlight";
 import { useState, useEffect } from "react";
 import Row from "react-bootstrap/esm/Row";
 import Col from "react-bootstrap/esm/Col";
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { Editor } from "@tiptap/core";
 
 export default function TipTap({ content, onChange, id }) {
@@ -265,7 +266,9 @@ export default function TipTap({ content, onChange, id }) {
                       editor.chain().focus().setFontFamily("Courier New").run()
                     }
                     className={
-                      editor.isActive("textStyle", { fontFamily: "Courier New" })
+                      editor.isActive("textStyle", {
+                        fontFamily: "Courier New",
+                      })
                         ? "is-active pt-2 w-100 bg-dark text-white"
                         : ""
                     }
@@ -316,7 +319,9 @@ export default function TipTap({ content, onChange, id }) {
                       editor.chain().focus().setFontFamily("Marker Felt").run()
                     }
                     className={
-                      editor.isActive("textStyle", { fontFamily: "Marker Felt" })
+                      editor.isActive("textStyle", {
+                        fontFamily: "Marker Felt",
+                      })
                         ? "is-active pt-2 w-100 bg-dark text-white"
                         : ""
                     }
@@ -388,14 +393,16 @@ export default function TipTap({ content, onChange, id }) {
                       editor.chain().focus().setFontFamily("Arial Narrow").run()
                     }
                     className={
-                      editor.isActive("textStyle", { fontFamily: "Arial Narrow" })
+                      editor.isActive("textStyle", {
+                        fontFamily: "Arial Narrow",
+                      })
                         ? "is-active pt-2 w-100 bg-dark text-white"
                         : ""
                     }
                     style={{ fontFamily: "Arial Narrow" }}
                   >
-                    Arial Narrow                  
-                    </button>
+                    Arial Narrow
+                  </button>
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
@@ -527,25 +534,31 @@ export default function TipTap({ content, onChange, id }) {
   useEffect(() => {
     if (content && editor) {
       setContentLoaded(true);
-      editor.content = content;
     }
   }, [content, editor, contentLoaded]);
 
   return (
     <>
-      {contentLoaded && (
-        <EditorProvider
-          slotBefore={<MenuBar />}
-          extensions={extensions}
-          content={content}
-          onUpdate={({ editor }) => {
-            const html = editor.getHTML();
-            onChange(html);
-          }}
-          placeholder="Start typing here..."
-          slotAfter={<FooterBar />}
-        ></EditorProvider>
-      )}
+    {contentLoaded &&
+    <TransitionGroup>
+            {contentLoaded && (
+                <CSSTransition classNames="editor" timeout={500}>
+                    <EditorProvider
+                        slotBefore={<MenuBar />}
+                        extensions={extensions}
+                        content={content}
+                        onUpdate={({ editor }) => {
+                            const html = editor.getHTML();
+                            onChange(html);
+                        }}
+                        classNames="editor"
+                        placeholder="Start typing here..."
+                        slotAfter={<FooterBar />}
+                    ></EditorProvider>
+                </CSSTransition>
+            )}
+        </TransitionGroup>
+      }
     </>
   );
 }

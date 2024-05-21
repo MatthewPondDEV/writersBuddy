@@ -201,3 +201,18 @@ table tr th {
 #tiptap-nav {
   border-radius: 2%;
 }
+
+.editor-enter {
+    opacity: 0;
+}
+.editor-enter-active {
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out; /* Adjust timing as needed */
+}
+.editor-exit {
+    opacity: 1;
+}
+.editor-exit-active {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out; /* Adjust timing as needed */
+}
