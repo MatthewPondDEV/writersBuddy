@@ -607,7 +607,7 @@ export default function ProjectSidebar({
                         className="border-top border-dark mt-3 py-2"
                       >
                         <Col xs={12}>
-                          <Nav.Link className="py-4 mx-2 text-start">
+                          <Nav.Link href='/manageProjects' className="py-4 mx-2 text-start">
                             {" "}
                             <i className="bi bi-journal-text mx-2"></i> Projects
                           </Nav.Link>

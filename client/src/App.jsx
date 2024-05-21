@@ -5,6 +5,7 @@ import IndexPage from './pages/IndexPage';
 import HomePage from './pages/HomePage';
 import ProjectsPage from './pages/ProjectPage';
 import NotePage from './pages/NotePage';
+import ManagePojects from './pages/ManageProjects';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path='/home' element={<HomePage />} />
         <Route path='/project/:id' element={<ProjectsPage />  } />
         <Route path='/notes' element={<NotePage />} />
+        <Route path='/manageProjects' element={<ManagePojects />} />
       </Route>
     </Routes>
   )

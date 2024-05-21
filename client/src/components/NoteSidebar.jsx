@@ -114,7 +114,7 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
                       </Row>
                       <Row className="border-top border-bottom border-dark mb-2 py-3">
                         <Col xs={12}>
-                          <Nav.Link className="py-4 text-start">
+                          <Nav.Link href='/manageProjects' className="py-4 text-start">
                             {" "}
                             <i className="bi bi-journal-text mx-2"></i> Projects
                           </Nav.Link>
