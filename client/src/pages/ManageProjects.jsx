@@ -10,7 +10,7 @@ import Col from "react-bootstrap/Col";
 import Header from "../components/Header";
 
 export default function ManagePojects() {
-     const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
+  const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
   const [projects, setProjects] = useState([]);
   const [projectId, setProjectId] = useState("");
 
@@ -38,15 +38,13 @@ export default function ManagePojects() {
 
   return (
     <>
-    <Header />
-    <Container>
+      <Header />
+      <Container>
         <Row>
-            <h1 className='my-5 text-center'>My Projects</h1>
-            <Col>
-            </Col>
+          <h1 className="my-5 text-center">My Projects</h1>
+          <Col></Col>
         </Row>
-    </Container>
+      </Container>
     </>
-  )
-
+  );
 }
