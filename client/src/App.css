@@ -216,3 +216,10 @@ table tr th {
     opacity: 0;
     transition: opacity 0.5s ease-in-out; /* Adjust timing as needed */
 }
+
+#manage-projects {
+  min-height: 500px;
+  border-radius: 2%;
+  background: linear-gradient(to bottom right, #fffff2, #ffbd59);
+  border: 2px solid black;
+}

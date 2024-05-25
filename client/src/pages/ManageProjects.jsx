@@ -24,6 +24,7 @@ export default function ManagePojects() {
       if (response.ok) {
         const userProjects = await response.json();
         setProjects(userProjects);
+        console.log(userProjects);
       } else {
         alert("failed to load projects");
       }
@@ -39,10 +40,29 @@ export default function ManagePojects() {
   return (
     <>
       <Header />
-      <Container>
+      <Container fluid id="papyrus">
         <Row>
           <h1 className="my-5 text-center">My Projects</h1>
-          <Col></Col>
+          <Col xs={12}>
+            <Row className="m-5" id="manage-projects">
+              {projects.length &&
+                projects.map((project) => {
+                  return (
+                    <Col xs={12} className="m-3">
+                      <h2 className="mt-3">{project.title}</h2>
+                      <div className="mt-3">
+                        <Button variant="primary mx-1">
+                          <i className="bi bi-pencil-square mx-2"> Edit</i>
+                        </Button>
+                        <Button variant="danger mx-1">
+                          <i className="bi bi-trash">Delete</i>
+                        </Button>
+                      </div>
+                    </Col>
+                  );
+                })}
+            </Row>
+          </Col>
         </Row>
       </Container>
     </>
