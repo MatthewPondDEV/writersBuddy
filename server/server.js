@@ -88,6 +88,8 @@ app.get("/getProjects", async (req, res) => {
         _id: project._id,
         title: project.title,
         createdBy: project.createdBy,
+        summary: project.summary,
+        cover: project.cover
       }));
       res.json(userProjects);
     });

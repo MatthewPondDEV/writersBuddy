@@ -3,6 +3,8 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import mangaPic from '../../cssImages/Manga5.jpeg'
+import Image from "react-bootstrap/Image";
 import { useState, useEffect } from "react";
 
 export default function EditProjectOverview({
@@ -18,6 +20,7 @@ export default function EditProjectOverview({
   const [author, setAuthor] = useState("");
   const [genre, setGenre] = useState("");
   const [summary, setSummary] = useState("");
+  const [picture, setPicture] = useState("")
   const [loadData, setLoadData] = useState(false);
   const id = projectInfo._id;
 
@@ -27,6 +30,7 @@ export default function EditProjectOverview({
       setAuthor(projectInfo.author)
       setGenre(projectInfo.genre)
       setSummary(projectInfo.summary)
+      setPicture(projectInfo.cover)
     }
   }, [projectInfo._id])
 
@@ -60,6 +64,20 @@ export default function EditProjectOverview({
         <Row className="my-5">
           <Col xs={12}>
             <h1 className="mt-3">{title} Overview</h1>
+              {picture ? (
+                <Image
+                  src={`http://localhost:5000/${picture}`}
+                  alt= 'Avatar'
+                  style={{ height: "300px"}}
+                />
+            ) :
+            (
+              <Image
+                  src={mangaPic}
+                  alt= 'Avatar'
+                  style={{ height: "300px"}}
+                />
+            )}
             <Form className="my-4" onSubmit={updatePost}>
               <Form.Group className="mb-3">
                 <Form.Label>Title:</Form.Label>
