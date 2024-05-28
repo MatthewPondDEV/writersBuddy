@@ -161,6 +161,16 @@ app.get("/project/:id", async (req, res) => {
   res.json(project);
 });
 
+app.delete('/deleteProject', async (req,res) => {
+  const {token} = req.cookies;
+  const projectId = req.body.id
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    await Project.findByIdAndDelete(projectId);
+    res.json({ message: "Note deleted successfully" });
+  });
+})
+
 app.put(
   "/projectOverview",
   uploadMiddleware.single("file"),
@@ -1224,7 +1234,7 @@ app.delete("/deleteNote", async (req, res) => {
   const { currentNoteId } = req.body;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-    await Note.findByIdAndRemove(currentNoteId);
+    await Note.findByIdAndDelete(currentNoteId);
     res.json({ message: "Note deleted successfully" });
   });
 });

@@ -93,7 +93,7 @@ export default function NotePage() {
     });
     if (deleteFunction.ok) {
       setUpdated(false);
-      setCurrentNoteId(notes[0]._id);
+      setCurrentNoteId(notes[Math.floor(notes.length - 2)]._id);
     }
   }
   return (

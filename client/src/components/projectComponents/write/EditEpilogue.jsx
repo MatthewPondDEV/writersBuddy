@@ -4,7 +4,6 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
-import 'react-quill/dist/quill.snow.css'
 import TipTap from "../../Tiptap";
 
 export default function EditEpilogue({projectInfo, setViewNumber, id}) {
@@ -14,7 +13,7 @@ useEffect(() => {
   if (projectInfo._id) setEpilogue(projectInfo.write.epilogue);
 }, [projectInfo._id]);
 
-async function update() {
+async function updateData() {
   const data = new FormData();
   data.set('epilogue', epilogue)
   data.set("id", id);
@@ -35,10 +34,8 @@ async function update() {
           <Row className="my-5">
             <Col xs={12}>
               <h1 className="text-center my-5">{projectInfo.title} Epilogue</h1>
-              <Form onSubmit={update}>
-                <div>
+              <Form onSubmit={updateData}>
                   <TipTap content = {epilogue} onChange={setEpilogue} id = {id} />
-                </div>
                 <div className="text-center my-5">
                   <Button variant="primary w-75 mt-4" size="lg" type="submit">
                     Save Changes

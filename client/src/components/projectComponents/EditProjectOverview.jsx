@@ -31,6 +31,7 @@ export default function EditProjectOverview({
       setGenre(projectInfo.genre)
       setSummary(projectInfo.summary)
       setPicture(projectInfo.cover)
+      setLoadData(true)
     }
   }, [projectInfo._id])
 
@@ -75,7 +76,7 @@ export default function EditProjectOverview({
               <Image
                   src={mangaPic}
                   alt= 'Avatar'
-                  style={{ height: "300px"}}
+                  style={{ maxHeight: "200px"}}
                 />
             )}
             <Form className="my-4" onSubmit={updatePost}>

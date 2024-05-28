@@ -1,4 +1,5 @@
 import CreateProjectModal from "../components/projectComponents/CreateProjectModal";
+import DeleteProjectModal from "../components/projectComponents/DeleteProjectModal";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
@@ -10,11 +11,22 @@ import Col from "react-bootstrap/Col";
 import Header from "../components/Header";
 import mangaPic from "../cssImages/Manga5.jpeg";
 import Image from "react-bootstrap/Image";
+import Sidebar from "../components/Sidebar";
 
 export default function ManagePojects() {
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
+  const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
   const [projects, setProjects] = useState([]);
   const [projectId, setProjectId] = useState("");
+  const [deleteId, setDeleteId] = useState("");
+  const [updated, setUpdated] = useState(false);
+  const [redirect, setRedirect] = useState(false);
+
+  const handleClose = () => setShowCreateProjectModal(false);
+  const handleShow = () => setShowCreateProjectModal(true);
+
+  const deleteHandleClose = () => setShowDeleteProjectModal(false);
+  const deleteHandleShow = () => setShowDeleteProjectModal(true);
 
   useEffect(() => {
     async function fetchProjects() {
@@ -26,83 +38,118 @@ export default function ManagePojects() {
       if (response.ok) {
         const userProjects = await response.json();
         setProjects(userProjects);
-        console.log(userProjects);
+        setUpdated(true);
       } else {
         alert("failed to load projects");
       }
     }
 
     fetchProjects();
-  }, []);
+  }, [updated]);
 
-  if (projectId) {
+  if (projectId && redirect) {
     return <Navigate to={`/project/${projectId}`} />;
   }
 
   return (
-    <>
+    <Container fluid>
       <Header />
-      <Container fluid id="papyrus">
-        <Row>
+      <Row>
+        <Sidebar />
+        <Col xs={12} xxl={10} id="papyrus">
           <h1 className="my-5 text-center">My Projects</h1>
-          <Col xs={12}>
-            <Row className="m-5 p-5" id="manage-projects">
-              {projects.length &&
-                projects.map((project) => {
-                  return (
-                    <div className="border-bottom border-dark">
-                      <Row>
-                        <Col xs={12} md={6} xl={8}>
-                          <Row>
-                            <Col xs={12} xl={6} className="p-3 text-center">
-                              <h2 className="mt-3">{project.title}</h2>
-                              <div className="mt-3">
-                                <Button
-                                  variant="primary mx-1"
-                                  onClick={() => setProjectId(project._id)}
-                                >
-                                  <i className="bi bi-pencil-square mx-2">
-                                    {" "}
-                                    Edit
-                                  </i>
-                                </Button>
-                                <Button variant="danger mx-1">
-                                  <i className="bi bi-trash">Delete</i>
-                                </Button>
-                              </div>
-                            </Col>
-                            <Col xs={12} xl={6} className="p-3 text-center">
-                              {project.cover ? (
-                                <Image
-                                  src={`http://localhost:5000/${project.cover}`}
-                                  alt="Avatar"
-                                  style={{
-                                    height: "300px",
-                                    borderRadius: "60%",
-                                  }}
-                                />
-                              ) : (
-                                <Image
-                                  className="text-center"
-                                  src={mangaPic}
-                                  alt="character picture"
-                                  style={{ height: "150px" }}
-                                />
-                              )}
-                            </Col>
-                          </Row>
-                        </Col>
-                        <Col xs={12} md={6} xl={4} className="p-3 text-center">
-                          <p>dsfsdafgsbvfgxbnfhgnhf</p>
-                        </Col>
-                      </Row>
-                    </div>
-                  );
-                })}
-            </Row>
+          <Col className="mx-3 my-5 py-5 px-3" id="manage-projects">
+            {projects.length &&
+              projects.map((project) => {
+                return (
+                  <div className="border-bottom border-dark">
+                    <Row className="my-4">
+                      <Col xs={12} md={6} xl={8}>
+                        <Row>
+                          <Col xs={12} xl={6} className="p-3 text-center">
+                            <h2 className="mt-3">{project.title}</h2>
+                            <div className="mt-3">
+                              <Button
+                                variant="primary m-1"
+                                onClick={() => {
+                                  setProjectId(project._id);
+                                  setRedirect(true);
+                                }}
+                              >
+                                <i className="bi bi-pencil-square"> Edit</i>
+                              </Button>
+                              <Button
+                                variant="danger m-1"
+                                onClick={() => {
+                                  setDeleteId(project._id);
+                                  deleteHandleShow();
+                                }}
+                              >
+                                <i className="bi bi-trash">Delete</i>
+                              </Button>
+                            </div>
+                          </Col>
+                          <Col xs={12} xl={6} className="py-3 text-center">
+                            {project.cover ? (
+                              <Image
+                                src={`http://localhost:5000/${project.cover}`}
+                                alt="Avatar"
+                                style={{
+                                  maxHeight: "300px",
+                                  maxWidth: "250px",
+                                }}
+                              />
+                            ) : (
+                              <Image
+                                className="text-center"
+                                src={mangaPic}
+                                alt="character picture"
+                                style={{
+                                  maxHeight: "300px",
+                                  maxWidth: "250px",
+                                }}
+                              />
+                            )}
+                          </Col>
+                        </Row>
+                      </Col>
+                      <Col
+                        xs={12}
+                        md={6}
+                        xl={4}
+                        className="py-3 d-flex justify-content-center align-items-center"
+                      >
+                        <p>{project.summary}</p>
+                      </Col>
+                    </Row>
+                  </div>
+                );
+              })}
+            <Col
+              xs={12}
+              className="pt-5 d-flex justify-content-center align-items-center"
+            >
+              <Button
+                variant="primary text-center"
+                size="lg"
+                onClick={handleShow}
+              >
+                + Create New Project
+              </Button>
+            </Col>
           </Col>
-        </Row>
-      </Container>
-    </>
+        </Col>
+      </Row>
+      <CreateProjectModal
+        handleClose={handleClose}
+        showModal={showCreateProjectModal}
+      />
+      <DeleteProjectModal
+        handleClose={deleteHandleClose}
+        showModal={showDeleteProjectModal}
+        id={deleteId}
+        setUpdated={setUpdated}
+      />
+    </Container>
   );
 }
