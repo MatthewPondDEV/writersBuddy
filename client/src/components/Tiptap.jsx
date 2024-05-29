@@ -11,7 +11,7 @@ import Highlight from "@tiptap/extension-highlight";
 import { useState, useEffect } from "react";
 import Row from "react-bootstrap/esm/Row";
 import Col from "react-bootstrap/esm/Col";
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 import { Editor } from "@tiptap/core";
 
 export default function TipTap({ content, onChange, id }) {
@@ -126,12 +126,14 @@ export default function TipTap({ content, onChange, id }) {
         >
           <Col className="d-flex my-2 justify-content-center flex-wrap">
             <button
+              type="button"
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().chain().focus().undo().run()}
             >
               <i className="bi bi-arrow-counterclockwise"></i>
             </button>
             <button
+              type="button"
               onClick={() => editor.chain().focus().redo().run()}
               disabled={!editor.can().chain().focus().redo().run()}
             >
@@ -139,6 +141,7 @@ export default function TipTap({ content, onChange, id }) {
             </button>
             <span className="mx-1">|</span>
             <button
+              type="button"
               onClick={() => editor.chain().focus().toggleBold().run()}
               disabled={!editor.can().chain().focus().toggleBold().run()}
               className={
@@ -148,6 +151,7 @@ export default function TipTap({ content, onChange, id }) {
               <i className="bi bi-type-bold"></i>
             </button>
             <button
+              type="button"
               onClick={() => editor.chain().focus().toggleItalic().run()}
               disabled={!editor.can().chain().focus().toggleItalic().run()}
               className={
@@ -157,6 +161,7 @@ export default function TipTap({ content, onChange, id }) {
               <i className="bi bi-type-italic"></i>
             </button>
             <button
+              type="button"
               onClick={() => editor.chain().focus().toggleUnderline().run()}
               disabled={!editor.can().chain().focus().toggleUnderline().run()}
               className={
@@ -168,6 +173,7 @@ export default function TipTap({ content, onChange, id }) {
               <i className="bi bi-type-underline"></i>
             </button>
             <button
+              type="button"
               onClick={() => editor.chain().focus().toggleStrike().run()}
               disabled={!editor.can().chain().focus().toggleStrike().run()}
               className={
@@ -177,6 +183,7 @@ export default function TipTap({ content, onChange, id }) {
               <i className="bi bi-type-strikethrough"></i>
             </button>
             <button
+              type="button"
               onClick={() => editor.chain().focus().toggleHighlight().run()}
               className={
                 editor.isActive("highlight")
@@ -188,6 +195,7 @@ export default function TipTap({ content, onChange, id }) {
             </button>
             <span className="mx-1">|</span>
             <button
+              type="button"
               onClick={() => editor.chain().focus().setTextAlign("left").run()}
               className={
                 editor.isActive({ textAlign: "left" })
@@ -198,6 +206,7 @@ export default function TipTap({ content, onChange, id }) {
               <i className="bi bi-text-left"></i>
             </button>
             <button
+              type="button"
               onClick={() =>
                 editor.chain().focus().setTextAlign("center").run()
               }
@@ -210,6 +219,7 @@ export default function TipTap({ content, onChange, id }) {
               <i className="bi bi-text-center"></i>
             </button>
             <button
+              type="button"
               onClick={() => editor.chain().focus().setTextAlign("right").run()}
               className={
                 editor.isActive({ textAlign: "right" })
@@ -220,6 +230,7 @@ export default function TipTap({ content, onChange, id }) {
               <i className="bi bi-text-right"></i>
             </button>
             <button
+              type="button"
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               className={
                 editor.isActive("bulletList")
@@ -230,6 +241,7 @@ export default function TipTap({ content, onChange, id }) {
               <i class="bi bi-list-ul"></i>
             </button>
             <button
+              type="button"
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
               className={
                 editor.isActive("orderedList")
@@ -539,26 +551,26 @@ export default function TipTap({ content, onChange, id }) {
 
   return (
     <>
-    {contentLoaded &&
-    <TransitionGroup>
-            {contentLoaded && (
-                <CSSTransition classNames="editor" timeout={500}>
-                    <EditorProvider
-                        slotBefore={<MenuBar />}
-                        extensions={extensions}
-                        content={content}
-                        onUpdate={({ editor }) => {
-                            const html = editor.getHTML();
-                            onChange(html);
-                        }}
-                        classNames="editor"
-                        placeholder="Start typing here..."
-                        slotAfter={<FooterBar />}
-                    ></EditorProvider>
-                </CSSTransition>
-            )}
+      {contentLoaded && (
+        <TransitionGroup>
+          {contentLoaded && (
+            <CSSTransition classNames="editor" timeout={500}>
+              <EditorProvider
+                slotBefore={<MenuBar />}
+                extensions={extensions}
+                content={content}
+                onUpdate={({ editor }) => {
+                  const html = editor.getHTML();
+                  onChange(html);
+                }}
+                classNames="editor"
+                placeholder="Start typing here..."
+                slotAfter={<FooterBar />}
+              ></EditorProvider>
+            </CSSTransition>
+          )}
         </TransitionGroup>
-      }
+      )}
     </>
   );
 }

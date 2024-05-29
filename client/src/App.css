@@ -133,28 +133,6 @@ table tr th {
   scroll-behavior: auto;
 }
 
-#editor {
-  height: 90%;
-}
-
-#editor-container {
-  border: 2px solid lightgray;
-  border-radius: 2%;
-  overflow-y: auto;
-  height: 85vh;
-  width: 100%;
-}
-
-
-.ql-container.ql-snow {
-  border: none !important;
-}
-
-.ql-toolbar {
-  border-top: none !important;
-  border-right: none !important;
-  border-left: none !important;
-}
 
 
 .sticky-container {

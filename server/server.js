@@ -1161,7 +1161,6 @@ app.put("/updateEpilogue", uploadMiddleware.single(""), async (req, res) => {
         "write.epilogue": epilogue,
       },
     });
-    console.log(projectDoc.write.epilogue);
     res.json(projectDoc);
   });
 });
