@@ -126,13 +126,13 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
                           </Nav.Link>
                         </Col>
                         <Col xs={12}>
-                          <Nav.Link className="py-4 text-start">
+                          <Nav.Link href='/brainstorm' className="py-4 text-start">
                             {" "}
                             <i className="bi bi-lightbulb mx-2"></i> Brainstorm
                           </Nav.Link>
                         </Col>
                         <Col xs={12}>
-                          <Nav.Link className="py-4 text-start">
+                          <Nav.Link href='/profile' className="py-4 text-start">
                             <i className="bi bi-person-circle mx-2"></i> Profile
                           </Nav.Link>
                         </Col>

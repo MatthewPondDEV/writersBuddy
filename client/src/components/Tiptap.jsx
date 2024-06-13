@@ -498,6 +498,7 @@ export default function TipTap({ content, onChange, id }) {
             </Dropdown>
 
             <span className="mx-1">|</span>
+            
             <button>
               <i className="bi bi-palette me-2"></i>
               <input

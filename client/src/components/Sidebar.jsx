@@ -99,7 +99,7 @@ export default function Sidebar() {
                             </Nav.Link>
                           </Col>
                           <Col xs={12}>
-                            <Nav.Link className="py-4 text-start">
+                            <Nav.Link href='/profile' className="py-4 text-start">
                               <i className="bi bi-person-circle mx-2"></i>{" "}
                               Profile
                             </Nav.Link>

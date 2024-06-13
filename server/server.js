@@ -1208,7 +1208,6 @@ app.get("/getUserNotes", async (req, res) => {
   if (token) {
     jwt.verify(token, secret, {}, async (err, info) => {
       const notes = await Note.find({ createdBy: info.id });
-      console.log(notes);
       res.json(notes);
     });
   }

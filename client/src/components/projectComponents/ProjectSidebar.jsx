@@ -622,13 +622,13 @@ export default function ProjectSidebar({
                           </Nav.Link>
                         </Col>
                         <Col xs={12}>
-                          <Nav.Link className="py-4 mx-2 text-start">
+                          <Nav.Link href='/brainstorm' className="py-4 mx-2 text-start">
                             {" "}
                             <i className="bi bi-lightbulb mx-2"></i> Brainstorm
                           </Nav.Link>
                         </Col>
                         <Col xs={12}>
-                          <Nav.Link className="py-4 mx-2 text-start">
+                          <Nav.Link href='/profile' className="py-4 mx-2 text-start">
                             <i className="bi bi-person-circle mx-2"></i> Profile
                           </Nav.Link>
                         </Col>
