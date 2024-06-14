@@ -201,3 +201,9 @@ table tr th {
   background: linear-gradient(to bottom right, #fffff2, #ffbd59);
   border: 2px solid black;
 }
+
+#profile-background {
+  background: url(cssImages/silkBackground.jpg) no-repeat;
+  background-size: cover;
+  min-height: 600px;
+}
