@@ -8,10 +8,10 @@ const UserInfoSchema = new Schema({
   profilePicture: String,
   bio: String,
   experience: String,
-  favoriteBooks: [String],
-  favoriteAuthors: [String],
+  favoriteBooks: String,
+  favoriteAuthors: String,
   favoriteGenre: String,
-  goals: [String],
+  goals: String,
   socialMediaLinks: {
     facebook: String,
     instagram: String,
