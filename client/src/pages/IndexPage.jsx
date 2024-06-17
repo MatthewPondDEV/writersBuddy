@@ -95,7 +95,7 @@ useEffect(() => {
                                 </Button>
                             </>}
                     {loadRegister && <><Register setLoadRegister={setLoadRegister}
-                                                setLogOrReg={setLogOrReg}/>
+                                                setLoadLogin={setLoadLogin}/>
                                     <Button variant='link' onClick={() => {
                                     setLoadRegister(false)
                                     setLogOrReg(true)

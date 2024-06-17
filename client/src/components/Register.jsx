@@ -3,7 +3,7 @@ import Form from 'react-bootstrap/Form';
 import {useState} from 'react'
 
 
-export default function Register({setLoadRegister, setLogOrReg}) {
+export default function Register({setLoadRegister, setLoadLogin}) {
 
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -20,9 +20,9 @@ export default function Register({setLoadRegister, setLogOrReg}) {
         })
         if (response.status === 200) {
             alert('Registration Successful')
-            setLogOrReg(true)
+            setLoadLogin(true)
             setLoadRegister(false)
-
+            setRedirect(true)
         } else {
             alert('Registration Failed')
         }

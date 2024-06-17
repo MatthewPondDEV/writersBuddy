@@ -6,6 +6,7 @@ const cors = require("cors");
 const User = require("./models/User");
 const Project = require("./models/Project");
 const Note = require("./models/Note");
+const UserInfo = require("./models/UserInfo")
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
@@ -28,12 +29,30 @@ mongoose.connect(
 
 app.post("/register", async (req, res) => {
   const { email, username, password } = req.body;
-  console.log(req.body);
   try {
     const userDoc = await User.create({
       email,
       username,
       password: bcrypt.hashSync(password, salt),
+    });
+    const userInfo = await UserInfo.create({
+      user_id: userDoc._id,
+      name: "",
+      email: userDoc.email,
+      profilePicture: "",
+      bio: "",
+      experience: "",
+      favoriteBooks: "",
+      favoriteAuthors: "",
+      favoriteGenre: "",
+      goals: "",
+      socialMediaLinks: {
+        facebook: "",
+        instagram: "",
+        tiktok: "",
+        pinterest: "",
+        twitter: "",
+      },
     });
     res.json(userDoc);
   } catch (e) {
@@ -1236,5 +1255,55 @@ app.delete("/deleteNote", async (req, res) => {
     res.json({ message: "Note deleted successfully" });
   });
 });
+
+app.get('/getUserInfo', async (req,res) => {
+  const {token} = req.cookies
+  if (token) {
+    jwt.verify(token,secret, {}, async (err, info) => {
+      if (err) throw err;
+      const userInfo = await UserInfo.findOne({user_id: info.id})
+      res.json(userInfo)
+    })
+  }
+})
+
+app.put("/updateUserInfo", uploadMiddleware.single("file"), async (req, res) => {
+    const {token} = req.cookies
+    let newPath = null;
+    if (req.file) {
+      const { originalname, path } = req.file;
+      const parts = originalname.split(".");
+      const ext = parts[parts.length - 1];
+      newPath = path + "." + ext;
+      fs.renameSync(path, newPath);
+    }
+
+    jwt.verify(token, secret, {}, async (err,info) => {
+      if (err) throw err;
+      const {id} = req.body
+      const data = req.body
+      const userInfo = await UserInfo.findById(id)
+      await userInfo.updateOne({
+            name: data.name,
+            profilePicture: newPath ? newPath : userInfo.profilePicture,
+            bio: data.bio,
+            experience: data.experience,
+            favoriteBooks: data.favoriteBooks,
+            favoriteAuthors: data.favoriteAuthors,
+            favoriteGenre: data.favoriteGenre,
+            goals: data.goals,
+            "socialMediaLinks.instagram": data.instagram,
+            "socialMediaLinks.facebook": data.facebook,
+            "socialMediaLinks.pinterest": data.pinterest,
+            "socialMediaLinks.twitter": data.twitter,
+            "socialMediaLinks.tiktok": data.tiktok,
+        }
+      );
+
+      res.json(userInfo)
+      console.log(userInfo)
+    })
+})
+
 
 app.listen(5000);
