@@ -154,7 +154,7 @@ export default function ProfilePage() {
             <>
               <Col xs={12} lg={6} xxl={5}>
                 <h1 className="mt-5 mx-1">Profile</h1>
-                <div className="m-3 mb-5">
+                <div className="m-3 mb-5 pe-3">
                   <h2 className="mt-5">{userData.name}</h2>
                   {userData.profilePicture ? (
                     <Image
@@ -233,6 +233,7 @@ export default function ProfilePage() {
                     <Form.Label>Bio: </Form.Label>
                     <Form.Control
                       as="textarea"
+                      rows='5'
                       placeholder="Your bio here"
                       name="bio"
                       value={userData.bio}
