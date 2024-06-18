@@ -41,16 +41,13 @@ export default function Sidebar() {
     
 
     return (
-      <Col xs={12} xxl={2} className="bg-light">
-        <Container fluid>
-          <Row>
-            <Col className="bg-light">
+            <Col xs={12} xxl={2} className="bg-light">
               <Navbar
                 key={true}
                 expand="xxl"
                 className="bg-light w-100 flex-xxl-column align-items-start"
               >
-                <Navbar.Brand href="#home">
+                <Navbar.Brand>
                   <Link to="/home">
                     <Image src={logo} width="100px" rounded />
                   </Link>
@@ -92,7 +89,7 @@ export default function Sidebar() {
                             </Nav.Link>
                           </Col>
                           <Col xs={12}>
-                            <Nav.Link className="py-4 text-start">
+                            <Nav.Link href='/brainstorm' className="py-4 text-start">
                               {" "}
                               <i className="bi bi-lightbulb mx-2"></i>{" "}
                               Brainstorm
@@ -123,9 +120,6 @@ export default function Sidebar() {
                 </Navbar.Offcanvas>
               </Navbar>
             </Col>
-          </Row>
-        </Container>
-      </Col>
     );
 }
 

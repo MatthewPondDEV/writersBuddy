@@ -32,6 +32,7 @@ export default function ProfilePage() {
       twitter: "",
     },
   });
+
   const [files, setFiles] = useState("");
   const [showEdit, setShowEdit] = useState(false);
   const [updated, setUpdated] = useState(false)
@@ -122,23 +123,23 @@ export default function ProfilePage() {
                 <Col xs={12} xxl={10}>
                   <h1 className="mt-5 mx-1">Profile</h1>
                   <div className="ms-3 mb-5">
+                    <h2 className="mt-5">{userData.name}</h2>
                     {userData.profilePicture ? (
                       <Image
                         src={`http://localhost:5000/${userData.profilePicture}`}
                         alt="Avatar"
-                        className="mt-5"
-                        style={{ height: "200px", borderRadius: "60%" }}
+                        className="mt-2"
+                        style={{ height: "200px", borderRadius: "60%", border: '2px solid black' }}
                       />
                     ) : (
                       <Image
                         src={avatar}
                         alt="Avatar"
-                        className="mt-5"
+                        className="mt-2"
                         style={{ height: "200px", borderRadius: "60%" }}
                       />
                     )}
-                    <h2 className="my-1">{userData.name}</h2>
-                    <p>{userData.bio}</p>
+                    <p className='my-4' style={{width: '75%', maxWidth: '400px'}}>{userData.bio}</p>
                     <a href={userData.socialMediaLinks.instagram}>
                       <Image src={instagram} className="me-2" width="20px" />
                     </a>
@@ -154,25 +155,26 @@ export default function ProfilePage() {
                     <a href={userData.socialMediaLinks.tiktok}>
                       <Image src={tiktok} className="mx-2" width="20px" />
                     </a>
-                    <h4 className="my-4">
-                      Writing Experience: {userData.experience}
+                    <h4 className="mt-4 mb-2">
+                      Writing Experience:
                     </h4>
-                    <h4 className="my-4">
+                    <p className='mx-2'>{userData.experience}</p>
+                    <h4 className="mt-4 mb-2">
                       Writing Goals:
-                      <br /> {userData.goals}
                     </h4>
-                    <h4 className="my-4">
+                    <p className='mx-2'>{userData.goals}</p>
+                    <h4 className="mt-4 mb-2">
                       Favorite Authors:
-                      <br /> {userData.favoriteAuthors}
                     </h4>
-                    <h4 className="my-4">
+                    <p className='mx-2'>{userData.favoriteAuthors}</p>
+                    <h4 className="mt-4 mb-2">
                       Favorite Books:
-                      <br /> {userData.favoriteBooks}
                     </h4>
-                    <h4 className="my-4">
+                    <p className='mx-2'>{userData.favoriteBooks}</p>
+                    <h4 className="mt-4 mb-2">
                       Favorite Genre:
-                      <br /> {userData.favoriteGenre}
                     </h4>
+                    <p className='mx-2'>{userData.favoriteGenre}</p>
                   </div>
                   <Button
                     variant="primary mx-3 mb-5"
@@ -192,7 +194,7 @@ export default function ProfilePage() {
                           src={`http://localhost:5000/${userData.profilePicture}`}
                           alt="Avatar"
                           className="mt-2"
-                          style={{ height: "200px", borderRadius: "60%" }}
+                          style={{ height: "200px", borderRadius: "60%", border: '2px solid black' }}
                         />
                       ) : (
                         <Image
@@ -202,61 +204,42 @@ export default function ProfilePage() {
                           style={{ height: "200px", borderRadius: "60%" }}
                         />
                       )}
-                      <p>{userData.bio}</p>
-                      <a href={userData.socialMediaLinks.instagram}>
-                        <Image
-                          src={instagram}
-                          className="me-4 mb-4"
-                          width="20px"
-                        />
-                      </a>
-                      <a href={userData.socialMediaLinks.facebook}>
-                        <Image
-                          src={facebook}
-                          className="mx-4 mb-4"
-                          width="20px"
-                        />
-                      </a>
-                      <a href={userData.socialMediaLinks.pinterest}>
-                        <Image
-                          src={pinterest}
-                          className="mx-4 mb-4"
-                          width="20px"
-                        />
-                      </a>
-                      <a href={userData.socialMediaLinks.twitter}>
-                        <Image
-                          src={twitter}
-                          className="mx-4 mb-4"
-                          width="20px"
-                        />
-                      </a>
-                      <a href={userData.socialMediaLinks.tiktok}>
-                        <Image
-                          src={tiktok}
-                          className="mx-4 mb-4"
-                          width="20px"
-                        />
-                      </a>
-                      <h4 className="my-4">
-                        Writing Experience: {userData.experience}
-                      </h4>
-                      <h4 className="my-4">
-                        Writing Goals:
-                        <br /> {userData.goals}
-                      </h4>
-                      <h4 className="my-4">
-                        Favorite Authors:
-                        <br /> {userData.favoriteAuthors}
-                      </h4>
-                      <h4 className="my-4">
-                        Favorite Books:
-                        <br /> {userData.favoriteBooks}
-                      </h4>
-                      <h4 className="my-4">
-                        Favorite Genre:
-                        <br /> {userData.favoriteGenre}
-                      </h4>
+                      <p className='my-4' style={{width: '75%', maxWidth: '400px'}}>{userData.bio}</p>
+                    <a href={userData.socialMediaLinks.instagram}>
+                      <Image src={instagram} className="me-2" width="20px" />
+                    </a>
+                    <a href={userData.socialMediaLinks.facebook}>
+                      <Image src={facebook} className="mx-2" width="20px" />
+                    </a>
+                    <a href={userData.socialMediaLinks.pinterest}>
+                      <Image src={pinterest} className="mx-2" width="20px" />
+                    </a>
+                    <a href={userData.socialMediaLinks.twitter}>
+                      <Image src={twitter} className="mx-2" width="20px" />
+                    </a>
+                    <a href={userData.socialMediaLinks.tiktok}>
+                      <Image src={tiktok} className="mx-2" width="20px" />
+                    </a>
+                    <h4 className="mt-4 mb-2">
+                      Writing Experience:
+                    </h4>
+                    <p className='mx-2'>{userData.experience}</p>
+                    <h4 className="mt-4 mb-2">
+                      Writing Goals:
+                    </h4>
+                    <p className='mx-2'>{userData.goals}</p>
+                    <h4 className="mt-4 mb-2">
+                      Favorite Authors:
+                    </h4>
+                    <p className='mx-2'>{userData.favoriteAuthors}</p>
+                    <h4 className="mt-4 mb-2">
+                      Favorite Books:
+                    </h4>
+                    <p className='mx-2'>{userData.favoriteBooks}</p>
+                    <h4 className="mt-4 mb-2">
+                      Favorite Genre:
+                    </h4>
+                    <p className='mx-2'>{userData.favoriteGenre}</p>
                     </div>
                   </Col>
                   <Col className="pe-4">
@@ -312,22 +295,22 @@ export default function ProfilePage() {
                         />
                       </Form.Group>
                       <Form.Group className="mb-3">
-                        <Form.Label>Favorite Books: </Form.Label>
-                        <Form.Control
-                          type="text"
-                          placeholder="Your favorite books"
-                          name="favoriteBooks"
-                          value={userData.favoriteBooks}
-                          onChange={(e) => handleChange(e)}
-                        />
-                      </Form.Group>
-                      <Form.Group className="mb-3">
                         <Form.Label>Favorite Authors: </Form.Label>
                         <Form.Control
                           type="text"
                           placeholder="Your favorite authors"
                           name="favoriteAuthors"
                           value={userData.favoriteAuthors}
+                          onChange={(e) => handleChange(e)}
+                        />
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Favorite Books: </Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Your favorite books"
+                          name="favoriteBooks"
+                          value={userData.favoriteBooks}
                           onChange={(e) => handleChange(e)}
                         />
                       </Form.Group>

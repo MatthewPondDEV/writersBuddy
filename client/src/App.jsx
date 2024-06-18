@@ -7,6 +7,7 @@ import ProjectsPage from './pages/ProjectPage';
 import NotePage from './pages/NotePage';
 import ManageProjects from './pages/ManageProjects';
 import ProfilePage from './pages/ProfilePage';
+import BrainstormPage from './pages/BrainstormPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path='/notes' element={<NotePage />} />
         <Route path='/manageProjects' element={<ManageProjects />} />
         <Route path='/profile' element={<ProfilePage />} />
+        <Route path='/brainstorm' element={<BrainstormPage />} />
       </Route>
     </Routes>
   )

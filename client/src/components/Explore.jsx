@@ -107,9 +107,11 @@ export default function Explore() {
         </Col>
         <Col xs={12} xl={6} className="d-flex justify-content-center">
           <div className="m-5 p-5 text-white text-center w-75">
+            <Link to='/brainstorm'>
             <Button variant="outline-primary text-white mb-3" size="lg">
               Brainstorm
             </Button>
+            </Link>
             <p className="display-6">
               Writer's block? Use the brainstorm feature to get back on track
             </p>

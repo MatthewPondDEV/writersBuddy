@@ -42,10 +42,7 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
   const handleShow = () => setShow(true);
 
   return (
-    <Col xs={12} xxl={2} className="bg-light">
-      <Container fluid>
-        <Row>
-          <Col className="bg-light">
+          <Col xs={12} xxl={2} className="bg-light">
             <Navbar
               key={true}
               expand="xxl"
@@ -155,8 +152,5 @@ export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
               </Navbar.Offcanvas>
             </Navbar>
           </Col>
-        </Row>
-      </Container>
-    </Col>
   );
 }

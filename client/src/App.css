@@ -40,7 +40,7 @@
   background: none;
 }
 
-#project-sidebar .accordion-item {
+#project-sidebar .accordion-item, .offcanvas .accordion-item {
   border-right: none;
   border-left:none;
 }
@@ -206,4 +206,9 @@ table tr th {
   background: url(cssImages/silkBackground.jpg) no-repeat;
   background-size: cover;
   min-height: 600px;
+}
+
+#brainstorm-background {
+  background: url(cssImages/fogMountain.jpg) no-repeat;
+  background-size: cover;
 }
