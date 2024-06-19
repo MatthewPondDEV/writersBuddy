@@ -9,9 +9,11 @@ const Note = require("./models/Note");
 const UserInfo = require("./models/UserInfo")
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
+const openai = require("openai");
 require("dotenv").config();
 
 const salt = bcrypt.genSaltSync(10);
@@ -21,11 +23,14 @@ const key = process.env.MDB_API_KEY;
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.json());
 app.use("/uploads", express.static(__dirname + "/uploads"));
 
 mongoose.connect(
   `mongodb+srv://mattypond00:${key}@cluster0.32pnilj.mongodb.net/WritersBuddy?retryWrites=true&w=majority`
 );
+
+// const chatConnect = new openai.OpenAI('#/')
 
 app.post("/register", async (req, res) => {
   const { email, username, password } = req.body;
@@ -1304,6 +1309,8 @@ app.put("/updateUserInfo", uploadMiddleware.single("file"), async (req, res) => 
       console.log(userInfo)
     })
 })
+
+
 
 
 app.listen(5000);

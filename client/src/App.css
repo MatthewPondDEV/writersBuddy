@@ -212,3 +212,17 @@ table tr th {
   background: url(cssImages/fogMountain.jpg) no-repeat;
   background-size: cover;
 }
+
+#brainstorm-chat {
+  background-color: rgba(245, 245, 245, .4);
+  border-radius: 6%;
+  width: 93%;
+  min-height: 700px;
+  max-width: 1200px;
+}
+
+#chat-history {
+  min-height: 400px;
+  max-height: 650px;
+  overflow-y: auto;
+}

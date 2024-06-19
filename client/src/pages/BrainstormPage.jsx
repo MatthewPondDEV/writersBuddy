@@ -6,6 +6,7 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import BrainstormChatBot from "../components/brainstormComponents/BrainstormChatBot";
 
 export default function BrainstormPage() {
 
@@ -16,8 +17,10 @@ export default function BrainstormPage() {
             <Row id='brainstorm-background'>
                 <Sidebar />
                 <Col xs={12} xxl={10}>
-                    <h1 className='m-5 text-center' >Let's Brainstorm</h1>
-                    
+                <h1 className='m-5 text-center' >Let's Brainstorm</h1>
+                <div className='d-flex justify-content-center'>
+                    <BrainstormChatBot />
+                </div>
                 </Col>
             </Row>
         </Container>
