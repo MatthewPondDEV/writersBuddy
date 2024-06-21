@@ -163,7 +163,6 @@ app.post("/createProject", async (req, res) => {
         ],
       },
     });
-    console.log(projectDoc);
     res.json(projectDoc);
   });
 });
