@@ -117,9 +117,9 @@ export default function ManagePojects() {
                         xs={12}
                         md={6}
                         xl={4}
-                        className="py-3 d-flex justify-content-center align-items-center"
+                        className="py-3 pe-2 d-flex justify-content-center align-items-center"
                       >
-                        <p>{project.summary}</p>
+                        <p className='me-4'>{project.summary}</p>
                       </Col>
                     </Row>
                   </div>

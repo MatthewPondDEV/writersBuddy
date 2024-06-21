@@ -13,12 +13,14 @@ const bodyParser = require("body-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
-const openai = require("openai");
+const OpenAI = require("openai");
+const axios = require('axios')
 require("dotenv").config();
 
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
 const key = process.env.MDB_API_KEY;
+
 
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json());
@@ -30,7 +32,7 @@ mongoose.connect(
   `mongodb+srv://mattypond00:${key}@cluster0.32pnilj.mongodb.net/WritersBuddy?retryWrites=true&w=majority`
 );
 
-// const chatConnect = new openai.OpenAI('#/')
+// const openai = new OpenAI();
 
 app.post("/register", async (req, res) => {
   const { email, username, password } = req.body;
@@ -1309,7 +1311,30 @@ app.put("/updateUserInfo", uploadMiddleware.single("file"), async (req, res) => 
     })
 })
 
+app.post('/chatbot', async (req,res) => {
+  const { message } = req.body;
 
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/engines/davinci-codex/completions",
+      {
+        prompt: message,
+        max_tokens: 150,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    res.json({ reply: response.data.choices[0].text.trim() });
+  } catch (error) {
+    console.error("OpenAI API Error:", error);
+    res.status(500).json({ error: "Failed to get response from OpenAI" });
+  }
+})
 
 
 app.listen(5000);
