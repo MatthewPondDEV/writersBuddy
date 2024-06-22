@@ -6,21 +6,21 @@ const cors = require("cors");
 const User = require("./models/User");
 const Project = require("./models/Project");
 const Note = require("./models/Note");
-const UserInfo = require("./models/UserInfo")
+const UserInfo = require("./models/UserInfo");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
-const OpenAI = require("openai");
-const axios = require('axios')
+const openai = require("openai");
+const axios = require("axios");
 require("dotenv").config();
 
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
 const key = process.env.MDB_API_KEY;
-
+const openAIAPIKey = process.env.OPEN_AI_PROJECT_KEY;
 
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json());
@@ -115,7 +115,7 @@ app.get("/getProjects", async (req, res) => {
         title: project.title,
         createdBy: project.createdBy,
         summary: project.summary,
-        cover: project.cover
+        cover: project.cover,
       }));
       res.json(userProjects);
     });
@@ -186,15 +186,15 @@ app.get("/project/:id", async (req, res) => {
   res.json(project);
 });
 
-app.delete('/deleteProject', async (req,res) => {
-  const {token} = req.cookies;
-  const projectId = req.body.id
+app.delete("/deleteProject", async (req, res) => {
+  const { token } = req.cookies;
+  const projectId = req.body.id;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
     await Project.findByIdAndDelete(projectId);
     res.json({ message: "Note deleted successfully" });
   });
-})
+});
 
 app.put(
   "/projectOverview",
@@ -1082,7 +1082,7 @@ app.put("/createChapter", async (req, res) => {
             {
               title,
               chapterNumber: chapterNumber,
-              content: 'And the story continues...',
+              content: "And the story continues...",
               timestamp: new Date(),
             },
           ],
@@ -1221,7 +1221,7 @@ app.post("/createNewNote", async (req, res) => {
       const noteDoc = await Note.create({
         title,
         createdBy: info.id,
-        content: "Jot down some thoughts and ideas..."
+        content: "Jot down some thoughts and ideas...",
       });
       res.json(noteDoc);
     });
@@ -1262,19 +1262,22 @@ app.delete("/deleteNote", async (req, res) => {
   });
 });
 
-app.get('/getUserInfo', async (req,res) => {
-  const {token} = req.cookies
+app.get("/getUserInfo", async (req, res) => {
+  const { token } = req.cookies;
   if (token) {
-    jwt.verify(token,secret, {}, async (err, info) => {
+    jwt.verify(token, secret, {}, async (err, info) => {
       if (err) throw err;
-      const userInfo = await UserInfo.findOne({user_id: info.id})
-      res.json(userInfo)
-    })
+      const userInfo = await UserInfo.findOne({ user_id: info.id });
+      res.json(userInfo);
+    });
   }
-})
+});
 
-app.put("/updateUserInfo", uploadMiddleware.single("file"), async (req, res) => {
-    const {token} = req.cookies
+app.put(
+  "/updateUserInfo",
+  uploadMiddleware.single("file"),
+  async (req, res) => {
+    const { token } = req.cookies;
     let newPath = null;
     if (req.file) {
       const { originalname, path } = req.file;
@@ -1284,57 +1287,70 @@ app.put("/updateUserInfo", uploadMiddleware.single("file"), async (req, res) => 
       fs.renameSync(path, newPath);
     }
 
-    jwt.verify(token, secret, {}, async (err,info) => {
+    jwt.verify(token, secret, {}, async (err, info) => {
       if (err) throw err;
-      const {id} = req.body
-      const data = req.body
-      const userInfo = await UserInfo.findById(id)
+      const { id } = req.body;
+      const data = req.body;
+      const userInfo = await UserInfo.findById(id);
       await userInfo.updateOne({
-            name: data.name,
-            profilePicture: newPath ? newPath : userInfo.profilePicture,
-            bio: data.bio,
-            experience: data.experience,
-            favoriteBooks: data.favoriteBooks,
-            favoriteAuthors: data.favoriteAuthors,
-            favoriteGenre: data.favoriteGenre,
-            goals: data.goals,
-            "socialMediaLinks.instagram": data.instagram,
-            "socialMediaLinks.facebook": data.facebook,
-            "socialMediaLinks.pinterest": data.pinterest,
-            "socialMediaLinks.twitter": data.twitter,
-            "socialMediaLinks.tiktok": data.tiktok,
-        }
-      );
+        name: data.name,
+        profilePicture: newPath ? newPath : userInfo.profilePicture,
+        bio: data.bio,
+        experience: data.experience,
+        favoriteBooks: data.favoriteBooks,
+        favoriteAuthors: data.favoriteAuthors,
+        favoriteGenre: data.favoriteGenre,
+        goals: data.goals,
+        "socialMediaLinks.instagram": data.instagram,
+        "socialMediaLinks.facebook": data.facebook,
+        "socialMediaLinks.pinterest": data.pinterest,
+        "socialMediaLinks.twitter": data.twitter,
+        "socialMediaLinks.tiktok": data.tiktok,
+      });
 
-      res.json(userInfo)
-      console.log(userInfo)
-    })
-})
+      res.json(userInfo);
+      console.log(userInfo);
+    });
+  }
+);
 
-app.post('/chatbot', async (req,res) => {
+app.post("/chatbot", async (req, res) => {
   const { message } = req.body;
+  console.log(message);
+  const { token } = req.cookies;
 
   try {
     const response = await axios.post(
-      "https://api.openai.com/v1/engines/davinci-codex/completions",
+      "https://api.openai.com/v1/chat/completions",
       {
-        prompt: message,
-        max_tokens: 150,
+        model: "gpt-3.5-turbo", // Specify the model you want to use if needed
+        messages: [
+          {
+            role: "user",
+            content: message,
+            instructions: {
+              // Instructions for the chatbot
+              intent:
+                "Help the user to brainstorm for writing their next story, manga, play-write, or movie script",
+            },
+          },
+        ],
       },
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${openAIAPIKey}`,
         },
       }
     );
 
-    res.json({ reply: response.data.choices[0].text.trim() });
+    const botResponse = await response.data.choices[0].message.content;
+    console.log(botResponse);
+    res.json(botResponse);
   } catch (error) {
-    console.error("OpenAI API Error:", error);
-    res.status(500).json({ error: "Failed to get response from OpenAI" });
+    console.error("Error communicating with OpenAI API:", error);
+    throw error; // Handle or propagate the error as needed
   }
-})
-
+});
 
 app.listen(5000);

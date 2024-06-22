@@ -27,23 +27,32 @@ export default function BrainstormChatBot() {
     }
   }, [response]);
 
-  const sendMessage = async () => {
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/chatbot",
-        { message },
-        {
-          withCredentials: true, // Include credentials (cookies)
-        }
-      );
-      currentChat.push(message);
-      tracker.push("mes");
-      setResponse(response.data.message);
-      window.sessionStorage.setItem("currentChat", currentChat);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+const sendMessage = async () => {
+  const message = "Can you help me brainstorm for a story idea?"; // Example message
+  currentChat.push(message);
+  tracker.push("mes");
+
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/chatbot",
+      { message },
+      {
+        withCredentials: true, // Include credentials (cookies)
+      }
+    );
+
+    const chatResponse = res.data; // Access response data directly
+    console.log("Bot response:", chatResponse);
+    setResponse(chatResponse); // Assuming setResponse is a function to update state
+
+    currentChat.push(chatResponse);
+    tracker.push("res");
+    window.sessionStorage.setItem("currentChat", JSON.stringify(currentChat));
+  } catch (error) {
+    console.error("Error:", error);
+    // Handle error in fetching data from server
+  }
+};
 
   return (
     <div id="brainstorm-chat" className="py-5 my-5 mx-2">
