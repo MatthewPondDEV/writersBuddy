@@ -11,48 +11,50 @@ export default function BrainstormChatBot() {
   const [response, setResponse] = useState("");
   const [currentChat, setCurrentChat] = useState(
     window.sessionStorage.getItem("currentChat")
-      ? window.sessionStorage.getItem("currentChat")
+      ? JSON.parse(window.sessionStorage.getItem("currentChat"))
       : ["What can I help you with today?"]
   );
   const [tracker, setTracker] = useState(
     window.sessionStorage.getItem("messageTracker")
-      ? window.sessionStorage.getItem("messageTracker")
+      ? JSON.parse(window.sessionStorage.getItem("messageTracker"))
       : ["res"]
   );
 
   useEffect(() => {
-    if (response) {
-      currentChat.push(response);
-      tracker.push("res");
-    }
-  }, [response]);
+      window.sessionStorage.setItem(
+          "currentChat",
+          JSON.stringify(currentChat)
+        );
+        window.sessionStorage.setItem(
+          "messageTracker",
+          JSON.stringify(tracker))
+  }, [tracker, currentChat])
 
-const sendMessage = async () => {
-  const message = "Can you help me brainstorm for a story idea?"; // Example message
-  currentChat.push(message);
-  tracker.push("mes");
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    setCurrentChat((prevChat) => [...prevChat, message]);
+    setTracker((prevTracker) => [...prevTracker, "mes"]);
+    try {
+      const res = await fetch("http://localhost:5000/chatbot", {
+        method: "POST",
+        credentials: "include", // Include credentials (cookies)
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      });
 
-  try {
-    const res = await axios.post(
-      "http://localhost:5000/chatbot",
-      { message },
-      {
-        withCredentials: true, // Include credentials (cookies)
+      if (res.ok) {
+        const chatResponse = await res.json(); // Access response data directly
+
+        setCurrentChat((prevChat) => [...prevChat, chatResponse]);
+        setTracker((prevTracker) => [...prevTracker, "res"]);
       }
-    );
-
-    const chatResponse = res.data; // Access response data directly
-    console.log("Bot response:", chatResponse);
-    setResponse(chatResponse); // Assuming setResponse is a function to update state
-
-    currentChat.push(chatResponse);
-    tracker.push("res");
-    window.sessionStorage.setItem("currentChat", JSON.stringify(currentChat));
-  } catch (error) {
-    console.error("Error:", error);
-    // Handle error in fetching data from server
-  }
-};
+    } catch (error) {
+      console.error("Error:", error);
+      // Handle error in fetching data from server
+    }
+  };
 
   return (
     <div id="brainstorm-chat" className="py-5 my-5 mx-2">
@@ -61,14 +63,13 @@ const sendMessage = async () => {
           currentChat.map((chat, index) => {
             if (tracker[index] === "mes") {
               return (
-                <p key={index} className="me-2 my-3 ms-5 ps-3 text-end">
+                <p key={index} className="me-2 my-5 ms-5 ps-3 text-end">
                   {chat} .
                 </p>
               );
-            }
-            if (tracker[index] === "res") {
+            } else {
               return (
-                <p key={index} className="ms-2 my-3 me-5 pe-3 text-start">
+                <p key={index} className="ms-2 my-5 me-5 pe-3 text-start">
                   . {chat}
                 </p>
               );
@@ -76,8 +77,8 @@ const sendMessage = async () => {
           })}
       </div>
       <Form
-        className="mt-5 my-3 px-5 d-flex flex-column justify-content-center align-self-end"
         onSubmit={sendMessage}
+        className="mt-5 my-3 px-5 d-flex flex-column justify-content-center align-self-end"
       >
         <div className="px-5 mb-2 d-flex justify-content-between">
           <i className="bi bi-robot"></i>
