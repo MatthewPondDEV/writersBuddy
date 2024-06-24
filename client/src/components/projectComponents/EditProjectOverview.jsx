@@ -69,14 +69,14 @@ export default function EditProjectOverview({
                 <Image
                   src={`http://localhost:5000/${picture}`}
                   alt= 'Avatar'
-                  style={{ height: "300px"}}
+                  style={{ maxHeight: "300px", maxWidth: '97%', borderRadius: '3%'}}
                 />
             ) :
             (
               <Image
                   src={mangaPic}
                   alt= 'Avatar'
-                  style={{ maxHeight: "200px"}}
+                  style={{ maxHeight: "300px", maxWidth: '97%', borderRadius: '3%'}}
                 />
             )}
             <Form className="my-4" onSubmit={updatePost}>

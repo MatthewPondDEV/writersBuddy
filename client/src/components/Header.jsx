@@ -36,19 +36,19 @@ export default function Header() {
     <Row
       style={{
         background: "linear-gradient(to bottom right,#fffff2,#ffbd59)",
-        height: "75px",
+        minHeight: "75px",
       }}
     >
       <Col xs={12} className="text-center">
         <h3
-          className="mt-3"
+          className="my-3"
           style={{
             textShadow: "1px 1px 6px #FAF9F6, 1px 1px 10px #ccc",
             display: "inline-block",
             borderRadius: "10px",
           }}
         >
-          Hello {userInfo.username}, let's create something great today
+          Hey {userInfo.username}, let's create something great today
         </h3>
       </Col>
     </Row>

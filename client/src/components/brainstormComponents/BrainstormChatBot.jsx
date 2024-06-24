@@ -5,8 +5,11 @@ import { useState } from "react";
 import { useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
+import ClearChatModal from "./ClearChatModal";
 
 export default function BrainstormChatBot() {
+  const [showSaveChatModal, setSaveChatModal] = useState(false);
+  const [showClearChatModal, setShowClearChatModal] = useState(false);
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [currentChat, setCurrentChat] = useState(
@@ -20,15 +23,18 @@ export default function BrainstormChatBot() {
       : ["res"]
   );
 
+  const handleClose = () => setSaveChatModal(false);
+  const handleShow = () => setSaveChatModal(true);
+
+  const clearHandleClose = () => setShowClearChatModal(false);
+  const clearHandleShow = () => setShowClearChatModal(true);
+
   useEffect(() => {
-      window.sessionStorage.setItem(
-          "currentChat",
-          JSON.stringify(currentChat)
-        );
-        window.sessionStorage.setItem(
-          "messageTracker",
-          JSON.stringify(tracker))
-  }, [tracker, currentChat])
+    window.sessionStorage.setItem("currentChat", JSON.stringify(currentChat));
+    window.sessionStorage.setItem("messageTracker", JSON.stringify(tracker));
+    var element = document.getElementById("chat-history");
+    element.scrollTop = element.scrollHeight;
+  }, [tracker, currentChat]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -49,6 +55,7 @@ export default function BrainstormChatBot() {
 
         setCurrentChat((prevChat) => [...prevChat, chatResponse]);
         setTracker((prevTracker) => [...prevTracker, "res"]);
+        setMessage("");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -90,13 +97,27 @@ export default function BrainstormChatBot() {
             rows="4"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message that you want to send to the chatbot to help you brainstorm"
+            placeholder="Type a message that you want to send to the chatbot to help you brainstorm. Ex: 'I want to write a space western about a lone space cowboy. Can you help me get started?'"
           />
         </Form.Group>
-        <Button size="lg" className="mx-5" type="submit">
-          Send
+        <Button size="lg" className="mx-4" type="submit">
+          Submit Message
         </Button>
+        <div className="mt-4 d-flex justify-content-around">
+          <Button variant="primary" size="lg">
+            Save Chat
+          </Button>
+          <Button variant="danger" size="lg" onClick={() => setShowClearChatModal(true)}>
+            Clear Chat
+          </Button>
+        </div>
       </Form>
+      <ClearChatModal
+        setCurrentChat={setCurrentChat}
+        setTracker={setTracker}
+        handleClose={clearHandleClose}
+        showModal={showClearChatModal}
+      />
     </div>
   );
 }
