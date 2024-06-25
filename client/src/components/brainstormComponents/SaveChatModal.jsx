@@ -4,37 +4,21 @@ import Form from "react-bootstrap/Form";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 
-export default function CreateProjectModal({ handleClose, showModal }) {
+export default function SaveChatModal({ handleClose, showModal, currentChat, tracker }) {
   const [title, setTitle] = useState("");
-  const [redirect, setRedirect] = useState(false);
-  const [id, setId] = useState(null);
 
-  async function createProject(event) {
-    event.preventDefault();
-    const response = await fetch("http://localhost:5000/createProject", {
+  const createNote = async () => {
+    const create = await fetch("http://localhost:5000/createNewNote", {
       method: "Post",
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({ title, chatName: currentChat[1] ? currentChat[1] : "Brainstorm Chat", content: JSON.stringify(currentChat), tracker: JSON.stringify(tracker) }),
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
-    if (response.ok) {
-      setRedirect(true);
+
+    if (create.ok) {
+      handleClose()
     }
-  }
-
-  if (showModal && redirect) {
-    const getId = fetch("http://localhost:5000/getProjectID", {
-      credentials: "include",
-    }).then((res) => {
-      res.json().then((project) => {
-        setId(project[0]._id);
-      });
-    });
-  }
-
-  if (redirect && id) {
-    return <Navigate to={`/project/${id}`} />;
-  }
+  };
 
   return (
     <Modal
@@ -45,16 +29,17 @@ export default function CreateProjectModal({ handleClose, showModal }) {
       className="mt-5"
     >
       <Modal.Header closeButton>
-        <Modal.Title>Create Your Next Project</Modal.Title>
+        <Modal.Title>Would you like to save this chat?</Modal.Title>
       </Modal.Header>
+      <span className='mx-3'>This chat will be saved as a note</span>
       <Modal.Body>
-        <Form onSubmit={createProject}>
+        <Form onSubmit={createNote}>
           <Form.Group className="mb-4">
             <Form.Label>Title:</Form.Label>
             <Form.Control
               type="title"
               placeholder={
-                'Think "Romeo & Juliet", "One Piece", "Spiderman", ...'
+                'Title of this note'
               }
               value={title}
               onChange={(event) => setTitle(event.target.value)}
@@ -65,7 +50,7 @@ export default function CreateProjectModal({ handleClose, showModal }) {
               Cancel
             </Button>
             <Button variant="primary mt-3" type="submit">
-              Create
+              Save
             </Button>
           </div>
         </Form>

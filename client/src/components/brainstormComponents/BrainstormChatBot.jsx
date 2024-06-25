@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
 import ClearChatModal from "./ClearChatModal";
+import SaveChatModal from "./SaveChatModal";
 
 export default function BrainstormChatBot() {
   const [showSaveChatModal, setSaveChatModal] = useState(false);
@@ -70,14 +71,14 @@ export default function BrainstormChatBot() {
           currentChat.map((chat, index) => {
             if (tracker[index] === "mes") {
               return (
-                <p key={index} className="me-2 my-5 ms-5 ps-3 text-end">
-                  {chat} .
+                <p key={index} className="me-1 my-5 ms-5 ps-3 text-end">
+                  {chat} | <i className="bi bi-person"></i>
                 </p>
               );
             } else {
               return (
-                <p key={index} className="ms-2 my-5 me-5 pe-3 text-start">
-                  . {chat}
+                <p key={index} className="ms-1 my-5 me-5 pe-3 text-start">
+                  <i className="bi bi-robot"></i> | {chat}
                 </p>
               );
             }
@@ -97,17 +98,22 @@ export default function BrainstormChatBot() {
             rows="4"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message that you want to send to the chatbot to help you brainstorm. Ex: 'I want to write a space western about a lone space cowboy. Can you help me get started?'"
+            placeholder="Type a message that you want to send to the chatbot to help you brainstorm. Ex: 'I want to write a space western about a lone space cowboy. Can you help me get started?'. Please allow a few seconds for a response after submission."
           />
         </Form.Group>
         <Button size="lg" className="mx-4" type="submit">
-          Submit Message
+          <i class="bi bi-send"></i> Submit Message
         </Button>
         <div className="mt-4 d-flex justify-content-around">
-          <Button variant="primary" size="lg">
+          <Button variant="primary" size="lg"
+          onClick={() => setSaveChatModal(true)}>
             Save Chat
           </Button>
-          <Button variant="danger" size="lg" onClick={() => setShowClearChatModal(true)}>
+          <Button
+            variant="danger"
+            size="lg"
+            onClick={() => setShowClearChatModal(true)}
+          >
             Clear Chat
           </Button>
         </div>
@@ -118,6 +124,12 @@ export default function BrainstormChatBot() {
         handleClose={clearHandleClose}
         showModal={showClearChatModal}
       />
+      <SaveChatModal 
+        currentChat={currentChat}
+        tracker={tracker}
+        handleClose={handleClose}
+        showModal={showSaveChatModal}
+        />
     </div>
   );
 }
