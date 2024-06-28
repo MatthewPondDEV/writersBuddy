@@ -119,7 +119,7 @@ export default function ManagePojects() {
                         xl={4}
                         className="py-3 pe-2 d-flex justify-content-center align-items-center"
                       >
-                        <p className='me-4'>{project.summary}</p>
+                        <p className='me-4 text-center'>{project.summary}</p>
                       </Col>
                     </Row>
                   </div>

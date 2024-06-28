@@ -4,7 +4,7 @@ import Modal from "react-bootstrap/Modal";
 export default function ClearChatModal({ handleClose, showModal, setCurrentChat, setTracker }) {
 
   function clearChat() {
-     setCurrentChat(["What can I help you with today?"]);
+     setCurrentChat(["Let's brainstorm! What can I help you with today?"]);
      setTracker(['res'])
      handleClose()
   }

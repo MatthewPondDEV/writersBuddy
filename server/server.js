@@ -1327,7 +1327,7 @@ app.post("/chatbot", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: message,
+            content: message, 
             instructions: {
               // Instructions for the chatbot
               intent:
