@@ -1319,7 +1319,8 @@ app.post("/chatbot", async (req, res) => {
   console.log(message);
   const { token } = req.cookies;
 
-  try {
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
@@ -1347,10 +1348,7 @@ app.post("/chatbot", async (req, res) => {
     const botResponse = await response.data.choices[0].message.content;
     console.log(botResponse);
     res.json(botResponse);
-  } catch (error) {
-    console.error("Error communicating with OpenAI API:", error);
-    throw error; // Handle or propagate the error as needed
-  }
+  })
 });
 
 app.listen(5000);
