@@ -219,15 +219,22 @@ export default function ProjectsPage() {
   }, [currentChapterId])
 
   useEffect(() => {
-    fetch(`http://localhost:5000/project/${id}`).then((response) => {
-      response.json().then((projectInfo) => {
-        setProjectInfo(projectInfo);
+    const retrieveProject = async () => {
+      const response = await fetch(`http://localhost:5000/project/${id}`, {
+        method: "GET",
+        credentials: "include",
       });
-    });
+
+      if (response.ok) {
+        const projectInfo = await response.json()
+        setProjectInfo(projectInfo)
+      }
     if (projectInfo.title) {
       setIsUpdated(true);
       console.log(projectInfo);
     }
+  }
+  retrieveProject()
   }, [isUpdated]);
 
   return (

@@ -182,8 +182,12 @@ app.get("/getProjectID", async (req, res) => {
 
 app.get("/project/:id", async (req, res) => {
   const { id } = req.params;
+   const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
   const project = await Project.findById(id);
   res.json(project);
+  })
 });
 
 app.delete("/deleteProject", async (req, res) => {

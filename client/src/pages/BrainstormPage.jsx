@@ -18,7 +18,7 @@ export default function BrainstormPage() {
                 <Sidebar />
                 <Col xs={12} xxl={10}>
                 <h1 className='m-5 text-center' >Let's Brainstorm</h1>
-                <span className='my-3'>Use the chatbot to help break yourself out of writer's block, or to help start your next story.</span>
+                <p className='my-3 text-center'>Use the chatbot to help break yourself out of writer's block, or to help start your next story.</p>
                 <div className='d-flex justify-content-center'>
                     <BrainstormChatBot />
                 </div>

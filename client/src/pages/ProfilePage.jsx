@@ -140,19 +140,19 @@ export default function ProfilePage() {
                       />
                     )}
                     <p className='my-4' style={{width: '75%', maxWidth: '400px'}}>{userData.bio}</p>
-                    <a href={userData.socialMediaLinks.instagram}>
+                    <a href= {`http://${userData.socialMediaLinks.instagram}`} >
                       <Image src={instagram} className="me-2" width="20px" />
                     </a>
-                    <a href={userData.socialMediaLinks.facebook}>
+                    <a href={`http://${userData.socialMediaLinks.facebook}`}>
                       <Image src={facebook} className="mx-2" width="20px" />
                     </a>
-                    <a href={userData.socialMediaLinks.pinterest}>
+                    <a href={`http://${userData.socialMediaLinks.pinterest}`}>
                       <Image src={pinterest} className="mx-2" width="20px" />
                     </a>
-                    <a href={userData.socialMediaLinks.twitter}>
+                    <a href={`http://${userData.socialMediaLinks.twitter}`}>
                       <Image src={twitter} className="mx-2" width="20px" />
                     </a>
-                    <a href={userData.socialMediaLinks.tiktok}>
+                    <a href={`http://${userData.socialMediaLinks.tiktok}`}>
                       <Image src={tiktok} className="mx-2" width="20px" />
                     </a>
                     <h4 className="mt-4 mb-2">
@@ -205,19 +205,19 @@ export default function ProfilePage() {
                         />
                       )}
                       <p className='my-4' style={{width: '75%', maxWidth: '400px'}}>{userData.bio}</p>
-                    <a href={userData.socialMediaLinks.instagram}>
+                    <a href={`http://${userData.socialMediaLinks.instagram}`}>
                       <Image src={instagram} className="me-2" width="20px" />
                     </a>
-                    <a href={userData.socialMediaLinks.facebook}>
+                    <a href={`http://${userData.socialMediaLinks.facebook}`}>
                       <Image src={facebook} className="mx-2" width="20px" />
                     </a>
-                    <a href={userData.socialMediaLinks.pinterest}>
+                    <a href={`http://${userData.socialMediaLinks.pinterest}`}>
                       <Image src={pinterest} className="mx-2" width="20px" />
                     </a>
-                    <a href={userData.socialMediaLinks.twitter}>
+                    <a href={`http://${userData.socialMediaLinks.twitter}`}>
                       <Image src={twitter} className="mx-2" width="20px" />
                     </a>
-                    <a href={userData.socialMediaLinks.tiktok}>
+                    <a href={`http://${userData.socialMediaLinks.tiktok}`}>
                       <Image src={tiktok} className="mx-2" width="20px" />
                     </a>
                     <h4 className="mt-4 mb-2">

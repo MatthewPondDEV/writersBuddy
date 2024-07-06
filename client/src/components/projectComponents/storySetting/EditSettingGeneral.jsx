@@ -49,8 +49,6 @@ export default function EditSettingGeneral({settingInfo, setViewNumber,setIsUpda
 
             if (response.ok) {
                 setIsUpdated(false)
-                setViewNumber('2')
-                window.location.reload()
             }
     }
 
