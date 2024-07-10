@@ -743,7 +743,6 @@ app.put(
           arrayFilters: [{ "inner._id": characterId }],
         }
       );
-      console.log(birthDate);
       if (birthDate != "undefined") {
         await projectDoc.updateOne(
           {
@@ -770,6 +769,7 @@ app.put(
         );
       }
       res.json(projectDoc);
+      console.log(projectDoc)
     });
   }
 );
