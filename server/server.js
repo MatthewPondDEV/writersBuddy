@@ -1355,4 +1355,20 @@ app.post("/chatbot", async (req, res) => {
   })
 });
 
+app.post('/saveChat', async (req,res) => {
+  const { token } = req.cookies
+  const { title, content } = req.body;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const noteDoc = await Note.create({
+      title,
+      createdBy: info.id,
+      content,
+    });
+    res.json(noteDoc);
+    console.log(noteDoc)
+  })
+
+})
+
 app.listen(5000);
