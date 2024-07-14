@@ -1225,7 +1225,7 @@ app.post("/createNewNote", async (req, res) => {
       const noteDoc = await Note.create({
         title,
         createdBy: info.id,
-        content: "Jot down some thoughts and ideas...",
+        content: "Jot down some thoughts and ideas..."
       });
       res.json(noteDoc);
     });
