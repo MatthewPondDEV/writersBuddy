@@ -9,7 +9,7 @@ export default function SaveChatModal({ handleClose, showModal, currentChat, tra
 
   const createNote = async (e) => {
     e.preventDefault()
-    let content = currentChat
+    let content = JSON.parse(window.sessionStorage.getItem("currentChat"))
     for (let i = 0; i < content.length; i++) {
       if (i % 2 === 0 || i === 0) {
         content[i] = `<h4>Chat: ${content[i]}<br></h4>`
