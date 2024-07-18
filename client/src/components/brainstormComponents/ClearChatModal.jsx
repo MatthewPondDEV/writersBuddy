@@ -1,11 +1,10 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
-export default function ClearChatModal({ handleClose, showModal, setCurrentChat, setTracker }) {
+export default function ClearChatModal({ handleClose, showModal, setCurrentChat }) {
 
   function clearChat() {
-     setCurrentChat(["Let's brainstorm! What can I help you with today?"]);
-     setTracker(['res'])
+     setCurrentChat([{role: 'assistant', content: "Let's brainstorm! What can I help you with today?"}]);
      handleClose()
   }
 

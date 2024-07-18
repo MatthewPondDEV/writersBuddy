@@ -1319,27 +1319,27 @@ app.put(
 );
 
 app.post("/chatbot", async (req, res) => {
-  const { message } = req.body;
-  console.log(message);
+  const { updatedChat } = req.body;
+  console.log(updatedChat)
   const { token } = req.cookies;
 
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
+
+    let chatHistory = updatedChat
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-3.5-turbo", // Specify the model you want to use if needed
-        messages: [
-          {
-            role: "user",
-            content: message, 
+        messages: chatHistory.map(msg => ({
+          role: msg.role,
+          content: msg.content,
             instructions: {
               // Instructions for the chatbot
               intent:
                 "Help the user to brainstorm for writing their next story, manga, play-write, or movie script",
             },
-          },
-        ],
+          })),
       },
       {
         headers: {

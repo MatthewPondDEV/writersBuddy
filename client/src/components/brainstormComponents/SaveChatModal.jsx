@@ -2,19 +2,18 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
 
-export default function SaveChatModal({ handleClose, showModal, currentChat, tracker }) {
+export default function SaveChatModal({ handleClose, showModal, currentChat }) {
   const [title, setTitle] = useState("");
 
   const createNote = async (e) => {
     e.preventDefault()
     let content = JSON.parse(window.sessionStorage.getItem("currentChat"))
     for (let i = 0; i < content.length; i++) {
-      if (i % 2 === 0 || i === 0) {
-        content[i] = `<h4>Chat: ${content[i]}<br></h4>`
+      if (content[i].role === 'assistant') {
+        content[i] = `<h4>Chat: ${content[i].content}<br></h4>`
       } else {
-        content[i] = `<h4>User: ${content[i]}<br></h4>`
+        content[i] = `<h4>User: ${content[i].content}<br></h4>`
     }
   }
     content = content.join(' ')

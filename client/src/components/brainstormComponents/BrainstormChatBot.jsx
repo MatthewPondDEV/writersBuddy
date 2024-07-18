@@ -16,12 +16,7 @@ export default function BrainstormChatBot() {
   const [currentChat, setCurrentChat] = useState(
     window.sessionStorage.getItem("currentChat")
       ? JSON.parse(window.sessionStorage.getItem("currentChat"))
-      : ["Let's brainstorm! What can I help you with today?"]
-  );
-  const [tracker, setTracker] = useState(
-    window.sessionStorage.getItem("messageTracker")
-      ? JSON.parse(window.sessionStorage.getItem("messageTracker"))
-      : ["res"]
+      : [{role: 'assistant', content: "Let's brainstorm! What can I help you with today?"}]
   );
 
   const handleClose = () => setSaveChatModal(false);
@@ -32,15 +27,15 @@ export default function BrainstormChatBot() {
 
   useEffect(() => {
     window.sessionStorage.setItem("currentChat", JSON.stringify(currentChat));
-    window.sessionStorage.setItem("messageTracker", JSON.stringify(tracker));
     var element = document.getElementById("chat-history");
     element.scrollTop = element.scrollHeight;
-  }, [tracker, currentChat]);
+  }, [currentChat]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    setCurrentChat((prevChat) => [...prevChat, message]);
-    setTracker((prevTracker) => [...prevTracker, "mes"]);
+    const updatedChat = [...currentChat, { role: 'user', content: message }];
+    setCurrentChat(updatedChat)
+    setMessage("");
     try {
       const res = await fetch("http://localhost:5000/chatbot", {
         method: "POST",
@@ -48,15 +43,13 @@ export default function BrainstormChatBot() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ updatedChat }),
       });
 
       if (res.ok) {
         const chatResponse = await res.json(); // Access response data directly
 
-        setCurrentChat((prevChat) => [...prevChat, chatResponse]);
-        setTracker((prevTracker) => [...prevTracker, "res"]);
-        setMessage("");
+        setCurrentChat([...updatedChat, { role: 'assistant', content: chatResponse }]);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -67,18 +60,18 @@ export default function BrainstormChatBot() {
   return (
     <div id="brainstorm-chat" className="py-5 my-5 mx-2">
       <div id="chat-history" className="px-2">
-        {currentChat[0] === "Let's brainstorm! What can I help you with today?" &&
+        {currentChat[0].role === "assistant" &&
           currentChat.map((chat, index) => {
-            if (tracker[index] === "mes") {
+            if (chat.role === "user") {
               return (
                 <p key={index} className="me-1 my-5 ms-5 ps-3 text-end">
-                | <i className="bi bi-person"></i><br/>{chat}
+                | <i className="bi bi-person"></i><br/>{chat.content}
                 </p>
               );
             } else {
               return (
                 <p key={index} className="ms-1 my-5 me-5 pe-3 text-start">
-                  <i className="bi bi-robot"></i> | <br/>{chat}
+                  <i className="bi bi-robot"></i> | <br/>{chat.content}
                 </p>
               );
             }
@@ -120,13 +113,11 @@ export default function BrainstormChatBot() {
       </Form>
       <ClearChatModal
         setCurrentChat={setCurrentChat}
-        setTracker={setTracker}
         handleClose={clearHandleClose}
         showModal={showClearChatModal}
       />
       <SaveChatModal 
         currentChat={currentChat}
-        tracker={tracker}
         handleClose={handleClose}
         showModal={showSaveChatModal}
         />
