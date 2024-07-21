@@ -20,7 +20,7 @@ export default function SaveChatModal({ handleClose, showModal, currentChat }) {
 
     const create = await fetch("http://localhost:5000/saveChat", {
       method: "Post",
-      body: JSON.stringify({ title, content }),
+      body: JSON.stringify({ title, content, currentChat }),
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });

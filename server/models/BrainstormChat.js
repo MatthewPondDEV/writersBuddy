@@ -5,8 +5,7 @@ const BrainstormChatSchema = new Schema(
   {
     chatName: String,
     createdBy: { type: Schema.Types.ObjectID, ref: "User" },
-    content: [String],
-    tracker: [String]
+    chatHistory: [{role: String, content: String}],
   },
   {
     timestamps: true,

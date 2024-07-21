@@ -7,6 +7,8 @@ const User = require("./models/User");
 const Project = require("./models/Project");
 const Note = require("./models/Note");
 const UserInfo = require("./models/UserInfo");
+const BrainstormChat = require("./models/BrainstormChat");
+const RefreshToken = require("./models/RefreshToken");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
@@ -31,8 +33,6 @@ app.use("/uploads", express.static(__dirname + "/uploads"));
 mongoose.connect(
   `mongodb+srv://mattypond00:${key}@cluster0.32pnilj.mongodb.net/WritersBuddy?retryWrites=true&w=majority`
 );
-
-// const openai = new OpenAI();
 
 app.post("/register", async (req, res) => {
   const { email, username, password } = req.body;
@@ -70,33 +70,65 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const userDoc = await User.findOne({ username });
-  const passOk = bcrypt.compareSync(password, userDoc.password);
-  if (passOk) {
-    //logged in
-    jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
-      if (err) throw err;
-      res.cookie("token", token).json({
-        id: userDoc._id,
-        username,
-      });
-    });
-  } else {
-    res.status(400).json("wrong credentials");
+
+  if (!userDoc) {
+    return res.status(400).json({ error: "User not found" });
   }
+
+  const passOk = bcrypt.compareSync(password, userDoc.password);
+
+  if (!passOk) {
+    return res.status(400).json({ error: "Wrong credentials" });
+  }
+
+  // User authenticated, generate tokens
+  const accessToken = jwt.sign({ username, id: userDoc._id }, secret, {
+    expiresIn: "15m",
+  });
+  const refreshToken = jwt.sign({ username, id: userDoc._id }, secret, {
+    expiresIn: "7d",
+  });
+
+  // Store refreshToken securely using the RefreshToken model
+  try {
+    await RefreshToken.create({ userId: userDoc._id, token: refreshToken });
+  } catch (error) {
+    console.error("Error saving refresh token:", error);
+    return res.status(500).json({ error: "Failed to save refresh token" });
+  }
+
+  res.cookie("token", accessToken, { httpOnly: true }).json({
+    id: userDoc._id,
+    username,
+    accessToken,
+    refreshToken,
+  });
 });
 
-app.get("/profile", (req, res) => {
-  const { token } = req.cookies;
-  if (token) {
-    jwt.verify(token, secret, {}, (err, info) => {
-      if (err) {
-        res.json(null);
-      } else {
-        res.json(info);
-      }
+app.post("/refresh-token", async (req, res) => {
+  const refreshToken = req.body.refreshToken;
+
+  try {
+    const decoded = jwt.verify(refreshToken, secret);
+    const userDoc = await User.findOne({ _id: decoded.id });
+
+    if (!userDoc || userDoc.refreshToken !== refreshToken) {
+      throw new Error("Invalid refresh token");
+    }
+
+    // Generate new access token
+    const accessToken = jwt.sign(
+      { username: userDoc.username, id: userDoc._id },
+      secret,
+      { expiresIn: "15m" }
+    );
+
+    res.cookie("token", accessToken, { httpOnly: true }).json({
+      accessToken,
     });
-  } else {
-    res.json(null);
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ error: "Unauthorized" });
   }
 });
 
@@ -182,12 +214,12 @@ app.get("/getProjectID", async (req, res) => {
 
 app.get("/project/:id", async (req, res) => {
   const { id } = req.params;
-   const { token } = req.cookies;
+  const { token } = req.cookies;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-  const project = await Project.findById(id);
-  res.json(project);
-  })
+    const project = await Project.findById(id);
+    res.json(project);
+  });
 });
 
 app.delete("/deleteProject", async (req, res) => {
@@ -769,7 +801,7 @@ app.put(
         );
       }
       res.json(projectDoc);
-      console.log(projectDoc)
+      console.log(projectDoc);
     });
   }
 );
@@ -1225,7 +1257,7 @@ app.post("/createNewNote", async (req, res) => {
       const noteDoc = await Note.create({
         title,
         createdBy: info.id,
-        content: "Jot down some thoughts and ideas..."
+        content: "Jot down some thoughts and ideas...",
       });
       res.json(noteDoc);
     });
@@ -1320,26 +1352,26 @@ app.put(
 
 app.post("/chatbot", async (req, res) => {
   const { updatedChat } = req.body;
-  console.log(updatedChat)
+  console.log(updatedChat);
   const { token } = req.cookies;
 
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
 
-    let chatHistory = updatedChat
+    let chatHistory = updatedChat;
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-3.5-turbo", // Specify the model you want to use if needed
-        messages: chatHistory.map(msg => ({
+        messages: chatHistory.map((msg) => ({
           role: msg.role,
           content: msg.content,
-            instructions: {
-              // Instructions for the chatbot
-              intent:
-                "Help the user to brainstorm for writing their next story, manga, play-write, or movie script",
-            },
-          })),
+          instructions: {
+            // Instructions for the chatbot
+            intent:
+              "Help the user to brainstorm for writing their next story, manga, play-write, or movie script",
+          },
+        })),
       },
       {
         headers: {
@@ -1352,12 +1384,12 @@ app.post("/chatbot", async (req, res) => {
     const botResponse = await response.data.choices[0].message.content;
     console.log(botResponse);
     res.json(botResponse);
-  })
+  });
 });
 
-app.post('/saveChat', async (req,res) => {
-  const { token } = req.cookies
-  const { title, content } = req.body;
+app.post("/saveChat", async (req, res) => {
+  const { token } = req.cookies;
+  const { title, content, currentChat } = req.body;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
     const noteDoc = await Note.create({
@@ -1365,10 +1397,10 @@ app.post('/saveChat', async (req,res) => {
       createdBy: info.id,
       content,
     });
+    const chatDoc = await BrainstormChat.create;
     res.json(noteDoc);
-    console.log(noteDoc)
-  })
-
-})
+    console.log(noteDoc);
+  });
+});
 
 app.listen(5000);
