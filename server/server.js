@@ -21,6 +21,7 @@ require("dotenv").config();
 
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
+const secretRefresh = process.env.JWT_REFRESH_SECRET;
 const key = process.env.MDB_API_KEY;
 const openAIAPIKey = process.env.OPEN_AI_PROJECT_KEY;
 
@@ -67,6 +68,73 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// Middleware to verify access token and handle refresh token if needed
+const verifyTokens = async (req, res, next) => {
+  const accessToken = req.cookies.token;
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!accessToken) {
+    return res.status(401).json({ error: "Access token not found" });
+  }
+
+  try {
+    // Verify access token
+    jwt.verify(accessToken, secret, async (err, decoded) => {
+      if (err) {
+        // If access token is expired or invalid, check refresh token
+        if (err.name === "TokenExpiredError") {
+          try {
+            const decodedRefreshToken = jwt.verify(refreshToken, secretRefresh);
+
+            // Check if the refresh token exists in the database
+            const storedRefreshToken = await RefreshToken.findOne({
+              userId: decodedRefreshToken.id,
+            });
+              console.log('hello')
+            if (
+              !storedRefreshToken ||
+              storedRefreshToken.token !== refreshToken
+            ) {
+              throw new Error("Invalid refresh token");
+            }
+
+            // Generate new access token
+            const newAccessToken = jwt.sign(
+              {
+                username: decodedRefreshToken.username,
+                id: decodedRefreshToken.id,
+              },
+              secret,
+              { expiresIn: "15m" }
+            );
+
+            // Update the access token in the response cookies
+            res.cookie("token", newAccessToken, { httpOnly: true });
+
+            // Attach decoded token payload to request object
+            req.user = decodedRefreshToken;
+
+            next(); // Proceed to the route handler
+          } catch (err) {
+            console.error("Error verifying refresh token:", err);
+            return res.status(401).json({ error: "Unauthorized" });
+          }
+        } else {
+          console.error("Error verifying access token:", err);
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+      } else {
+        // If access token is valid, attach decoded payload to request object
+        req.user = decoded;
+        next();
+      }
+    });
+  } catch (err) {
+    console.error("Error verifying tokens:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const userDoc = await User.findOne({ username });
@@ -83,10 +151,10 @@ app.post("/login", async (req, res) => {
 
   // User authenticated, generate tokens
   const accessToken = jwt.sign({ username, id: userDoc._id }, secret, {
-    expiresIn: "15m",
+    expiresIn: "15s",
   });
-  const refreshToken = jwt.sign({ username, id: userDoc._id }, secret, {
-    expiresIn: "7d",
+  const refreshToken = jwt.sign({ username, id: userDoc._id }, secretRefresh, {
+    expiresIn: "2d",
   });
 
   // Store refreshToken securely using the RefreshToken model
@@ -97,43 +165,59 @@ app.post("/login", async (req, res) => {
     return res.status(500).json({ error: "Failed to save refresh token" });
   }
 
-  res.cookie("token", accessToken, { httpOnly: true }).json({
+  res.cookie("token", accessToken, {
+    httpOnly: true,
+  });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    // secure: true, // Set secure to true if your app uses HTTPS
+    sameSite: "strict", // Adjust sameSite attribute based on your needs
+    maxAge: 2 * 24 * 60 * 60 * 1000, // Max age in milliseconds (2 days in this case)
+  });
+
+  res.json({
     id: userDoc._id,
     username,
-    accessToken,
-    refreshToken,
   });
 });
 
-app.post("/refresh-token", async (req, res) => {
-  const refreshToken = req.body.refreshToken;
-
+app.get("/profile", verifyTokens, async (req, res) => {
   try {
-    const decoded = jwt.verify(refreshToken, secret);
-    const userDoc = await User.findOne({ _id: decoded.id });
-
-    if (!userDoc || userDoc.refreshToken !== refreshToken) {
-      throw new Error("Invalid refresh token");
+    // Fetch user information based on decoded token
+    const user = await User.findOne({ _id: req.user.id });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    // Generate new access token
-    const accessToken = jwt.sign(
-      { username: userDoc.username, id: userDoc._id },
-      secret,
-      { expiresIn: "15m" }
-    );
+    // You can choose what information to return to the client
+    const userInfo = {
+      id: user._id,
+      username: user.username,
+      // Add other relevant user information here
+    };
 
-    res.cookie("token", accessToken, { httpOnly: true }).json({
-      accessToken,
-    });
+    res.json(userInfo);
   } catch (err) {
-    console.error(err);
-    res.status(401).json({ error: "Unauthorized" });
+    console.error("Error fetching user profile:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-app.post("/logout", (req, res) => {
-  res.cookie("token", "").json();
+app.post("/logout", async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  try {
+    // Delete the refresh token from the database
+    await RefreshToken.findOneAndDelete({ token: refreshToken });
+
+    res.clearCookie("token");
+    res.cookie("token", "");
+    res.clearCookie("refreshToken");
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error("Error logging out:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 app.get("/getProjects", async (req, res) => {
