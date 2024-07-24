@@ -72,7 +72,7 @@ app.post("/register", async (req, res) => {
 const verifyTokens = async (req, res, next) => {
   const accessToken = req.cookies.token;
   const refreshToken = req.cookies.refreshToken;
-
+  
   if (!accessToken) {
     return res.status(401).json({ error: "Access token not found" });
   }
@@ -86,7 +86,7 @@ const verifyTokens = async (req, res, next) => {
           try {
             const decodedRefreshToken = jwt.verify(refreshToken, secretRefresh);
 
-            // Check if the refresh token exists in the database
+           // Check if the refresh token exists in the database
             const storedRefreshToken = await RefreshToken.findOne({
               userId: decodedRefreshToken.id,
             });
@@ -97,7 +97,7 @@ const verifyTokens = async (req, res, next) => {
             ) {
               throw new Error("Invalid refresh token");
             }
-
+            
             // Generate new access token
             const newAccessToken = jwt.sign(
               {
@@ -113,10 +113,10 @@ const verifyTokens = async (req, res, next) => {
 
             // Attach decoded token payload to request object
             req.user = decodedRefreshToken;
-
+            
             next(); // Proceed to the route handler
           } catch (err) {
-            console.error("Error verifying refresh token:", err);
+            console.log("Error verifying refresh token:", err);
             return res.status(401).json({ error: "Unauthorized" });
           }
         } else {
