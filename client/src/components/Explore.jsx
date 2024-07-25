@@ -28,7 +28,7 @@ export default function Explore() {
         const userProjects = await response.json();
         setProjects(userProjects);
       } else {
-        alert("failed to load projects");
+        console.log(response)
       }
     }
 
@@ -77,9 +77,9 @@ export default function Explore() {
               </thead>
               <tbody>
                 {projects.length &&
-                  projects.map((project) => {
+                  projects.map((project, index) => {
                     return (
-                      <tr>
+                      <tr key = {index}>
                         <td>
                           <Button
                             variant="outline-primary w-100 text-white border-white"

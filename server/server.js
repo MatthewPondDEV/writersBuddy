@@ -15,7 +15,6 @@ const bodyParser = require("body-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
-const openai = require("openai");
 const axios = require("axios");
 require("dotenv").config();
 
@@ -77,7 +76,6 @@ const verifyTokens = async (req, res, next) => {
     return res.status(401).json({ error: "Access token not found" });
   }
 
-  try {
     // Verify access token
     jwt.verify(accessToken, secret, async (err, decoded) => {
       if (err) {
@@ -90,7 +88,6 @@ const verifyTokens = async (req, res, next) => {
             const storedRefreshToken = await RefreshToken.findOne({
               userId: decodedRefreshToken.id,
             });
-              console.log('hello')
             if (
               !storedRefreshToken ||
               storedRefreshToken.token !== refreshToken
@@ -129,10 +126,6 @@ const verifyTokens = async (req, res, next) => {
         next();
       }
     });
-  } catch (err) {
-    console.error("Error verifying tokens:", err);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
 };
 
 app.post("/login", async (req, res) => {
@@ -151,12 +144,18 @@ app.post("/login", async (req, res) => {
 
   // User authenticated, generate tokens
   const accessToken = jwt.sign({ username, id: userDoc._id }, secret, {
-    expiresIn: "15s",
+    expiresIn: "15m",
   });
   const refreshToken = jwt.sign({ username, id: userDoc._id }, secretRefresh, {
     expiresIn: "2d",
   });
 
+  try {
+    const del = await RefreshToken.deleteMany({userId: userDoc._id})
+    console.log(del)
+  } catch (error) {
+    console.error('Error deleting previous refresh tokens:', error)
+  }
   // Store refreshToken securely using the RefreshToken model
   try {
     await RefreshToken.create({ userId: userDoc._id, token: refreshToken });
@@ -210,9 +209,8 @@ app.post("/logout", async (req, res) => {
     // Delete the refresh token from the database
     await RefreshToken.findOneAndDelete({ token: refreshToken });
 
-    res.clearCookie("token");
-    res.cookie("token", "");
-    res.clearCookie("refreshToken");
+    res.cookie("token", '', {httpOnly: true});
+    res.cookie("refreshToken", '', {httpsOnly: true});
     res.json({ message: "Logged out successfully" });
   } catch (err) {
     console.error("Error logging out:", err);
@@ -220,13 +218,10 @@ app.post("/logout", async (req, res) => {
   }
 });
 
-app.get("/getProjects", async (req, res) => {
-  const { token } = req.cookies;
-  if (token) {
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
-      const projects = await Project.find({ createdBy: info.id });
-      const userProjects = projects.map((project) => ({
+app.get("/getProjects", verifyTokens, async (req, res) => {
+  try {
+    const projects = await Project.find({ createdBy: req.user.id });
+    const userProjects = projects.map((project) => ({
         _id: project._id,
         title: project.title,
         createdBy: project.createdBy,
@@ -234,14 +229,20 @@ app.get("/getProjects", async (req, res) => {
         cover: project.cover,
       }));
       res.json(userProjects);
-    });
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    res.status(500).json({ error: "Failed to fetch projects" });
   }
+  
 });
 
 app.post("/createProject", async (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+    if (err) {
+      console.error('Error creating project:', err.name)
+      res.status(500).json({error: 'Failed to create project'})
+    }
     const { title } = req.body;
     const projectDoc = await Project.create({
       title,
@@ -285,25 +286,29 @@ app.post("/createProject", async (req, res) => {
   });
 });
 
-app.get("/getProjectID", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const project = await Project.find({ createdBy: info.id })
+app.get("/getProjectID", verifyTokens, async (req, res) => {
+  try {
+    // Assuming req.user contains decoded token payload from verifyTokens middleware
+    const project = await Project.find({ createdBy: req.user.id })
       .limit(1)
       .sort({ $natural: -1 });
+
     res.json(project);
-  });
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    res.status(500).json({ error: "Failed to fetch project" });
+  }
 });
 
-app.get("/project/:id", async (req, res) => {
-  const { id } = req.params;
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.get("/project/:id", verifyTokens, async (req, res) => {
+  try {
+    const { id } = req.params;
     const project = await Project.findById(id);
     res.json(project);
-  });
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    res.status(500).json({ error: "Failed to fetch project" });
+  }
 });
 
 app.delete("/deleteProject", async (req, res) => {
@@ -412,16 +417,17 @@ app.put("/createCountry", async (req, res) => {
   });
 });
 
-app.get("/getCountryId/:id", async (req, res) => {
-  const { token } = req.cookies;
+app.get("/getCountryId/:id", verifyTokens, async (req, res) => {
+  try {
   const { id } = req.params;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const project = await Project.findById(id);
     const { countries } = project.setting;
     recentCountry = countries[countries.length - 1];
     res.json(recentCountry);
-  });
+  } catch (error) {
+    console.error("Error fetching country:", error);
+    res.status(500).json({ error: "Failed to fetch country" });
+  }
 });
 
 app.put(
@@ -532,16 +538,17 @@ app.put("/createLand", async (req, res) => {
   });
 });
 
-app.get("/getLandId/:id", async (req, res) => {
-  const { token } = req.cookies;
-  const { id } = req.params;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.get("/getLandId/:id", verifyTokens, async (req, res) => {
+   try {
+    const { id } = req.params;
     const project = await Project.findById(id);
     const { lands } = project.setting;
     recentLand = lands[lands.length - 1];
     res.json(recentLand);
-  });
+  } catch (error) {
+      console.error("Error fetching land:", error);
+      res.status(500).json({ error: "Failed to fetch land" });
+  }
 });
 
 app.put("/updateLand", uploadMiddleware.single("files"), async (req, res) => {
@@ -636,16 +643,17 @@ app.put("/createBodyOfWater", async (req, res) => {
   });
 });
 
-app.get("/getBodyOfWaterId/:id", async (req, res) => {
-  const { token } = req.cookies;
-  const { id } = req.params;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.get("/getBodyOfWaterId/:id", verifyTokens, async (req, res) => {
+  try {
+    const { id } = req.params;
     const project = await Project.findById(id);
     const { bodiesOfWater } = project.setting;
     const recentWater = bodiesOfWater[bodiesOfWater.length - 1];
     res.json(recentWater);
-  });
+    } catch (error) {
+      console.error("Error fetching body of water:", error);
+      res.status(500).json({ error: "Failed to fetch body of water" });
+    }
 });
 
 app.put(
@@ -715,7 +723,6 @@ app.delete("/deleteBodyOfWater", async (req, res) => {
 
 app.put("/createCharacter", async (req, res) => {
   const { token } = req.cookies;
-  console.log(req.body);
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
     const { characterName, characterType, id } = req.body;
@@ -738,16 +745,17 @@ app.put("/createCharacter", async (req, res) => {
   });
 });
 
-app.get("/getCharacterId/:id", async (req, res) => {
-  const { token } = req.cookies;
+app.get("/getCharacterId/:id", verifyTokens, async (req, res) => {
+  try {
   const { id } = req.params;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const project = await Project.findById(id);
     const characters = project.characters;
     const recentCharacter = characters[characters.length - 1];
     res.json(recentCharacter);
-  });
+  } catch (error) {
+    console.error("Error fetching character:", error);
+    res.status(500).json({ error: "Failed to fetch character" });
+  }
 });
 
 app.put(
@@ -925,16 +933,17 @@ app.put("/createGroup", async (req, res) => {
   });
 });
 
-app.get("/getGroupId/:id", async (req, res) => {
-  const { token } = req.cookies;
+app.get("/getGroupId/:id", verifyTokens, async (req, res) => {
+  try {
   const { id } = req.params;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const project = await Project.findById(id);
     const groups = project.groups;
     const recentGroup = groups[groups.length - 1];
     res.json(recentGroup);
-  });
+  } catch (error) {
+    console.error("Error fetching group:", error);
+    res.status(500).json({ error: "Failed to fetch group" });
+  }
 });
 
 app.put("/updateGroup", uploadMiddleware.single("files"), async (req, res) => {
@@ -1078,16 +1087,17 @@ app.put("/createArc", async (req, res) => {
   });
 });
 
-app.get("/getArcId/:id", async (req, res) => {
-  const { token } = req.cookies;
+app.get("/getArcId/:id", verifyTokens, async (req, res) => {
+try {
   const { id } = req.params;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const project = await Project.findById(id);
     const arcs = project.plot.arcs;
     const recentArc = arcs[arcs.length - 1];
     res.json(recentArc);
-  });
+  } catch (error) {
+    console.error("Error fetching Arc:", error);
+    res.status(500).json({ error: "Failed to fetch Arc" });
+  }
 });
 
 app.put("/updateArc", uploadMiddleware.single("files"), async (req, res) => {
@@ -1217,11 +1227,9 @@ app.put("/createChapter", async (req, res) => {
   });
 });
 
-app.get("/getChapterId/:id", async (req, res) => {
-  const { token } = req.cookies;
+app.get("/getChapterId/:id", verifyTokens, async (req, res) => {
+  try {
   const { id } = req.params;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const project = await Project.findById(id);
     const chapters = project.write.chapters;
 
@@ -1232,7 +1240,10 @@ app.get("/getChapterId/:id", async (req, res) => {
     const recentChapter = sortedChapters[0];
 
     res.json(recentChapter);
-  });
+  } catch (error) {
+     console.error("Error fetching chapter:", error);
+     res.status(500).json({ error: "Failed to fetch chapter" });
+  }
 });
 
 app.put("/updateChapter", uploadMiddleware.single("file"), async (req, res) => {
@@ -1348,14 +1359,14 @@ app.post("/createNewNote", async (req, res) => {
   }
 });
 
-app.get("/getUserNotes", async (req, res) => {
-  const { token } = req.cookies;
-  if (token) {
-    jwt.verify(token, secret, {}, async (err, info) => {
-      const notes = await Note.find({ createdBy: info.id });
+app.get("/getUserNotes", verifyTokens, async (req, res) => {
+  try {
+      const notes = await Note.find({ createdBy: req.user.id });
       res.json(notes);
-    });
-  }
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      res.status(500).json({ error: "Failed to fetch notes" });
+    }
 });
 
 app.put("/updateNote", async (req, res) => {
@@ -1382,15 +1393,14 @@ app.delete("/deleteNote", async (req, res) => {
   });
 });
 
-app.get("/getUserInfo", async (req, res) => {
-  const { token } = req.cookies;
-  if (token) {
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
-      const userInfo = await UserInfo.findOne({ user_id: info.id });
+app.get("/getUserInfo", verifyTokens, async (req, res) => {
+  try {
+      const userInfo = await UserInfo.findOne({ user_id: req.user.id });
       res.json(userInfo);
-    });
-  }
+    } catch (error) {
+        console.error("Error fetching user info:", error);
+        res.status(500).json({ error: "Failed to fetch user info" });
+    }
 });
 
 app.put(

@@ -16,6 +16,7 @@ import Offcanvas from "react-bootstrap/Offcanvas";
 import { Link } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 
 export default function ProjectSidebar({
   setProjectInfo,
@@ -39,16 +40,38 @@ export default function ProjectSidebar({
 }) {
   const { userInfo, setUserInfo } = useContext(UserContext);
   const [loadData, setLoadData] = useState(false);
+const [loggedOutRedirect, setLoggedOutRedirect] = useState(false);
+const [logCheck, setLogCheck] = useState(false)
+
+  setInterval(() => {
+		setLogCheck(false)
+	}, 15 * 60 * 1000 + 50);
+
 
   useEffect(() => {
-    fetch("http://localhost:5000/profile", {
-      credentials: "include",
-    }).then((response) => {
-      response.json().then((userInfo) => {
-        setUserInfo(userInfo);
+    const loginCheck = async () => {
+      const response = await fetch("http://localhost:5000/profile", {
+        credentials: "include",
       });
-    });
-  }, []);
+
+      const userInfo = await response.json();
+
+      if (userInfo.error) {
+        setLoggedOutRedirect(true);
+      } else if (userInfo.id){
+      setUserInfo(userInfo);
+      setLogCheck(true)
+      }
+    };
+    loginCheck();
+  }, [logCheck]);
+
+
+  if (loggedOutRedirect === true) {
+    alert("Must log in or create account to use the application");
+    return <Navigate to={"/"} />;
+  }
+
 
   function logout() {
     fetch("http://localhost:5000/logout", {

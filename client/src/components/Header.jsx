@@ -9,28 +9,7 @@ import Row from "react-bootstrap/esm/Row";
 
 export default function Header() {
   const { userInfo, setUserInfo } = useContext(UserContext);
-  const [loggedOutRedirect, setLoggedOutRedirect] = useState(false);
-
-  useEffect(() => {
-    const loginCheck = async () => {
-      const response = await fetch("http://localhost:5000/profile", {
-        credentials: "include",
-      });
-
-      const userInfo = await response.json();
-      setUserInfo(userInfo);
-
-      if (userInfo === null) {
-        setLoggedOutRedirect(true);
-      }
-    };
-    loginCheck();
-  }, []);
-
-  if (loggedOutRedirect === true) {
-    alert("Must log in or create account to use the application");
-    return <Navigate to={"/"} />;
-  }
+  
 
   return (
     <Row

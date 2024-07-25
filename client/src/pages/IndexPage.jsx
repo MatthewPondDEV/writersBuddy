@@ -21,7 +21,7 @@ import twitter from '../cssImages/icons/twitter.png'
 import tiktok from '../cssImages/icons/tiktok.png'
 
 export default function IndexPage() {
-
+const [loggedInRedirect, setLoggedInRedirect] = useState(false);
 
 const [loadLogin, setLoadLogin] = useState(false)
 const [loadRegister, setLoadRegister] = useState(false)

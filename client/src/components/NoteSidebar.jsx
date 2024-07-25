@@ -7,6 +7,7 @@ import logo from "../cssImages/logo.png";
 import { useEffect, useState } from "react";
 import { UserContext } from "../UserContext";
 import { useContext } from "react";
+import { Navigate } from "react-router-dom";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
@@ -16,17 +17,37 @@ import { Link } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 export default function NoteSidebar({ notes, createNote, setCurrentNoteId }) {
-  const { userInfo, setUserInfo } = useContext(UserContext);
+const { userInfo, setUserInfo } = useContext(UserContext);
+const [loggedOutRedirect, setLoggedOutRedirect] = useState(false);
+const [logCheck, setLogCheck] = useState(false)
 
   useEffect(() => {
-    fetch("http://localhost:5000/profile", {
-      credentials: "include",
-    }).then((response) => {
-      response.json().then((userInfo) => {
-        setUserInfo(userInfo);
+    const loginCheck = async () => {
+      const response = await fetch("http://localhost:5000/profile", {
+        credentials: "include",
       });
-    });
-  }, []);
+
+      const userInfo = await response.json();
+
+      if (userInfo.error) {
+        setLoggedOutRedirect(true);
+      } else if (userInfo.id){
+      setUserInfo(userInfo);
+      setLogCheck(true)
+      }
+    };
+    loginCheck();
+  }, [logCheck]);
+
+
+  if (loggedOutRedirect === true) {
+    alert("Must log in or create account to use the application");
+    return <Navigate to={"/"} />;
+  }
+
+  setInterval(() => {
+		setLogCheck(false)
+	}, 15 * 60 * 1000 + 50);
 
   function logout() {
     fetch("http://localhost:5000/logout", {
