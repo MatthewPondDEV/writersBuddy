@@ -109,6 +109,7 @@ export default function ProjectsPage() {
       settingInfo={projectInfo.setting}
       setViewNumber={setViewNumber}
       setIsUpdated={setIsUpdated}
+      isUpdated={isUpdated}
       _id={id}
     />,
     <Country projectInfo={projectInfo} setViewNumber={setViewNumber} />,
@@ -227,6 +228,7 @@ export default function ProjectsPage() {
 
       if (response.ok) {
         const projectInfo = await response.json()
+        console.log(projectInfo)
         setProjectInfo(projectInfo)
       }
     if (projectInfo.title) {

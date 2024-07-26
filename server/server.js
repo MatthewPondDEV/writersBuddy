@@ -16,6 +16,7 @@ const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 const axios = require("axios");
+//const verifyTokens = require('./verifytokens'); // Import verifytokens middleware from Authorization API (Server A)
 require("dotenv").config();
 
 const salt = bcrypt.genSaltSync(10);
@@ -71,61 +72,61 @@ app.post("/register", async (req, res) => {
 const verifyTokens = async (req, res, next) => {
   const accessToken = req.cookies.token;
   const refreshToken = req.cookies.refreshToken;
-  
+
   if (!accessToken) {
     return res.status(401).json({ error: "Access token not found" });
   }
 
-    // Verify access token
-    jwt.verify(accessToken, secret, async (err, decoded) => {
-      if (err) {
-        // If access token is expired or invalid, check refresh token
-        if (err.name === "TokenExpiredError") {
-          try {
-            const decodedRefreshToken = jwt.verify(refreshToken, secretRefresh);
+  // Verify access token
+  jwt.verify(accessToken, secret, async (err, decoded) => {
+    if (err) {
+      // If access token is expired or invalid, check refresh token
+      if (err.name === "TokenExpiredError") {
+        try {
+          const decodedRefreshToken = jwt.verify(refreshToken, secretRefresh);
 
-           // Check if the refresh token exists in the database
-            const storedRefreshToken = await RefreshToken.findOne({
-              userId: decodedRefreshToken.id,
-            });
-            if (
-              !storedRefreshToken ||
-              storedRefreshToken.token !== refreshToken
-            ) {
-              throw new Error("Invalid refresh token");
-            }
-            
-            // Generate new access token
-            const newAccessToken = jwt.sign(
-              {
-                username: decodedRefreshToken.username,
-                id: decodedRefreshToken.id,
-              },
-              secret,
-              { expiresIn: "15m" }
-            );
-
-            // Update the access token in the response cookies
-            res.cookie("token", newAccessToken, { httpOnly: true });
-
-            // Attach decoded token payload to request object
-            req.user = decodedRefreshToken;
-            
-            next(); // Proceed to the route handler
-          } catch (err) {
-            console.log("Error verifying refresh token:", err);
-            return res.status(401).json({ error: "Unauthorized" });
+          // Check if the refresh token exists in the database
+          const storedRefreshToken = await RefreshToken.findOne({
+            userId: decodedRefreshToken.id,
+          });
+          if (
+            !storedRefreshToken ||
+            storedRefreshToken.token !== refreshToken
+          ) {
+            throw new Error("Invalid refresh token");
           }
-        } else {
-          console.error("Error verifying access token:", err);
+
+          // Generate new access token
+          const newAccessToken = jwt.sign(
+            {
+              username: decodedRefreshToken.username,
+              id: decodedRefreshToken.id,
+            },
+            secret,
+            { expiresIn: "15m" }
+          );
+
+          // Update the access token in the response cookies
+          res.cookie("token", newAccessToken, { httpOnly: true });
+          console.log("new access token");
+          // Attach decoded token payload to request object
+          req.user = decodedRefreshToken;
+
+          next(); // Proceed to the route handler
+        } catch (err) {
+          console.log("Error verifying refresh token:", err);
           return res.status(401).json({ error: "Unauthorized" });
         }
       } else {
-        // If access token is valid, attach decoded payload to request object
-        req.user = decoded;
-        next();
+        console.error("Error verifying access token:", err);
+        return res.status(401).json({ error: "Unauthorized" });
       }
-    });
+    } else {
+      // If access token is valid, attach decoded payload to request object
+      req.user = decoded;
+      next();
+    }
+  });
 };
 
 app.post("/login", async (req, res) => {
@@ -151,10 +152,10 @@ app.post("/login", async (req, res) => {
   });
 
   try {
-    const del = await RefreshToken.deleteMany({userId: userDoc._id})
-    console.log(del)
+    const del = await RefreshToken.deleteMany({ userId: userDoc._id });
+    console.log(del);
   } catch (error) {
-    console.error('Error deleting previous refresh tokens:', error)
+    console.error("Error deleting previous refresh tokens:", error);
   }
   // Store refreshToken securely using the RefreshToken model
   try {
@@ -209,8 +210,8 @@ app.post("/logout", async (req, res) => {
     // Delete the refresh token from the database
     await RefreshToken.findOneAndDelete({ token: refreshToken });
 
-    res.cookie("token", '', {httpOnly: true});
-    res.cookie("refreshToken", '', {httpsOnly: true});
+    res.cookie("token", "", { httpOnly: true });
+    res.cookie("refreshToken", "", { httpsOnly: true });
     res.json({ message: "Logged out successfully" });
   } catch (err) {
     console.error("Error logging out:", err);
@@ -222,31 +223,25 @@ app.get("/getProjects", verifyTokens, async (req, res) => {
   try {
     const projects = await Project.find({ createdBy: req.user.id });
     const userProjects = projects.map((project) => ({
-        _id: project._id,
-        title: project.title,
-        createdBy: project.createdBy,
-        summary: project.summary,
-        cover: project.cover,
-      }));
-      res.json(userProjects);
+      _id: project._id,
+      title: project.title,
+      createdBy: project.createdBy,
+      summary: project.summary,
+      cover: project.cover,
+    }));
+    res.json(userProjects);
   } catch (error) {
     console.error("Error fetching projects:", error);
     res.status(500).json({ error: "Failed to fetch projects" });
   }
-  
 });
 
-app.post("/createProject", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) {
-      console.error('Error creating project:', err.name)
-      res.status(500).json({error: 'Failed to create project'})
-    }
+app.post("/createProject", verifyTokens, async (req, res) => {
+  try {
     const { title } = req.body;
     const projectDoc = await Project.create({
       title,
-      createdBy: info.id,
+      createdBy: req.user.id,
       author: "",
       genre: "",
       summary: "",
@@ -283,7 +278,10 @@ app.post("/createProject", async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error creating project:", error);
+    res.status(500).json({ error: "Failed to create project" });
+  }
 });
 
 app.get("/getProjectID", verifyTokens, async (req, res) => {
@@ -311,19 +309,21 @@ app.get("/project/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.delete("/deleteProject", async (req, res) => {
-  const { token } = req.cookies;
-  const projectId = req.body.id;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.delete("/deleteProject", verifyTokens, async (req, res) => {
+  try {
+    const projectId = req.body.id;
     await Project.findByIdAndDelete(projectId);
-    res.json({ message: "Note deleted successfully" });
-  });
+    res.json({ message: "Project deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    res.status(404).json({ error: "Failed to delete project" });
+  }
 });
 
 app.put(
   "/projectOverview",
   uploadMiddleware.single("file"),
+  verifyTokens,
   async (req, res) => {
     let newPath = null;
     if (req.file) {
@@ -334,13 +334,11 @@ app.put(
       fs.renameSync(path, newPath);
     }
 
-    const { token } = req.cookies;
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
+    try {
       const { id, title, summary, genre, author } = req.body;
       const projectDoc = await Project.findById(id);
       const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
       if (!isAuthor) {
         return res.status(400).json("you are not the author");
       }
@@ -352,13 +350,17 @@ app.put(
         cover: newPath ? newPath : projectDoc.cover,
       });
       res.json(projectDoc);
-    });
+    } catch (error) {
+      console.error("Error editing project:", error);
+      res.status(500).json({ error: "Failed to edit project" });
+    }
   }
 );
 
 app.put(
   "/settingGeneral",
   uploadMiddleware.single("files"),
+  verifyTokens,
   async (req, res) => {
     let newPath = null;
     if (req.file) {
@@ -369,13 +371,11 @@ app.put(
       fs.renameSync(path, newPath);
     }
 
-    const { token } = req.cookies;
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
+    try {
       const { id, location, timePeriod, description } = req.body;
       const projectDoc = await Project.findById(id);
       const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
       if (!isAuthor) {
         return res.status(400).json("you are not the author");
       }
@@ -391,18 +391,19 @@ app.put(
       });
 
       res.json(projectDoc);
-    });
+    } catch (error) {
+      console.error("Error editing setting:", error);
+      res.status(500).json({ error: "Failed to edit setting" });
+    }
   }
 );
 
-app.put("/createCountry", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/createCountry", verifyTokens, async (req, res) => {
+  try {
     const { countryName, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -414,12 +415,15 @@ app.put("/createCountry", async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error create country:", error);
+    res.status(500).json({ error: "Failed to create country" });
+  }
 });
 
 app.get("/getCountryId/:id", verifyTokens, async (req, res) => {
   try {
-  const { id } = req.params;
+    const { id } = req.params;
     const project = await Project.findById(id);
     const { countries } = project.setting;
     recentCountry = countries[countries.length - 1];
@@ -432,6 +436,7 @@ app.get("/getCountryId/:id", verifyTokens, async (req, res) => {
 
 app.put(
   "/updateCountry",
+  verifyTokens,
   uploadMiddleware.single("files"),
   async (req, res) => {
     const { token } = req.cookies;
@@ -444,8 +449,7 @@ app.put(
       fs.renameSync(path, newPath);
     }
 
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
+    try {
       const {
         name,
         borders,
@@ -464,7 +468,7 @@ app.put(
       const cities = JSON.parse(req.body.cities);
       const projectDoc = await Project.findById(id);
       const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
       if (!isAuthor) {
         return res.status(400).json("you are not the author");
       }
@@ -500,30 +504,32 @@ app.put(
         );
       }
       res.json(projectDoc);
-    });
+    } catch (error) {
+      console.error("Error editing country:", error);
+      res.status(500).json({ error: "Failed to edit country" });
+    }
   }
 );
 
-app.delete("/deleteCountry", async (req, res) => {
-  const { token } = req.cookies;
-  const { id, currentCountryId } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.delete("/deleteCountry", verifyTokens, async (req, res) => {
+  try {
+    const { id, currentCountryId } = req.body;
     const project = await Project.findById(id);
     project.setting.countries.pull({ _id: currentCountryId });
     await project.save();
     res.json({ message: "Country deleted successfully", project });
-  });
+  } catch (error) {
+    console.error("Error deleting country:", error);
+    res.status(404).json({ error: "Failed to delete country" });
+  }
 });
 
-app.put("/createLand", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/createLand", verifyTokens, async (req, res) => {
+  try {
     const { landName, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -535,100 +541,108 @@ app.put("/createLand", async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error creating land:", error);
+    res.status(500).json({ error: "Failed to create land" });
+  }
 });
 
 app.get("/getLandId/:id", verifyTokens, async (req, res) => {
-   try {
+  try {
     const { id } = req.params;
     const project = await Project.findById(id);
     const { lands } = project.setting;
     recentLand = lands[lands.length - 1];
     res.json(recentLand);
   } catch (error) {
-      console.error("Error fetching land:", error);
-      res.status(500).json({ error: "Failed to fetch land" });
+    console.error("Error fetching land:", error);
+    res.status(500).json({ error: "Failed to fetch land" });
   }
 });
 
-app.put("/updateLand", uploadMiddleware.single("files"), async (req, res) => {
-  const { token } = req.cookies;
-  let newPath = null;
-  if (req.file) {
-    const { originalname, path } = req.file;
-    const parts = originalname.split(".");
-    const ext = parts[parts.length - 1];
-    newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
-  }
-
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const {
-      name,
-      description,
-      terrain,
-      location,
-      weather,
-      wildlife,
-      landId,
-      id,
-    } = req.body;
-    const projectDoc = await Project.findById(id);
-    const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
-    if (!isAuthor) {
-      return res.status(400).json("you are not the author");
+app.put(
+  "/updateLand",
+  uploadMiddleware.single("files"),
+  verifyTokens,
+  async (req, res) => {
+    let newPath = null;
+    if (req.file) {
+      const { originalname, path } = req.file;
+      const parts = originalname.split(".");
+      const ext = parts[parts.length - 1];
+      newPath = path + "." + ext;
+      fs.renameSync(path, newPath);
     }
 
-    await projectDoc.updateOne(
-      {
-        $set: {
-          "setting.lands.$[inner].name": name,
-          "setting.lands.$[inner].description": description,
-          "setting.lands.$[inner].terrain": terrain,
-          "setting.lands.$[inner].location": location,
-          "setting.lands.$[inner].weather": weather,
-          "setting.lands.$[inner].wildlife": wildlife,
-        },
-      },
-      { arrayFilters: [{ "inner._id": landId }] }
-    );
+    try {
+      const {
+        name,
+        description,
+        terrain,
+        location,
+        weather,
+        wildlife,
+        landId,
+        id,
+      } = req.body;
+      const projectDoc = await Project.findById(id);
+      const isAuthor =
+        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+      if (!isAuthor) {
+        return res.status(400).json("you are not the author");
+      }
 
-    if (newPath) {
       await projectDoc.updateOne(
         {
-          $push: {
-            "setting.lands.$[inner].pictures": newPath,
+          $set: {
+            "setting.lands.$[inner].name": name,
+            "setting.lands.$[inner].description": description,
+            "setting.lands.$[inner].terrain": terrain,
+            "setting.lands.$[inner].location": location,
+            "setting.lands.$[inner].weather": weather,
+            "setting.lands.$[inner].wildlife": wildlife,
           },
         },
         { arrayFilters: [{ "inner._id": landId }] }
       );
-    }
-    res.json(projectDoc);
-  });
-});
 
-app.delete("/deleteLand", async (req, res) => {
-  const { token } = req.cookies;
-  const { id, currentLandId } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+      if (newPath) {
+        await projectDoc.updateOne(
+          {
+            $push: {
+              "setting.lands.$[inner].pictures": newPath,
+            },
+          },
+          { arrayFilters: [{ "inner._id": landId }] }
+        );
+      }
+      res.json(projectDoc);
+    } catch (error) {
+      console.error("Error editing land:", error);
+      res.status(500).json({ error: "Failed to edit land" });
+    }
+  }
+);
+
+app.delete("/deleteLand", verifyTokens, async (req, res) => {
+  try {
+    const { id, currentLandId } = req.body;
     const project = await Project.findById(id);
     project.setting.lands.pull({ _id: currentLandId });
     await project.save();
     res.json({ message: "Land deleted successfully", project });
-  });
+  } catch (error) {
+    console.error("Error deleting land:", error);
+    res.status(404).json({ error: "Failed to delete land" });
+  }
 });
 
-app.put("/createBodyOfWater", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/createBodyOfWater", verifyTokens, async (req, res) => {
+  try {
     const { bodyOfWaterName, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -640,7 +654,10 @@ app.put("/createBodyOfWater", async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error creating body of water:", error);
+    res.status(500).json({ error: "Failed to creating body of water" });
+  }
 });
 
 app.get("/getBodyOfWaterId/:id", verifyTokens, async (req, res) => {
@@ -650,15 +667,16 @@ app.get("/getBodyOfWaterId/:id", verifyTokens, async (req, res) => {
     const { bodiesOfWater } = project.setting;
     const recentWater = bodiesOfWater[bodiesOfWater.length - 1];
     res.json(recentWater);
-    } catch (error) {
-      console.error("Error fetching body of water:", error);
-      res.status(500).json({ error: "Failed to fetch body of water" });
-    }
+  } catch (error) {
+    console.error("Error fetching body of water:", error);
+    res.status(500).json({ error: "Failed to fetch body of water" });
+  }
 });
 
 app.put(
   "/updateBodyOfWater",
   uploadMiddleware.single("files"),
+  verifyTokens,
   async (req, res) => {
     const { token } = req.cookies;
     console.log(req.file);
@@ -671,13 +689,12 @@ app.put(
       fs.renameSync(path, newPath);
     }
 
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
+    try {
       const { name, location, wildlife, description, size, id, bodyOfWaterId } =
         req.body;
       const projectDoc = await Project.findById(id);
       const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
       if (!isAuthor) {
         return res.status(400).json("you are not the author");
       }
@@ -705,30 +722,32 @@ app.put(
         );
       }
       res.json(projectDoc);
-    });
+    } catch (error) {
+      console.error("Error editing body of water:", error);
+      res.status(500).json({ error: "Failed to edit body of water" });
+    }
   }
 );
 
-app.delete("/deleteBodyOfWater", async (req, res) => {
-  const { token } = req.cookies;
-  const { id, currentBodyOfWaterId } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.delete("/deleteBodyOfWater", verifyTokens, async (req, res) => {
+  try {
+    const { id, currentBodyOfWaterId } = req.body;
     const project = await Project.findById(id);
     project.setting.bodiesOfWater.pull({ _id: currentBodyOfWaterId });
     await project.save();
     res.json({ message: "Body of water deleted successfully", project });
-  });
+  } catch (error) {
+    console.error("Error deleting body of water:", error);
+    res.status(404).json({ error: "Failed to delete body of water" });
+  }
 });
 
-app.put("/createCharacter", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/createCharacter", verifyTokens, async (req, res) => {
+  try {
     const { characterName, characterType, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -742,12 +761,15 @@ app.put("/createCharacter", async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error creating character:", error);
+    res.status(500).json({ error: "Failed to create character" });
+  }
 });
 
 app.get("/getCharacterId/:id", verifyTokens, async (req, res) => {
   try {
-  const { id } = req.params;
+    const { id } = req.params;
     const project = await Project.findById(id);
     const characters = project.characters;
     const recentCharacter = characters[characters.length - 1];
@@ -761,9 +783,8 @@ app.get("/getCharacterId/:id", verifyTokens, async (req, res) => {
 app.put(
   "/updateCharacter",
   uploadMiddleware.single("files"),
+  verifyTokens,
   async (req, res) => {
-    const { token } = req.cookies;
-
     let newPath = null;
     if (req.file) {
       const { originalname, path } = req.file;
@@ -773,8 +794,7 @@ app.put(
       fs.renameSync(path, newPath);
     }
 
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
+    try {
       const {
         name,
         abilities,
@@ -818,7 +838,7 @@ app.put(
 
       const projectDoc = await Project.findById(id);
       const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
       if (!isAuthor) {
         return res.status(400).json("you are not the author");
       }
@@ -894,30 +914,32 @@ app.put(
       }
       res.json(projectDoc);
       console.log(projectDoc);
-    });
+    } catch (error) {
+      console.error("Error editing character:", error);
+      res.status(500).json({ error: "Failed to edit character"});
+    }
   }
 );
 
-app.delete("/deleteCharacter", async (req, res) => {
-  const { token } = req.cookies;
-  const { id, currentCharacterId } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.delete("/deleteCharacter", verifyTokens, async (req, res) => {
+  try {
+    const { id, currentCharacterId } = req.body;
     const project = await Project.findById(id);
     project.characters.pull({ _id: currentCharacterId });
     await project.save();
     res.json({ message: "Character deleted successfully", project });
-  });
+  } catch (error) {
+    console.error("Error deleting character:", error);
+    res.status(404).json({ error: "Failed to delete character" });
+  }
 });
 
-app.put("/createGroup", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/createGroup", verifyTokens, async (req, res) => {
+  try {
     const { groupName, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -930,12 +952,15 @@ app.put("/createGroup", async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error creating group:", error);
+    res.status(500).json({ error: "Failed to create group" });
+  }
 });
 
 app.get("/getGroupId/:id", verifyTokens, async (req, res) => {
   try {
-  const { id } = req.params;
+    const { id } = req.params;
     const project = await Project.findById(id);
     const groups = project.groups;
     const recentGroup = groups[groups.length - 1];
@@ -946,110 +971,114 @@ app.get("/getGroupId/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.put("/updateGroup", uploadMiddleware.single("files"), async (req, res) => {
-  const { token } = req.cookies;
-
-  let newPath = null;
-  if (req.file) {
-    const { originalname, path } = req.file;
-    const parts = originalname.split(".");
-    const ext = parts[parts.length - 1];
-    newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
-  }
-
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const {
-      name,
-      business,
-      capital,
-      connections,
-      description,
-      established,
-      location,
-      notableMembers,
-      size,
-      id,
-      groupId,
-    } = req.body;
-
-    const projectDoc = await Project.findById(id);
-    const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
-    if (!isAuthor) {
-      return res.status(400).json("you are not the author");
+app.put(
+  "/updateGroup",
+  uploadMiddleware.single("files"),
+  verifyTokens,
+  async (req, res) => {
+    let newPath = null;
+    if (req.file) {
+      const { originalname, path } = req.file;
+      const parts = originalname.split(".");
+      const ext = parts[parts.length - 1];
+      newPath = path + "." + ext;
+      fs.renameSync(path, newPath);
     }
 
-    await projectDoc.updateOne(
-      {
-        $set: {
-          "groups.$[inner].name": name,
-          "groups.$[inner].business": business,
-          "groups.$[inner].capital": capital,
-          "groups.$[inner].connections": connections,
-          "groups.$[inner].description": description,
-          "groups.$[inner].location": location,
-          "groups.$[inner].notableMembers": notableMembers,
-          "groups.$[inner].size": size,
-        },
-      },
-      {
-        arrayFilters: [{ "inner._id": groupId }],
+    try {
+      const {
+        name,
+        business,
+        capital,
+        connections,
+        description,
+        established,
+        location,
+        notableMembers,
+        size,
+        id,
+        groupId,
+      } = req.body;
+
+      const projectDoc = await Project.findById(id);
+      const isAuthor =
+        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+      if (!isAuthor) {
+        return res.status(400).json("you are not the author");
       }
-    );
 
-    if (newPath) {
-      console.log(newPath);
-      await projectDoc.updateOne(
-        {
-          $push: {
-            "groups.$[inner].pictures": newPath,
-          },
-        },
-        {
-          arrayFilters: [{ "inner._id": groupId }],
-        }
-      );
-    }
-
-    if (established != "undefined") {
       await projectDoc.updateOne(
         {
           $set: {
-            "groups.$[inner].established": established,
+            "groups.$[inner].name": name,
+            "groups.$[inner].business": business,
+            "groups.$[inner].capital": capital,
+            "groups.$[inner].connections": connections,
+            "groups.$[inner].description": description,
+            "groups.$[inner].location": location,
+            "groups.$[inner].notableMembers": notableMembers,
+            "groups.$[inner].size": size,
           },
         },
         {
           arrayFilters: [{ "inner._id": groupId }],
         }
       );
-    }
-    res.json(projectDoc);
-    console.log(projectDoc.groups);
-  });
-});
 
-app.delete("/deleteGroup", async (req, res) => {
-  const { token } = req.cookies;
+      if (newPath) {
+        console.log(newPath);
+        await projectDoc.updateOne(
+          {
+            $push: {
+              "groups.$[inner].pictures": newPath,
+            },
+          },
+          {
+            arrayFilters: [{ "inner._id": groupId }],
+          }
+        );
+      }
+
+      if (established != "undefined") {
+        await projectDoc.updateOne(
+          {
+            $set: {
+              "groups.$[inner].established": established,
+            },
+          },
+          {
+            arrayFilters: [{ "inner._id": groupId }],
+          }
+        );
+      }
+      res.json(projectDoc);
+      console.log(projectDoc.groups);
+    } catch (error) {
+      console.error("Error editing group:", error);
+      res.status(500).json({ error: "Failed to edit group" });
+    }
+  }
+);
+
+app.delete("/deleteGroup", verifyTokens, async (req, res) => {
+try {
   const { id, currentGroupId } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const project = await Project.findById(id);
     project.groups.pull({ _id: currentGroupId });
     await project.save();
     res.json({ message: "Group deleted successfully", project });
-  });
+  } catch (error) {
+    console.error("Error deleting group:", error);
+    res.status(404).json({ error: "Failed to delete group" });
+  }
 });
 
-app.put("/updateThemes", uploadMiddleware.single("files"), async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/updateThemes", uploadMiddleware.single("files"), verifyTokens, async (req, res) => {
+  try {
     const { primary, secondary, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -1061,17 +1090,18 @@ app.put("/updateThemes", uploadMiddleware.single("files"), async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error editing themes:", error);
+    res.status(500).json({ error: "Failed to edit themes"});
+  }
 });
 
-app.put("/createArc", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/createArc", verifyTokens, async (req, res) => {
+  try {
     const { arcName, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -1084,12 +1114,15 @@ app.put("/createArc", async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error creating arc:", error);
+    res.status(500).json({ error: "Failed to create arc" });
+  }
 });
 
 app.get("/getArcId/:id", verifyTokens, async (req, res) => {
-try {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
     const project = await Project.findById(id);
     const arcs = project.plot.arcs;
     const recentArc = arcs[arcs.length - 1];
@@ -1100,8 +1133,7 @@ try {
   }
 });
 
-app.put("/updateArc", uploadMiddleware.single("files"), async (req, res) => {
-  const { token } = req.cookies;
+app.put("/updateArc", uploadMiddleware.single("files"), verifyTokens, async (req, res) => {
 
   let newPath = null;
   if (req.file) {
@@ -1111,9 +1143,7 @@ app.put("/updateArc", uploadMiddleware.single("files"), async (req, res) => {
     newPath = path + "." + ext;
     fs.renameSync(path, newPath);
   }
-
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+try {
     const {
       name,
       arcId,
@@ -1134,7 +1164,7 @@ app.put("/updateArc", uploadMiddleware.single("files"), async (req, res) => {
 
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -1177,30 +1207,32 @@ app.put("/updateArc", uploadMiddleware.single("files"), async (req, res) => {
     }
     res.json(projectDoc);
     console.log(projectDoc.plot.arcs);
-  });
+  } catch (error) {
+    console.error("Error editing group:", error);
+    res.status(500).json({ error: "Failed to edit group" });
+  }
 });
 
-app.delete("/deleteArc", async (req, res) => {
-  const { token } = req.cookies;
+app.delete("/deleteArc", verifyTokens, async (req, res) => {
+  try {
   const { id, currentArcId } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const project = await Project.findById(id);
     project.plot.arcs.pull({ _id: currentArcId });
     await project.save();
     res.json({ message: "Arc deleted successfully", project });
-  });
+  } catch (error) {
+    console.error("Error deleting arc:", error);
+    res.status(404).json({ error: "Failed to delete arc" });
+  }
 });
 
-app.put("/createChapter", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/createChapter", verifyTokens, async (req, res) => {
+  try {
     const { title, id } = req.body;
     const chapterNumber = Number(req.body.chapterNumber);
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -1224,12 +1256,15 @@ app.put("/createChapter", async (req, res) => {
     });
 
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error creating chapter:", error);
+    res.status(500).json({ error: "Failed to create chapter" });
+  }
 });
 
 app.get("/getChapterId/:id", verifyTokens, async (req, res) => {
   try {
-  const { id } = req.params;
+    const { id } = req.params;
     const project = await Project.findById(id);
     const chapters = project.write.chapters;
 
@@ -1241,22 +1276,20 @@ app.get("/getChapterId/:id", verifyTokens, async (req, res) => {
 
     res.json(recentChapter);
   } catch (error) {
-     console.error("Error fetching chapter:", error);
-     res.status(500).json({ error: "Failed to fetch chapter" });
+    console.error("Error fetching chapter:", error);
+    res.status(500).json({ error: "Failed to fetch chapter" });
   }
 });
 
-app.put("/updateChapter", uploadMiddleware.single("file"), async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/updateChapter", uploadMiddleware.single("file"), verifyTokens, async (req, res) => {
+  try {
     const { title, id, content, chapterId } = req.body;
 
     const chapterNumber = Number(req.body.chapterNumber);
     console.log(title, chapterNumber);
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -1284,30 +1317,32 @@ app.put("/updateChapter", uploadMiddleware.single("file"), async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error editing chapter:", error);
+    res.status(500).json({ error: "Failed to edit chapter" });
+  }
 });
 
-app.delete("/deleteChapter", async (req, res) => {
-  const { token } = req.cookies;
+app.delete("/deleteChapter", verifyTokens, async (req, res) => {
+  try {
   const { id, currentChapterId } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const project = await Project.findById(id);
     project.write.chapters.pull({ _id: currentChapterId });
     await project.save();
     res.json({ message: "Chapter deleted successfully", project });
-  });
+  } catch (error) {
+    console.error("Error deleting chapter:", error);
+    res.status(404).json({ error: "Failed to delete chapter" });
+  }
 });
 
-app.put("/updateEpilogue", uploadMiddleware.single(""), async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/updateEpilogue", uploadMiddleware.single(""), verifyTokens, async (req, res) => {
+try {
     console.log(req.body);
     const { epilogue, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -1318,18 +1353,19 @@ app.put("/updateEpilogue", uploadMiddleware.single(""), async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error editing epilogue:", error);
+    res.status(500).json({ error: "Failed to edit epilogue" });
+  }
 });
 
-app.put("/updatePrologue", uploadMiddleware.single(""), async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/updatePrologue", verifyTokens, uploadMiddleware.single(""), async (req, res) => {
+try{
     console.log(req.body);
     const { prologue, id } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
-      JSON.stringify(projectDoc.createdBy) === JSON.stringify(info.id);
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
     if (!isAuthor) {
       return res.status(400).json("you are not the author");
     }
@@ -1340,39 +1376,39 @@ app.put("/updatePrologue", uploadMiddleware.single(""), async (req, res) => {
       },
     });
     res.json(projectDoc);
-  });
+  } catch (error) {
+    console.error("Error editing prologue:", error);
+    res.status(500).json({ error: "Failed to edit prologue" });
+  }
 });
 
-app.post("/createNewNote", async (req, res) => {
-  const { token } = req.cookies;
-  if (token) {
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
+app.post("/createNewNote", verifyTokens, async (req, res) => {
+  try {
       const { title } = req.body;
       const noteDoc = await Note.create({
         title,
-        createdBy: info.id,
+        createdBy: req.user.id,
         content: "Jot down some thoughts and ideas...",
       });
       res.json(noteDoc);
-    });
-  }
+    } catch (error) {
+      console.error("Error creating note:", error);
+      res.status(500).json({ error: "Failed to create note" });
+    }
 });
 
 app.get("/getUserNotes", verifyTokens, async (req, res) => {
   try {
-      const notes = await Note.find({ createdBy: req.user.id });
-      res.json(notes);
-    } catch (error) {
-      console.error("Error fetching notes:", error);
-      res.status(500).json({ error: "Failed to fetch notes" });
-    }
+    const notes = await Note.find({ createdBy: req.user.id });
+    res.json(notes);
+  } catch (error) {
+    console.error("Error fetching notes:", error);
+    res.status(500).json({ error: "Failed to fetch notes" });
+  }
 });
 
-app.put("/updateNote", async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
+app.put("/updateNote", verifyTokens, async (req, res) => {
+  try {
     const { title, content, currentNoteId } = req.body;
     const noteDoc = await Note.findById(currentNoteId);
     await noteDoc.updateOne({
@@ -1380,34 +1416,38 @@ app.put("/updateNote", async (req, res) => {
       content,
     });
     res.json(noteDoc);
-  });
+  } catch (error) {
+    console.error("Error updating note:", error);
+    res.status(500).json({ error: "Failed to update note" });
+  }
 });
 
-app.delete("/deleteNote", async (req, res) => {
-  const { token } = req.cookies;
+app.delete("/deleteNote", verifyTokens, async (req, res) => {
+  try {
   const { currentNoteId } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     await Note.findByIdAndDelete(currentNoteId);
     res.json({ message: "Note deleted successfully" });
-  });
+  } catch (error) {
+    console.error("Error deleting note:", error);
+    res.status(404).json({ error: "Failed to delete note" });
+  }
 });
 
 app.get("/getUserInfo", verifyTokens, async (req, res) => {
   try {
-      const userInfo = await UserInfo.findOne({ user_id: req.user.id });
-      res.json(userInfo);
-    } catch (error) {
-        console.error("Error fetching user info:", error);
-        res.status(500).json({ error: "Failed to fetch user info" });
-    }
+    const userInfo = await UserInfo.findOne({ user_id: req.user.id });
+    res.json(userInfo);
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    res.status(500).json({ error: "Failed to fetch user info" });
+  }
 });
 
 app.put(
   "/updateUserInfo",
   uploadMiddleware.single("file"),
+  verifyTokens,
   async (req, res) => {
-    const { token } = req.cookies;
     let newPath = null;
     if (req.file) {
       const { originalname, path } = req.file;
@@ -1417,8 +1457,7 @@ app.put(
       fs.renameSync(path, newPath);
     }
 
-    jwt.verify(token, secret, {}, async (err, info) => {
-      if (err) throw err;
+    try {
       const { id } = req.body;
       const data = req.body;
       const userInfo = await UserInfo.findById(id);
@@ -1440,18 +1479,16 @@ app.put(
 
       res.json(userInfo);
       console.log(userInfo);
-    });
+    } catch (error) {
+      console.error("Error editing user profile:", error);
+      res.status(500).json({ error: "Failed to edit user profile" });
+    }
   }
 );
 
-app.post("/chatbot", async (req, res) => {
+app.post("/chatbot", verifyTokens, async (req, res) => {
+  try {
   const { updatedChat } = req.body;
-  console.log(updatedChat);
-  const { token } = req.cookies;
-
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-
     let chatHistory = updatedChat;
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
@@ -1478,23 +1515,27 @@ app.post("/chatbot", async (req, res) => {
     const botResponse = await response.data.choices[0].message.content;
     console.log(botResponse);
     res.json(botResponse);
-  });
+  } catch (error) {
+    console.error("Error getting response:", error);
+    res.status(500).json({ error: "Failed to get response" });
+  }
 });
 
-app.post("/saveChat", async (req, res) => {
-  const { token } = req.cookies;
+app.post("/saveChat", verifyTokens, async (req, res) => {
+  try {
   const { title, content, currentChat } = req.body;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
     const noteDoc = await Note.create({
       title,
-      createdBy: info.id,
+      createdBy: req.user.id,
       content,
     });
-    const chatDoc = await BrainstormChat.create;
+    //const chatDoc = await BrainstormChat.create;
     res.json(noteDoc);
     console.log(noteDoc);
-  });
+  } catch (error) {
+    console.error("Error saving chat:", error);
+    res.status(500).json({ error: "Failed to save chat" });
+  }
 });
 
 app.listen(5000);

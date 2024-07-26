@@ -54,7 +54,6 @@ export default function EditProjectOverview({
 
     if (response.ok) {
       setIsUpdated(false);
-      setViewNumber("1");
       window.location.reload();
     }
   }
