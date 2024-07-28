@@ -36,6 +36,7 @@ export default function Sidebar() {
 
       if (userInfo.error) {
         setLoggedOutRedirect(true);
+        setUserInfo(null)
       } else if (userInfo.id) {
         setUserInfo(userInfo);
         setLogCheck(true);

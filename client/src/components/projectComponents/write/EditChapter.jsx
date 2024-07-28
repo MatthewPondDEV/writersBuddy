@@ -69,7 +69,7 @@ export default function EditChapter({
       <div className="d-flex justify-content-between mt-4">
         <h5 className="mx-2">Chapters</h5>
         <Button variant="primary" onClick={handleOpen}>
-          <i class="bi bi-trash"></i> Delete Chapter
+          <i className="bi bi-trash"></i> Delete Chapter
         </Button>
       </div>
       <Container>

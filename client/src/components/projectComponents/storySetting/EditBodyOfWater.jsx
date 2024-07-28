@@ -26,18 +26,20 @@ export default function EditBodyOfWater({
   const handleOpen = () => setShowDeleteModal(true);
 
   useEffect(() => {
-    if (projectInfo._id) {
-      projectInfo.setting.bodiesOfWater.forEach((water) => {
-        if (currentBodyOfWaterId === water._id) {
-          setName(water.name);
-          setDescription(water.description);
-          setLocation(water.location);
-          setSize(water.size);
-          setWildlife(water.wildlife);
-        }
-      });
+    if (projectInfo?.setting?.bodiesOfWater) {
+      const water = projectInfo.setting.bodiesOfWater.find(
+        (w) => w._id === currentBodyOfWaterId
+      );
+
+      if (water) {
+        setName(water.name || "");
+        setDescription(water.description || "");
+        setLocation(water.location || "");
+        setSize(water.size || '')
+        setWildlife(water.wildlife || []);
+      }
     }
-  }, [currentBodyOfWaterId, projectInfo._id]);
+  }, [currentBodyOfWaterId, projectInfo]);
 
   async function updateBodyOfWater(ev) {
     ev.preventDefault();
@@ -76,7 +78,7 @@ export default function EditBodyOfWater({
       <div className="d-flex justify-content-between mt-4">
         <h5 className="mx-2">Bodies of Water</h5>
         <Button variant="primary" onClick={handleOpen}>
-          <i class="bi bi-trash"></i> Delete Body of Water
+          <i className="bi bi-trash"></i> Delete Body of Water
         </Button>
       </div>
       <Container>

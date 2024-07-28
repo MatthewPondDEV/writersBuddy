@@ -44,31 +44,35 @@ export default function EditArc({
   const handleOpen = () => setShowDeleteModal(true);
 
   useEffect(() => {
-    if (projectInfo._id) {
-      projectInfo.plot.arcs.forEach((arc) => {
-        if (currentArcId === arc._id) {
-          setName(arc.name);
-          setChapters(arc.chapters);
-          setForeshadowing(arc.foreshadowing);
-          setTwists(arc.twists);
-          setPicture(arc.picture);
-          setCharacterDevelopment(arc.characterDevelopment);
-          setIntroduction(arc.introduction);
-          setDevelopment(arc.development);
-          if (arc.obstacles.length > 0) setObstacles(arc.obstacles);
-          setResolution(arc.resolution);
-          if (arc.subplots.length > 0) setSubplots(arc.subplots);
-          if (arc.protagonists.length > 0) {
-            setProtagonists(arc.protagonists); // Assuming arc.protagonists is an array of objects
-          }
-          if (arc.antagonists.length > 0) {
-            setAntagonists(arc.antagonists); // Assuming arc.antagonists is an array of objects
-          }
-        }
-      });
-    }
-  }, [currentArcId, projectInfo._id]);
+  if (projectInfo._id) {
+    // Find the arc that matches the currentArcId
+    const arc = projectInfo.plot.arcs.find((arc) => currentArcId === arc._id);
 
+    if (arc) {
+      setName(arc.name || ""); // Default to an empty string if undefined
+      setChapters(arc.chapters || ""); // Default to an empty string if undefined
+      setForeshadowing(arc.foreshadowing || ""); // Default to an empty string if undefined
+      setTwists(arc.twists || ""); // Default to an empty string if undefined
+      setPicture(arc.picture || ""); // Default to an empty string or appropriate default
+      setCharacterDevelopment(arc.characterDevelopment || ""); // Default to an empty string if undefined
+      setIntroduction(arc.introduction || ""); // Default to an empty string if undefined
+      setDevelopment(arc.development || ""); // Default to an empty string if undefined
+      setResolution(arc.resolution || ""); // Default to an empty string if undefined
+
+      // Ensure that obstacles is always an array, even if empty
+      setObstacles(Array.isArray(arc.obstacles) ? arc.obstacles : []);
+
+      // Ensure that subplots is always an array, even if empty
+      setSubplots(Array.isArray(arc.subplots) ? arc.subplots : []);
+
+      // Ensure that protagonists is always an array, even if empty
+      setProtagonists(Array.isArray(arc.protagonists) ? arc.protagonists : []);
+
+      // Ensure that antagonists is always an array, even if empty
+      setAntagonists(Array.isArray(arc.antagonists) ? arc.antagonists : []);
+    }
+  }
+}, [currentArcId, projectInfo._id]);
 
   async function updateArc(ev) {
     ev.preventDefault();
@@ -105,10 +109,9 @@ export default function EditArc({
 
   const handleObstacleChange = (index, value) => {
     const newObstacles = [...obstacles];
-    newObstacles[index] = value;
+    newObstacles[index] = value || ""; // Ensure value is not undefined
     setObstacles(newObstacles);
   };
-
   const addObstacle = () => {
     setObstacles([...obstacles, ""]);
   };
@@ -127,26 +130,22 @@ export default function EditArc({
 
   const updateTertiaryName = (index, value) => {
     const updatedTertiary = [...tertiary];
-    updatedTertiary[index].name = value;
-    setTertiary(updatedTertiary);
+    if (updatedTertiary[index]) {
+      updatedTertiary[index].name = value || ""; // Ensure value is not undefined
+      setTertiary(updatedTertiary);
+    }
   };
 
   const addNewProtagonist = () => {
-    const updatedProtagonists = [...protagonists];
-    updatedProtagonists.push({ name: "" });
-    setProtagonists(updatedProtagonists);
+    setProtagonists([...protagonists, { name: "" }]);
   };
 
   const addNewAntagonist = () => {
-    const updatedAntagonists = [...antagonists];
-    updatedAntagonists.push({ name: "" });
-    setAntagonists(updatedAntagonists);
+    setAntagonists([...antagonists, { name: "" }]);
   };
 
   const addNewTertiary = () => {
-    const updatedTertiary = [...tertiary];
-    updatedTertiary.push({ name: "" });
-    setTertiary(updatedTertiary);
+    setTertiary([...tertiary, { name: "" }]);
   };
 
   const deleteItem = (index, setArray) => {
@@ -196,8 +195,10 @@ export default function EditArc({
 
   const handleSubplotChange = (index, field, value) => {
     const updatedSubplots = [...subplots];
-    updatedSubplots[index][field] = value;
-    setSubplots(updatedSubplots);
+    if (updatedSubplots[index]) {
+      updatedSubplots[index][field] = value || ""; // Ensure value is not undefined
+      setSubplots(updatedSubplots);
+    }
   };
 
   return (
@@ -212,7 +213,7 @@ export default function EditArc({
       <div className="d-flex justify-content-between mt-4">
         <h5 className="mx-2">Story Arcs</h5>
         <Button variant="primary" onClick={handleOpen}>
-          <i class="bi bi-trash"></i> Delete Arc
+          <i className="bi bi-trash"></i> Delete Arc
         </Button>
       </div>
       <Container>
@@ -270,33 +271,28 @@ export default function EditArc({
                           + Add New Protagonist
                         </Button>
                         {protagonists.map((character, index) => (
-                          <>
-                            <Form.Group>
-                              <h5 className="my-1">{character.name}</h5>
-                              <div className="d-flex justify-content-between">
-                                <Form.Control
-                                  type="text"
-                                  className="w-75"
-                                  placeholder={"Character Name"}
-                                  value={character.name}
-                                  onChange={(ev) =>
-                                    updateProtagonistName(
-                                      index,
-                                      ev.target.value
-                                    )
-                                  }
-                                />
-                                <Button
-                                  variant="primary mb-1"
-                                  onClick={() =>
-                                    deleteItem(index, setProtagonists)
-                                  }
-                                >
-                                  <i class="bi bi-trash"></i>
-                                </Button>
-                              </div>
-                            </Form.Group>
-                          </>
+                          <Form.Group key={index}>
+                            <h5 className="my-1">{character.name}</h5>
+                            <div className="d-flex justify-content-between">
+                              <Form.Control
+                                type="text"
+                                className="w-75"
+                                placeholder={"Character Name"}
+                                value={character.name}
+                                onChange={(ev) =>
+                                  updateProtagonistName(index, ev.target.value)
+                                }
+                              />
+                              <Button
+                                variant="primary mb-1"
+                                onClick={() =>
+                                  deleteItem(index, setProtagonists)
+                                }
+                              >
+                                <i className="bi bi-trash"></i>
+                              </Button>
+                            </div>
+                          </Form.Group>
                         ))}
                       </Accordion.Body>
                     </Accordion.Item>
@@ -310,30 +306,28 @@ export default function EditArc({
                           + Add New Antagonist
                         </Button>
                         {antagonists.map((character, index) => (
-                          <>
-                            <Form.Group>
-                              <h5 className="my-1">{character.name}</h5>
-                              <div className="d-flex justify-content-between">
-                                <Form.Control
-                                  type="text"
-                                  className="w-75"
-                                  placeholder={"Character Name"}
-                                  value={character.name}
-                                  onChange={(ev) =>
-                                    updateAntagonistName(index, ev.target.value)
-                                  }
-                                />
-                                <Button
-                                  variant="primary mb-1"
-                                  onClick={() =>
-                                    deleteItem(index, setAntagonists)
-                                  }
-                                >
-                                  <i className="bi bi-trash"></i>
-                                </Button>
-                              </div>
-                            </Form.Group>
-                          </>
+                          <Form.Group key={index}>
+                            <h5 className="my-1">{character.name}</h5>
+                            <div className="d-flex justify-content-between">
+                              <Form.Control
+                                type="text"
+                                className="w-75"
+                                placeholder={"Character Name"}
+                                value={character.name}
+                                onChange={(ev) =>
+                                  updateAntagonistName(index, ev.target.value)
+                                }
+                              />
+                              <Button
+                                variant="primary mb-1"
+                                onClick={() =>
+                                  deleteItem(index, setAntagonists)
+                                }
+                              >
+                                <i className="bi bi-trash"></i>
+                              </Button>
+                            </div>
+                          </Form.Group>
                         ))}
                       </Accordion.Body>
                     </Accordion.Item>
@@ -344,28 +338,26 @@ export default function EditArc({
                           + Add New Tertiary Character
                         </Button>
                         {tertiary.map((character, index) => (
-                          <>
-                            <Form.Group>
-                              <h5 className="my-1">{character.name}</h5>
-                              <div className="d-flex justify-content-between">
-                                <Form.Control
-                                  type="text"
-                                  className="w-75"
-                                  placeholder={"Character Name"}
-                                  value={character.name}
-                                  onChange={(ev) =>
-                                    updateTertiaryName(index, ev.target.value)
-                                  }
-                                />
-                                <Button
-                                  variant="primary mb-1"
-                                  onClick={() => deleteItem(index, setTertiary)}
-                                >
-                                  <i className="bi bi-trash"></i>
-                                </Button>
-                              </div>
-                            </Form.Group>
-                          </>
+                          <Form.Group key={index}>
+                            <h5 className="my-1">{character.name}</h5>
+                            <div className="d-flex justify-content-between">
+                              <Form.Control
+                                type="text"
+                                className="w-75"
+                                placeholder={"Character Name"}
+                                value={character.name}
+                                onChange={(ev) =>
+                                  updateTertiaryName(index, ev.target.value)
+                                }
+                              />
+                              <Button
+                                variant="primary mb-1"
+                                onClick={() => deleteItem(index, setTertiary)}
+                              >
+                                <i className="bi bi-trash"></i>
+                              </Button>
+                            </div>
+                          </Form.Group>
                         ))}
                       </Accordion.Body>
                     </Accordion.Item>
@@ -459,61 +451,50 @@ export default function EditArc({
                     <Accordion.Item eventKey="2" className="border-bottom">
                       <Accordion.Header>Obstacles</Accordion.Header>
                       <Accordion.Body>
-                        <Accordion defaultEventKey="50">
+                        <Accordion>
                           {obstacles.length > 0 &&
-                            obstacles.map((obstacle, index) => {
-                              return (
-                                <>
-                                  <Accordion.Item
-                                    eventKey={index + 50}
-                                    className="border-bottom"
-                                  >
-                                    <Accordion.Header>
-                                      Obstacle {index + 1}
-                                    </Accordion.Header>
-                                    <Accordion.Body>
-                                      <Form.Group className="mt-3" key={index}>
-                                        <Form.Control
-                                          as="textarea"
-                                          rows="10"
-                                          placeholder={""}
-                                          value={obstacle}
-                                          onChange={(ev) =>
-                                            handleObstacleChange(
-                                              index,
-                                              ev.target.value
-                                            )
-                                          }
-                                        />
-                                      </Form.Group>
-                                      <div>
-                                        <Button
-                                          variant="primary my-3"
-                                          size="sm"
-                                          onClick={async () => {
-                                            if (
-                                              index ===
-                                              obstacles.length - 1
-                                            ) {
-                                              await setObstacles(
-                                                obstacles.pop()
-                                              );
-                                            } else {
-                                              await setObstacles(
-                                                obstacles.splice(index, 1)
-                                              );
-                                            }
-                                            setObstacles(obstacles);
-                                          }}
-                                        >
-                                          Delete
-                                        </Button>
-                                      </div>
-                                    </Accordion.Body>
-                                  </Accordion.Item>
-                                </>
-                              );
-                            })}
+                            obstacles.map((obstacle, index) => (
+                              <Accordion.Item
+                                key={index}
+                                className="border-bottom"
+                              >
+                                <Accordion.Header>
+                                  Obstacle {index + 1}
+                                </Accordion.Header>
+                                <Accordion.Body>
+                                  <Form.Group className="mt-3">
+                                    <Form.Control
+                                      as="textarea"
+                                      rows="10"
+                                      placeholder={""}
+                                      value={obstacle}
+                                      onChange={(ev) =>
+                                        handleObstacleChange(
+                                          index,
+                                          ev.target.value
+                                        )
+                                      }
+                                    />
+                                  </Form.Group>
+                                  <div>
+                                    <Button
+                                      variant="primary my-3"
+                                      size="sm"
+                                      onClick={() => {
+                                        setObstacles((prevObstacles) => {
+                                          // Create a new array excluding the item at the current index
+                                          return prevObstacles.filter(
+                                            (_, i) => i !== index
+                                          );
+                                        });
+                                      }}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </Accordion.Body>
+                              </Accordion.Item>
+                            ))}
                         </Accordion>
                         <Form.Text muted>
                           The Obstacle stage introduces a significant and
@@ -590,7 +571,7 @@ export default function EditArc({
                           <Form.Control
                             as="textarea"
                             rows="6"
-                            placeHolder="Foreshadowing"
+                            placeholder="Foreshadowing"
                             value={foreshadowing}
                             onChange={(ev) => setForeshadowing(ev.target.value)}
                           />
@@ -620,7 +601,7 @@ export default function EditArc({
                           <Form.Control
                             as="textarea"
                             rows="6"
-                            placeHolder="Twists"
+                            placeholder="Twists"
                             value={twists}
                             onChange={(ev) => setTwists(ev.target.value)}
                           />
@@ -642,7 +623,7 @@ export default function EditArc({
                           <Form.Control
                             as="textarea"
                             rows="12"
-                            placeHolder="Character Development"
+                            placeholder="Character Development"
                             value={characterDevelopment}
                             onChange={(ev) =>
                               setCharacterDevelopment(ev.target.value)
@@ -674,148 +655,141 @@ export default function EditArc({
                       >
                         <Accordion.Header>{subplot.name}</Accordion.Header>
                         <Accordion.Body>
-                          <Form className="my-4">
-                            <Form.Group className="mb-3">
-                              <Form.Label>Name:</Form.Label>
-                              <Form.Control
-                                type="text"
-                                placeholder=""
-                                value={subplot.name}
-                                onChange={(ev) =>
-                                  handleSubplotChange(
-                                    subplotIndex,
-                                    "name",
-                                    ev.target.value
-                                  )
-                                }
-                              />
-                              <Form.Text muted>Name of Subplot</Form.Text>
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Chapters:</Form.Label>
-                              <Form.Control
-                                type="text"
-                                placeholder=""
-                                value={subplot.chapters}
-                                onChange={(ev) =>
-                                  handleSubplotChange(
-                                    subplotIndex,
-                                    "chapters",
-                                    ev.target.value
-                                  )
-                                }
-                              />
-                              <Form.Text muted>
-                                Which chapter or chapters will contain this
-                                subplot?
-                              </Form.Text>
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Introduction:</Form.Label>
-                              <Form.Control
-                                as="textarea"
-                                rows="4"
-                                placeholder=""
-                                value={subplot.introduction}
-                                onChange={(ev) =>
-                                  handleSubplotChange(
-                                    subplotIndex,
-                                    "introduction",
-                                    ev.target.value
-                                  )
-                                }
-                              />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Development:</Form.Label>
-                              <Form.Control
-                                as="textarea"
-                                rows="4"
-                                placeholder=""
-                                value={subplot.development}
-                                onChange={(ev) =>
-                                  handleSubplotChange(
-                                    subplotIndex,
-                                    "development",
-                                    ev.target.value
-                                  )
-                                }
-                              />
-                            </Form.Group>
-                            {subplot.obstacles.length > 0 &&
-                              subplot.obstacles.map(
-                                (obstacle, obstacleIndex) => (
-                                  <Form.Group
-                                    className="mt-3"
-                                    key={obstacleIndex}
-                                  >
-                                    <Form.Label>Obstacle:</Form.Label>
-                                    <Form.Control
-                                      as="textarea"
-                                      rows="4"
-                                      placeholder=""
-                                      value={obstacle}
-                                      onChange={(ev) =>
-                                        handleSubplotChange(
+                          <Form.Group className="mb-3">
+                            <Form.Label>Name:</Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder=""
+                              value={subplot.name}
+                              onChange={(ev) =>
+                                handleSubplotChange(
+                                  subplotIndex,
+                                  "name",
+                                  ev.target.value
+                                )
+                              }
+                            />
+                            <Form.Text muted>Name of Subplot</Form.Text>
+                          </Form.Group>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Chapters:</Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder=""
+                              value={subplot.chapters}
+                              onChange={(ev) =>
+                                handleSubplotChange(
+                                  subplotIndex,
+                                  "chapters",
+                                  ev.target.value
+                                )
+                              }
+                            />
+                            <Form.Text muted>
+                              Which chapter or chapters will contain this
+                              subplot?
+                            </Form.Text>
+                          </Form.Group>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Introduction:</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows="4"
+                              placeholder=""
+                              value={subplot.introduction}
+                              onChange={(ev) =>
+                                handleSubplotChange(
+                                  subplotIndex,
+                                  "introduction",
+                                  ev.target.value
+                                )
+                              }
+                            />
+                          </Form.Group>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Development:</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows="4"
+                              placeholder=""
+                              value={subplot.development}
+                              onChange={(ev) =>
+                                handleSubplotChange(
+                                  subplotIndex,
+                                  "development",
+                                  ev.target.value
+                                )
+                              }
+                            />
+                          </Form.Group>
+                          {subplot.obstacles.length > 0 &&
+                            subplot.obstacles.map((obstacle, obstacleIndex) => (
+                              <Form.Group className="mt-3" key={obstacleIndex}>
+                                <Form.Label>Obstacle:</Form.Label>
+                                <Form.Control
+                                  as="textarea"
+                                  rows="4"
+                                  placeholder=""
+                                  value={obstacle}
+                                  onChange={(ev) =>
+                                    handleSubplotChange(
+                                      subplotIndex,
+                                      "obstacles",
+                                      [
+                                        ...subplot.obstacles.slice(
+                                          0,
+                                          obstacleIndex
+                                        ),
+                                        ev.target.value,
+                                        ...subplot.obstacles.slice(
+                                          obstacleIndex + 1
+                                        ),
+                                      ]
+                                    )
+                                  }
+                                />
+                                {obstacleIndex > 0 && (
+                                  <div>
+                                    <Button
+                                      variant="primary my-3"
+                                      size="sm"
+                                      onClick={() =>
+                                        deleteSubplotObstacle(
                                           subplotIndex,
-                                          "obstacles",
-                                          [
-                                            ...subplot.obstacles.slice(
-                                              0,
-                                              obstacleIndex
-                                            ),
-                                            ev.target.value,
-                                            ...subplot.obstacles.slice(
-                                              obstacleIndex + 1
-                                            ),
-                                          ]
+                                          obstacleIndex
                                         )
                                       }
-                                    />
-                                    {obstacleIndex > 0 && (
-                                      <div>
-                                        <Button
-                                          variant="primary my-3"
-                                          size="sm"
-                                          onClick={() =>
-                                            deleteSubplotObstacle(
-                                              subplotIndex,
-                                              obstacleIndex
-                                            )
-                                          }
-                                        >
-                                          Delete Obstacle
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </Form.Group>
+                                    >
+                                      Delete Obstacle
+                                    </Button>
+                                  </div>
+                                )}
+                              </Form.Group>
+                            ))}
+                          <div>
+                            <Button
+                              variant="primary my-3"
+                              onClick={() => addSubplotObstacle(subplotIndex)}
+                            >
+                              + Add New Obstacle
+                            </Button>
+                          </div>
+                          <Form.Group className="my-3">
+                            <Form.Label>Resolution:</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows="4"
+                              placeholder=""
+                              value={subplot.resolution}
+                              onChange={(ev) =>
+                                handleSubplotChange(
+                                  subplotIndex,
+                                  "resolution",
+                                  ev.target.value
                                 )
-                              )}
-                            <div>
-                              <Button
-                                variant="primary my-3"
-                                onClick={() => addSubplotObstacle(subplotIndex)}
-                              >
-                                + Add New Obstacle
-                              </Button>
-                            </div>
-                            <Form.Group className="my-3">
-                              <Form.Label>Resolution:</Form.Label>
-                              <Form.Control
-                                as="textarea"
-                                rows="4"
-                                placeholder=""
-                                value={subplot.resolution}
-                                onChange={(ev) =>
-                                  handleSubplotChange(
-                                    subplotIndex,
-                                    "resolution",
-                                    ev.target.value
-                                  )
-                                }
-                              />
-                            </Form.Group>
-                          </Form>
+                              }
+                            />
+                          </Form.Group>
                           <Button
                             variant="primary my-3"
                             size="sm"

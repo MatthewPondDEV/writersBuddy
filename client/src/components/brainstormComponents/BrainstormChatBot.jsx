@@ -115,7 +115,7 @@ export default function BrainstormChatBot() {
           />
         </Form.Group>
         <Button size="lg" className="mx-4" type="submit">
-          <i class="bi bi-send"></i> Submit Message
+          <i className="bi bi-send"></i> Submit Message
         </Button>
         <div className="mt-4 d-flex justify-content-around">
           <Button

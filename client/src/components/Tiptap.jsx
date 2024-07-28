@@ -238,7 +238,7 @@ export default function TipTap({ content, onChange, id }) {
                   : ""
               }
             >
-              <i class="bi bi-list-ul"></i>
+              <i className="bi bi-list-ul"></i>
             </button>
             <button
               type="button"

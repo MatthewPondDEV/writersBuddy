@@ -28,20 +28,20 @@ export default function EditLands({
   const handleOpen = () => setShowDeleteModal(true);
 
   useEffect(() => {
-    if (projectInfo._id) {
-      projectInfo.setting.lands.forEach((land) => {
-        if (currentLandId === land._id) {
-          setName(land.name);
-          setDescription(land.description);
-          setTerrain(land.terrain);
-          setLocation(land.location);
-          setPictures(land.pictures);
-          setWeather(land.weather);
-          setWildlife(land.wildlife);
-        }
-      });
+    if (projectInfo?.setting?.lands) {
+      const land = projectInfo.setting.lands.find(l => l._id === currentLandId);
+      
+      if (land) {
+        setName(land.name || '');
+        setDescription(land.description || '');
+        setTerrain(land.terrain || '');
+        setLocation(land.location || '');
+        setPictures(land.pictures || []);
+        setWeather(land.weather || '');
+        setWildlife(land.wildlife || '');
+      }
     }
-  }, [currentLandId, projectInfo._id]);
+  }, [currentLandId, projectInfo]);
   
   async function updateLand(ev) {
     ev.preventDefault();
@@ -79,7 +79,7 @@ export default function EditLands({
       <div className="d-flex justify-content-between mt-4">
         <h5 className="mx-2">Lands & Areas</h5>
         <Button variant="primary" onClick={handleOpen}>
-          <i class="bi bi-trash"></i> Delete Land
+          <i className="bi bi-trash"></i> Delete Land
         </Button>
       </div>
       <Container>

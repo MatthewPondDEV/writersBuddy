@@ -59,10 +59,9 @@ export default function ManagePojects() {
         <Col xs={12} xxl={10} id="papyrus">
           <h1 className="my-5 text-center">My Projects</h1>
           <Col className="mx-3 my-5 py-5 px-3" id="manage-projects">
-            {projects.length &&
-              projects.map((project) => {
-                return (
-                  <div className="border-bottom border-dark">
+            {projects.length > 0 &&
+              projects.map((project, index) => (
+                  <div key = {index} className="border-bottom border-dark">
                     <Row className="my-4">
                       <Col xs={12} md={6} xl={8}>
                         <Row>
@@ -123,8 +122,7 @@ export default function ManagePojects() {
                       </Col>
                     </Row>
                   </div>
-                );
-              })}
+              ))}
             <Col
               xs={12}
               className="pt-5 d-flex justify-content-center align-items-center"

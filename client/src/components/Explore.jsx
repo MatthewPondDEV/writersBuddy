@@ -59,50 +59,53 @@ export default function Explore() {
         <Col xs={12} xl={6} className="d-flex justify-content-center">
           <div id="table-div" className="border border-white mt-5">
             <Table
-              hover
-              className="text-start bg-none"
-              style={{ border: "none" }}
+  hover
+  className="text-start bg-none"
+  style={{ border: "none" }}
+>
+  <thead className="text-center display-6">
+    <tr>
+      <th
+        style={{
+          color: "white",
+          borderBottom: "none",
+        }}
+      >
+        Continue a saved project
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {projects.length > 0 ? (
+      projects.map((project, index) => (
+        <tr key={index}>
+          <td>
+            <Button
+              variant="outline-primary w-100 text-white border-white"
+              onClick={() => setProjectId(project._id)}
             >
-              <thead className="text-center display-6">
-                <tr>
-                  <th
-                    style={{
-                      color: "white",
-                      borderBottom: "none",
-                    }}
-                  >
-                    Continue a saved project
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {projects.length &&
-                  projects.map((project, index) => {
-                    return (
-                      <tr key = {index}>
-                        <td>
-                          <Button
-                            variant="outline-primary w-100 text-white border-white"
-                            onClick={() => setProjectId(project._id)}
-                          >
-                            {project.title}
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                <tr>
-                  <td className="text-start">
-                    <Button
-                      variant="outline-primary border-light text-white w-100"
-                      onClick={handleShow}
-                    >
-                      + Create New
-                    </Button>
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
+              {project.title}
+            </Button>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="1">No projects available</td>
+      </tr>
+    )}
+    <tr>
+      <td className="text-start">
+        <Button
+          variant="outline-primary border-light text-white w-100"
+          onClick={handleShow}
+        >
+          + Create New
+        </Button>
+      </td>
+    </tr>
+  </tbody>
+</Table>
           </div>
         </Col>
         <Col xs={12} xl={6} className="d-flex justify-content-center">

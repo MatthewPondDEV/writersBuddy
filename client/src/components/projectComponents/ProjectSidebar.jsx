@@ -40,13 +40,12 @@ export default function ProjectSidebar({
 }) {
   const { userInfo, setUserInfo } = useContext(UserContext);
   const [loadData, setLoadData] = useState(false);
-const [loggedOutRedirect, setLoggedOutRedirect] = useState(false);
-const [logCheck, setLogCheck] = useState(false)
+  const [loggedOutRedirect, setLoggedOutRedirect] = useState(false);
+  const [logCheck, setLogCheck] = useState(false);
 
   setInterval(() => {
-		setLogCheck(false)
-	}, 15 * 60 * 1000 + 50);
-
+    setLogCheck(false);
+  }, 15 * 60 * 1000 + 50);
 
   useEffect(() => {
     const loginCheck = async () => {
@@ -58,20 +57,14 @@ const [logCheck, setLogCheck] = useState(false)
 
       if (userInfo.error) {
         setLoggedOutRedirect(true);
-      } else if (userInfo.id){
-      setUserInfo(userInfo);
-      setLogCheck(true)
+        setUserInfo(null);
+      } else if (userInfo.id) {
+        setUserInfo(userInfo);
+        setLogCheck(true);
       }
     };
     loginCheck();
   }, [logCheck]);
-
-
-  if (loggedOutRedirect === true) {
-    alert("Must log in or create account to use the application");
-    return <Navigate to={"/"} />;
-  }
-
 
   function logout() {
     fetch("http://localhost:5000/logout", {
@@ -87,6 +80,11 @@ const [logCheck, setLogCheck] = useState(false)
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  if (loggedOutRedirect === true) {
+    alert("Must log in or create account to use the application");
+    return <Navigate to={"/"} />;
+  }
+
   return (
     <Col xs={12} xxl={3} className="bg-light" id="project-sidebar">
       <Container fluid className="bg-light">
@@ -98,10 +96,8 @@ const [logCheck, setLogCheck] = useState(false)
               id="project-nav"
               className="bg-light vh-100 w-100 flex-xxl-column align-items-start"
             >
-              <Navbar.Brand href="#home">
-                <Link to="/home">
+              <Navbar.Brand href="/home">
                   <Image src={logo} width="100px" rounded />
-                </Link>
               </Navbar.Brand>
               <Navbar.Toggle
                 aria-controls={`offcanvasNavbar-expand-true`}
@@ -272,205 +268,169 @@ const [logCheck, setLogCheck] = useState(false)
                               </Accordion.Body>
                             </Accordion.Item>
                             <Accordion.Item eventKey="1">
-                              <Accordion.Header>Characters</Accordion.Header>
-                              <Accordion.Body>
-                                <Accordion.Item eventKey="6">
-                                  <Accordion.Header>
-                                    Protagonists
-                                  </Accordion.Header>
-                                  <Accordion.Body>
-                                    <Accordion.Item eventKey="13">
-                                      <Accordion.Header>Major</Accordion.Header>
-                                      <Accordion.Body>
-                                        <>
-                                          {projectInfo._id &&
-                                            projectInfo.characters.map(
-                                              (character) => {
-                                                if (
-                                                  character.characterType ===
-                                                    "Main Protagonist" ||
-                                                  character.characterType ===
-                                                    "Major Supporting Protagonist"
-                                                ) {
-                                                  return (
-                                                    <Button
-                                                      {...character}
-                                                      key={character._id}
-                                                      variant="none"
-                                                      className="w-100 text-start p-3"
-                                                      onClick={() => {
-                                                        setCurrentCharacterId(
-                                                          character._id
-                                                        );
-                                                        setViewNumber("11");
-                                                        handleClose();
-                                                      }}
-                                                    >
-                                                      {character.name}
-                                                    </Button>
-                                                  );
-                                                }
-                                              }
-                                            )}
-                                        </>
-                                      </Accordion.Body>
-                                    </Accordion.Item>
-                                    <Accordion.Item eventKey="9">
-                                      <Accordion.Header>Minor</Accordion.Header>
-                                      <Accordion.Body>
-                                        <>
-                                          {projectInfo._id &&
-                                            projectInfo.characters.map(
-                                              (character) => {
-                                                if (
-                                                  character.characterType ===
-                                                  "Minor Supporting Protagonist"
-                                                ) {
-                                                  return (
-                                                    <Button
-                                                      {...character}
-                                                      key={character._id}
-                                                      variant="none"
-                                                      className="border-top w-100 text-start p-3"
-                                                      onClick={() => {
-                                                        setCurrentCharacterId(
-                                                          character._id
-                                                        );
-                                                        setViewNumber("11");
-                                                        handleClose();
-                                                      }}
-                                                    >
-                                                      {character.name}
-                                                    </Button>
-                                                  );
-                                                }
-                                              }
-                                            )}
-                                        </>
-                                      </Accordion.Body>
-                                    </Accordion.Item>
-                                  </Accordion.Body>
-                                </Accordion.Item>
-                                <Accordion.Item eventKey="10">
-                                  <Accordion.Header>
-                                    Antagonists
-                                  </Accordion.Header>
-                                  <Accordion.Body>
-                                    <Accordion.Item eventKey="14">
-                                      <Accordion.Header>Major</Accordion.Header>
-                                      <Accordion.Body>
-                                        <>
-                                          {projectInfo._id &&
-                                            projectInfo.characters.map(
-                                              (character) => {
-                                                if (
-                                                  character.characterType ===
-                                                  "Major Antagonist"
-                                                ) {
-                                                  return (
-                                                    <Button
-                                                      {...character}
-                                                      key={character._id}
-                                                      variant="none"
-                                                      className="border-top w-100 text-start p-3"
-                                                      onClick={() => {
-                                                        setCurrentCharacterId(
-                                                          character._id
-                                                        );
-                                                        setViewNumber("11");
-                                                        handleClose();
-                                                      }}
-                                                    >
-                                                      {character.name}
-                                                    </Button>
-                                                  );
-                                                }
-                                              }
-                                            )}
-                                        </>
-                                      </Accordion.Body>
-                                    </Accordion.Item>
-                                    <Accordion.Item eventKey="11">
-                                      <Accordion.Header>Minor</Accordion.Header>
-                                      <Accordion.Body>
-                                        <>
-                                          {projectInfo._id &&
-                                            projectInfo.characters.map(
-                                              (character) => {
-                                                if (
-                                                  character.characterType ===
-                                                  "Minor Antagonist"
-                                                ) {
-                                                  return (
-                                                    <Button
-                                                      {...character}
-                                                      key={character._id}
-                                                      variant="none"
-                                                      className="border-top w-100 text-start p-3"
-                                                      onClick={() => {
-                                                        setCurrentCharacterId(
-                                                          character._id
-                                                        );
-                                                        setViewNumber("11");
-                                                        handleClose();
-                                                      }}
-                                                    >
-                                                      {character.name}
-                                                    </Button>
-                                                  );
-                                                }
-                                              }
-                                            )}
-                                        </>
-                                      </Accordion.Body>
-                                    </Accordion.Item>
-                                  </Accordion.Body>
-                                </Accordion.Item>
-                                <Accordion.Item eventKey="12" className="mb-2">
-                                  <Accordion.Header>Tertiary</Accordion.Header>
-                                  <Accordion.Body>
-                                    <>
-                                      {projectInfo._id &&
-                                        projectInfo.characters.map(
-                                          (character) => {
-                                            if (
-                                              character.characterType ===
-                                                "Tertiary" ||
-                                              !character.characterType
-                                            ) {
-                                              return (
-                                                <Button
-                                                  {...character}
-                                                  key={character._id}
-                                                  variant="none"
-                                                  className="border-top w-100 text-start p-3"
-                                                  onClick={() => {
-                                                    setCurrentCharacterId(
-                                                      character._id
-                                                    );
-                                                    setViewNumber("11");
-                                                    handleClose();
-                                                  }}
-                                                >
-                                                  {character.name}
-                                                </Button>
-                                              );
-                                            }
-                                          }
-                                        )}
-                                    </>
-                                  </Accordion.Body>
-                                </Accordion.Item>
-                                <Button
-                                  variant="outline-primary"
-                                  onClick={() =>
-                                    setShowCreateCharacterModal(true)
-                                  }
-                                >
-                                  Create New Character
-                                </Button>
-                              </Accordion.Body>
-                            </Accordion.Item>
+  <Accordion.Header>Characters</Accordion.Header>
+  <Accordion.Body>
+    <Accordion.Item eventKey="6">
+      <Accordion.Header>Protagonists</Accordion.Header>
+      <Accordion.Body>
+        <Accordion.Item eventKey="13">
+          <Accordion.Header>Major</Accordion.Header>
+          <Accordion.Body>
+            <>
+              {projectInfo._id &&
+                projectInfo.characters.map((character) => {
+                  if (
+                    character.characterType === "Main Protagonist" ||
+                    character.characterType === "Major Supporting Protagonist"
+                  ) {
+                    return (
+                      <Button
+                        key={character._id}
+                        variant="none"
+                        className="w-100 text-start p-3"
+                        onClick={() => {
+                          setCurrentCharacterId(character._id);
+                          setViewNumber("11");
+                          handleClose();
+                        }}
+                      >
+                        {character.name}
+                      </Button>
+                    );
+                  }
+                  return null; // Ensure to return null for characters that don't match
+                })}
+            </>
+          </Accordion.Body>
+        </Accordion.Item>
+        <Accordion.Item eventKey="9">
+          <Accordion.Header>Minor</Accordion.Header>
+          <Accordion.Body>
+            <>
+              {projectInfo._id &&
+                projectInfo.characters.map((character) => {
+                  if (
+                    character.characterType === "Minor Supporting Protagonist"
+                  ) {
+                    return (
+                      <Button
+                        key={character._id}
+                        variant="none"
+                        className="border-top w-100 text-start p-3"
+                        onClick={() => {
+                          setCurrentCharacterId(character._id);
+                          setViewNumber("11");
+                          handleClose();
+                        }}
+                      >
+                        {character.name}
+                      </Button>
+                    );
+                  }
+                  return null; // Ensure to return null for characters that don't match
+                })}
+            </>
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion.Body>
+    </Accordion.Item>
+    <Accordion.Item eventKey="10">
+      <Accordion.Header>Antagonists</Accordion.Header>
+      <Accordion.Body>
+        <Accordion.Item eventKey="14">
+          <Accordion.Header>Major</Accordion.Header>
+          <Accordion.Body>
+            <>
+              {projectInfo._id &&
+                projectInfo.characters.map((character) => {
+                  if (character.characterType === "Major Antagonist") {
+                    return (
+                      <Button
+                        key={character._id}
+                        variant="none"
+                        className="border-top w-100 text-start p-3"
+                        onClick={() => {
+                          setCurrentCharacterId(character._id);
+                          setViewNumber("11");
+                          handleClose();
+                        }}
+                      >
+                        {character.name}
+                      </Button>
+                    );
+                  }
+                  return null; // Ensure to return null for characters that don't match
+                })}
+            </>
+          </Accordion.Body>
+        </Accordion.Item>
+        <Accordion.Item eventKey="11">
+          <Accordion.Header>Minor</Accordion.Header>
+          <Accordion.Body>
+            <>
+              {projectInfo._id &&
+                projectInfo.characters.map((character) => {
+                  if (character.characterType === "Minor Antagonist") {
+                    return (
+                      <Button
+                        key={character._id}
+                        variant="none"
+                        className="border-top w-100 text-start p-3"
+                        onClick={() => {
+                          setCurrentCharacterId(character._id);
+                          setViewNumber("11");
+                          handleClose();
+                        }}
+                      >
+                        {character.name}
+                      </Button>
+                    );
+                  }
+                  return null; // Ensure to return null for characters that don't match
+                })}
+            </>
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion.Body>
+    </Accordion.Item>
+    <Accordion.Item eventKey="12" className="mb-2">
+      <Accordion.Header>Tertiary</Accordion.Header>
+      <Accordion.Body>
+        <>
+          {projectInfo._id &&
+            projectInfo.characters.map((character) => {
+              if (
+                character.characterType === "Tertiary" ||
+                !character.characterType
+              ) {
+                return (
+                  <Button
+                    key={character._id}
+                    variant="none"
+                    className="border-top w-100 text-start p-3"
+                    onClick={() => {
+                      setCurrentCharacterId(character._id);
+                      setViewNumber("11");
+                      handleClose();
+                    }}
+                  >
+                    {character.name}
+                  </Button>
+                );
+              }
+              return null; // Ensure to return null for characters that don't match
+            })}
+        </>
+      </Accordion.Body>
+    </Accordion.Item>
+    <Button
+      variant="outline-primary"
+      onClick={() => setShowCreateCharacterModal(true)}
+    >
+      Create New Character
+    </Button>
+  </Accordion.Body>
+</Accordion.Item>
                             <Accordion.Item eventKey="20">
                               <Accordion.Header>
                                 Groups/Organizations
@@ -593,7 +553,6 @@ const [logCheck, setLogCheck] = useState(false)
                                         projectInfo.write.chapters.map(
                                           (chapter, index) => (
                                             <Button
-                                              {...chapter}
                                               key={chapter._id}
                                               variant="none"
                                               className="border-top w-100 text-start p-3"
@@ -630,7 +589,10 @@ const [logCheck, setLogCheck] = useState(false)
                         className="border-top border-dark mt-3 py-2"
                       >
                         <Col xs={12}>
-                          <Nav.Link href='/manageProjects' className="py-4 mx-2 text-start">
+                          <Nav.Link
+                            href="/manageProjects"
+                            className="py-4 mx-2 text-start"
+                          >
                             {" "}
                             <i className="bi bi-journal-text mx-2"></i> Projects
                           </Nav.Link>
@@ -645,13 +607,19 @@ const [logCheck, setLogCheck] = useState(false)
                           </Nav.Link>
                         </Col>
                         <Col xs={12}>
-                          <Nav.Link href='/brainstorm' className="py-4 mx-2 text-start">
+                          <Nav.Link
+                            href="/brainstorm"
+                            className="py-4 mx-2 text-start"
+                          >
                             {" "}
                             <i className="bi bi-lightbulb mx-2"></i> Brainstorm
                           </Nav.Link>
                         </Col>
                         <Col xs={12}>
-                          <Nav.Link href='/profile' className="py-4 mx-2 text-start">
+                          <Nav.Link
+                            href="/profile"
+                            className="py-4 mx-2 text-start"
+                          >
                             <i className="bi bi-person-circle mx-2"></i> Profile
                           </Nav.Link>
                         </Col>

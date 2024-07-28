@@ -61,56 +61,27 @@ export default function EditCountry({
   const handleOpen = () => setShowDeleteModal(true);
 
   useEffect(() => {
-    if (projectInfo._id) {
-      projectInfo.setting.countries.forEach((country) => {
-        if (currentCountryId === country._id) {
-          setName(country.name);
-          setBorders(country.borders);
-          setCapital(country.capital);
-          if (country.cities[0]) setCities(country.cities);
-          if (country.landmarks[0]) setLandmarks(country.landmarks);
-          setCulture(country.culture);
-          setEconomy(country.economy);
-          setFood(country.food);
-          setLocation(country.location);
-          setPictures(country.pictures);
-          setPopulation(country.population);
-          setWeather(country.weather);
-          setWildlife(country.wildlife);
-        }
-      });
-    }
-  }, [currentCountryId]);
-
-  function startLoad() {
-    const t = setTimeout(() => {
-      if (!loadData && projectInfo._id && currentCountryId) {
-        projectInfo.setting.countries.forEach((country) => {
-          if (currentCountryId === country._id) {
-            setName(country.name);
-            setBorders(country.borders);
-            setCapital(country.capital);
-            if (country.cities[0]) setCities(country.cities);
-            if (country.landmarks[0]) setLandmarks(country.landmarks);
-            setCulture(country.culture);
-            setEconomy(country.economy);
-            setFood(country.food);
-            setLocation(country.location);
-            setPictures(country.pictures);
-            setPopulation(country.population);
-            setWeather(country.weather);
-            setWildlife(country.wildlife);
-          }
-        });
-        setLoadData(true);
+    if (projectInfo?.setting?.countries) {
+      const country = projectInfo.setting.countries.find(c => c._id === currentCountryId);
+      
+      if (country) {
+        setName(country.name || '');
+        setBorders(country.borders || []);
+        setCapital(country.capital || '');
+        setCities(country.cities || []);
+        setLandmarks(country.landmarks || []);
+        setCulture(country.culture || '');
+        setEconomy(country.economy || '');
+        setFood(country.food || '');
+        setLocation(country.location || '');
+        setPictures(country.pictures || []);
+        setPopulation(country.population || '');
+        setWeather(country.weather || '');
+        setWildlife(country.wildlife || '');
       }
-    }, 200);
-
-    if (loadData) {
-      clearTimeout(t);
     }
-  }
-  startLoad();
+  }, [currentCountryId, projectInfo]);
+
 
   async function updateCountry(ev) {
     ev.preventDefault();
@@ -223,7 +194,7 @@ export default function EditCountry({
       <div className="d-flex justify-content-between mt-4">
         <h5 className="mx-2">Countries</h5>
         <Button variant="primary" onClick={handleOpen}>
-          <i class="bi bi-trash"></i> Delete Country
+          <i className="bi bi-trash"></i> Delete Country
         </Button>
       </div>
       <Container>

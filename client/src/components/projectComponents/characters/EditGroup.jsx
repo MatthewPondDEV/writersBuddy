@@ -34,23 +34,25 @@ export default function EditGroup({
   const handleOpen = () => setShowDeleteModal(true);
 
   useEffect(() => {
-    if (projectInfo._id) {
-      projectInfo.groups.forEach((group) => {
-        if (currentGroupId === group._id) {
-          setName(group.name);
-          setBusiness(group.business);
-          setCapital(group.capital);
-          setConnections(group.connections);
-          setDescription(group.description);
-          setEstablished(dayjs(group.established).add(1, "day"));
-          setLocation(group.location);
-          setNotableMembers(group.notableMembers);
-          setPictures(group.pictures);
-          setSize(group.size);
-        }
-      });
+    if (projectInfo?.groups) {
+      const group = projectInfo.groups.find(g => g._id === currentGroupId);
+      
+      if (group) {
+        setName(group.name || '');
+        setBusiness(group.business || '');
+        setCapital(group.capital || 0); // Assuming capital is a number
+        setConnections(group.connections || []);
+        setDescription(group.description || '');
+        setEstablished(
+          group.established ? dayjs(group.established).add(1, 'day') : dayjs()
+        );
+        setLocation(group.location || '');
+        setNotableMembers(group.notableMembers || []);
+        setPictures(group.pictures || []);
+        setSize(group.size || 0); // Assuming size is a number
+      }
     }
-  }, [currentGroupId, projectInfo._id]);
+  }, [currentGroupId, projectInfo]);
 
   async function updateGroup(ev) {
     ev.preventDefault();
@@ -93,7 +95,7 @@ export default function EditGroup({
       <div className="d-flex justify-content-between mt-4">
         <h5 className="mx-2">Groups & Organizations</h5>
         <Button variant="primary" onClick={handleOpen}>
-          <i class="bi bi-trash"></i> Delete Group
+          <i className="bi bi-trash"></i> Delete Group
         </Button>
       </div>
       <Container>

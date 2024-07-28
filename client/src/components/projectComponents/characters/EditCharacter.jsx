@@ -198,7 +198,7 @@ export default function EditCharacter({
       <div className="d-flex justify-content-between mt-4">
         <h5 className="mx-2">Characters</h5>
         <Button variant="primary" onClick={handleOpen}>
-          <i class="bi bi-trash"></i> Delete Character
+          <i className= "bi bi-trash"></i> Delete Character
         </Button>
       </div>
       <Container>

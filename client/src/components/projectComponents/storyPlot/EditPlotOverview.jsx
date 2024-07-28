@@ -142,38 +142,42 @@ export default function EditPlotOverview({ projectInfo, setViewNumber, _id }) {
               </Form.Group>
               {obstacles.length > 0 &&
                 obstacles.map((obstacle, index) => (
-                  <>
-                    <Form.Group className="mt-3" key={index}>
-                      <Form.Label>Obstacle:</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows="6"
-                        placeholder={""}
-                        value={obstacle}
-                        onChange={(ev) =>
-                          handleInputChange(index, ev.target.value)
-                        }
-                      />
-                    </Form.Group>
+                  <Form.Group className="mt-3" key={index}>
+                    <Form.Label>Obstacle:</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows="6"
+                      placeholder={""}
+                      value={obstacle}
+                      onChange={(ev) =>
+                        handleInputChange(index, ev.target.value)
+                      }
+                    />
                     {index > 0 && (
                       <div>
                         <Button
                           variant="primary my-3"
                           size="sm"
-                          onClick={async () => {
-                            if (index === obstacles.length - 1) {
-                              await setObstacles(obstacles.pop());
+                          onClick={() => {
+                            // Create a copy of the obstacles array
+                            const updatedObstacles = [...obstacles];
+
+                            // Remove the obstacle at the given index
+                            if (index === updatedObstacles.length - 1) {
+                              updatedObstacles.pop();
                             } else {
-                              await setObstacles(obstacles.splice(index, 1));
+                              updatedObstacles.splice(index, 1);
                             }
-                            setObstacles(obstacles);
+
+                            // Update the state with the new array
+                            setObstacles(updatedObstacles);
                           }}
                         >
                           Delete
                         </Button>
                       </div>
                     )}
-                  </>
+                  </Form.Group>
                 ))}
               <Form.Text muted>
                 The Obstacle stage introduces a significant and unexpected turn
