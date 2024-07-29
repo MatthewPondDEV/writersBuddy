@@ -5,7 +5,7 @@
 #index-background {
   background: url(cssImages/background.png) no-repeat;
   background-size: cover;
-  height: 700px;
+  min-height: 700px;
 }
 #explore-col {
   background: url(./cssImages/Water-pic.jpg) no-repeat;
@@ -225,4 +225,9 @@ table tr th {
   min-height: 400px;
   max-height: 650px;
   overflow-y: auto;
+}
+
+#google-login-button {
+  width: 30px;
+  /* Add more styling here */
 }

@@ -27,7 +27,7 @@ export default function Header() {
             borderRadius: "10px",
           }}
         >
-          Hey {userInfo.username}, let's create something great today
+          Hey {userInfo?.username || ''}, let's create something great today
         </h3>
       </Col>
     </Row>

@@ -21,6 +21,7 @@ import facebook from "../cssImages/icons/facebook.png";
 import pinterest from "../cssImages/icons/pinterest.png";
 import twitter from "../cssImages/icons/twitter.png";
 import tiktok from "../cssImages/icons/tiktok.png";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function IndexPage() {
   const [loggedInRedirect, setLoggedInRedirect] = useState(false);
@@ -39,7 +40,7 @@ export default function IndexPage() {
 
       if (userInfo.id) {
         setUserInfo(userInfo);
-        setLoggedInRedirect(true)
+        setLoggedInRedirect(true);
       }
     };
     loginCheck();
@@ -53,9 +54,31 @@ export default function IndexPage() {
   }, [logOrReg]);
 
   if (loggedInRedirect) {
-    return <Navigate to={'/home'} />
+    return <Navigate to={"/home"} />;
   }
 
+  const handleGoogleSuccess = async (response) => {
+    // Send the response token to your backend to authenticate the user
+    const res = await fetch("http://localhost:5000/auth/google/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: 'include',
+      body: JSON.stringify({ id_token: response.credential }),
+    });
+
+    const data = await res.json();
+    if (data.user.id) {
+      setUserInfo(data.user);
+      setLoggedInRedirect(true);
+    }
+  };
+
+  const handleGoogleError = (error) => {
+    console.log('google error')
+    console.error("Google Sign-In Error:", error);
+  };
 
   return (
     <Container fluid>
@@ -123,7 +146,7 @@ export default function IndexPage() {
               <span className="m-3 mt-4">Login or create account to begin</span>
               <Button
                 variant="primary"
-                className="mb-5 mx-5 orange"
+                className="mb-4 mx-5 orange"
                 size="md"
                 onClick={() => {
                   setLoadLogin(true);
@@ -132,9 +155,8 @@ export default function IndexPage() {
               >
                 Login
               </Button>
-              <span> - or - </span>
               <Button
-                variant="primary mx-5 my-5"
+                variant="primary mx-5 mb-4"
                 size="md"
                 onClick={() => {
                   setLoadRegister(true);
@@ -143,6 +165,13 @@ export default function IndexPage() {
               >
                 Create Account
               </Button>
+              <span> - or - </span>
+              <div className="mx-5 my-4 d-flex justify-content-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onFailure={handleGoogleError}
+                />
+              </div>
             </div>
             {loadLogin && (
               <>
@@ -237,4 +266,3 @@ export default function IndexPage() {
     </Container>
   );
 }
- 
