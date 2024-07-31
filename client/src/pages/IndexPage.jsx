@@ -137,7 +137,7 @@ export default function IndexPage() {
               boxShadow: "0 0 15px #ffffff",
               borderRadius: "20px",
             }}
-            className="my-5 text-center"
+            className="my-5 mx-3 text-center"
           >
             <div
               id="create-or-login"

@@ -50,12 +50,13 @@ export default function Sidebar() {
     return <Navigate to={"/"} />;
   }
 
-  function logout() {
-    fetch("http://localhost:5000/logout", {
+  async function logout() {
+    await fetch("http://localhost:5000/logout", {
       credentials: "include",
       method: "POST",
     });
-    setUserInfo(null);
+    setUserInfo(null)
+    setLoggedOutRedirect(true);;
   }
 
   return (
@@ -124,7 +125,6 @@ export default function Sidebar() {
                 <Row>
                   <Col xs={12}>
                     <Nav.Link
-                      href="/"
                       onClick={logout}
                       className="py-4 mt-2 text-center"
                     >

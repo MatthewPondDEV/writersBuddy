@@ -66,13 +66,13 @@ export default function ProjectSidebar({
     loginCheck();
   }, [logCheck]);
 
-  function logout() {
-    fetch("http://localhost:5000/logout", {
+async function logout() {
+  setUserInfo(null)
+    await fetch("http://localhost:5000/logout", {
       credentials: "include",
       method: "POST",
     });
-    setUserInfo(null);
-    setProjectInfo(null);
+    setLoggedOutRedirect(true);
   }
 
   const [show, setShow] = useState(false);
@@ -80,10 +80,12 @@ export default function ProjectSidebar({
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+
   if (loggedOutRedirect === true) {
-    alert("Must log in or create account to use the application");
+
     return <Navigate to={"/"} />;
   }
+
 
   return (
     <Col xs={12} xxl={3} className="bg-light" id="project-sidebar">
@@ -661,8 +663,7 @@ export default function ProjectSidebar({
                       <Row>
                         <Col xs={12} className="border-top border-dark mb-2">
                           <Nav.Link
-                            href="/"
-                            onClick={logout}
+                            onClick={async () => await logout()}
                             id="logout-button"
                             className="py-4 mt-2 text-center"
                           >

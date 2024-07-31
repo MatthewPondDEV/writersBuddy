@@ -117,7 +117,7 @@ table tr th {
 
 #table-div {
   overflow-y: auto;
-  height: 320px;
+  max-height: 320px;
   width: 80%;
   border-radius: 1%;
 }

@@ -39,28 +39,28 @@ const [logCheck, setLogCheck] = useState(false)
     loginCheck();
   }, [logCheck]);
 
-
-  if (loggedOutRedirect === true) {
-    alert("Must log in or create account to use the application");
-    return <Navigate to={"/"} />;
-  }
-
   setInterval(() => {
 		setLogCheck(false)
 	}, 15 * 60 * 1000 + 50);
 
-  function logout() {
-    fetch("http://localhost:5000/logout", {
+
+  async function logout() {
+    setUserInfo(null)
+    await fetch("http://localhost:5000/logout", {
       credentials: "include",
       method: "POST",
     });
-    setUserInfo(null);
+    setLoggedOutRedirect(true);
   }
 
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  if (loggedOutRedirect === true) {
+    return <Navigate to={"/"} />;
+  }
 
   return (
           <Col xs={12} xxl={2} className="bg-light">
@@ -159,8 +159,7 @@ const [logCheck, setLogCheck] = useState(false)
                       <Row>
                         <Col xs={12}>
                           <Nav.Link
-                            href="/"
-                            onClick={logout}
+                            onClick={async () => await logout()}
                             className="py-4 mt-2 text-center"
                           >
                             Logout

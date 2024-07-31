@@ -68,7 +68,6 @@ export default function Explore() {
                   <th
                     style={{
                       color: "white",
-                      borderBottom: "none",
                     }}
                   >
                     Continue a saved project
@@ -79,7 +78,7 @@ export default function Explore() {
                 {projects.length > 0 ? (
                   projects.map((project, index) => (
                     <tr key={index}>
-                      <td className="text-white">
+                      <td className="text-white" >
                         <Button
                           variant="outline-primary w-100 text-white border-white"
                           onClick={() => setProjectId(project._id)}
@@ -103,9 +102,9 @@ export default function Explore() {
                   </tr>
                 )}
                 <tr>
-                  <td className="text-start">
+                  <td className="text-white">
                     <Button
-                      variant="outline-primary border-light text-white w-100"
+                      variant="outline-primary text-white w-100"
                       onClick={handleShow}
                     >
                       + Create New
