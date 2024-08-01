@@ -25,7 +25,7 @@ export default function NotePage() {
   );
 
   const createNote = async () => {
-    const nextNote = notes.length + 1
+    const nextNote = notes.length === 1 ? notes.length : notes.length + 1;
     const create = await fetch("http://localhost:5000/createNewNote", {
       method: "Post",
       body: JSON.stringify({ title: "New Note " + nextNote }),
@@ -34,9 +34,11 @@ export default function NotePage() {
     });
 
     if (create.ok) {
+      const noteDoc = await create.json();
+      setCurrentNoteId(noteDoc._id);
+      const updatedNotes = [...notes, noteDoc];
+      setNotes(updatedNotes);
       setUpdated(false);
-      setCurrentNoteId(notes[notes.length - 1]._id);
-      window.localStorage.setItem("currentNoteId", currentNoteId);
     }
   };
 
@@ -48,7 +50,7 @@ export default function NotePage() {
       });
 
       const noteArray = await response.json();
-      if (noteArray.length) {
+      if (noteArray.length > 0) {
         setNotes(noteArray);
         setUpdated(true);
       } else {
@@ -60,7 +62,7 @@ export default function NotePage() {
 
   useEffect(() => {
     window.localStorage.setItem("currentNoteId", currentNoteId);
-    if (notes.length) {
+    if (notes?.length > 0) {
       notes.forEach((note) => {
         if (note._id === currentNoteId) {
           setTitle(note.title);
@@ -92,8 +94,9 @@ export default function NotePage() {
       credentials: "include",
     });
     if (deleteFunction.ok) {
+      const updatedNoteId = notes[Math.floor(notes.length - 2)]?._id;
+      setCurrentNoteId(updatedNoteId);
       setUpdated(false);
-      setCurrentNoteId(notes[Math.floor(notes.length - 2)]._id);
     }
   }
   return (
@@ -145,7 +148,11 @@ export default function NotePage() {
                       </Form.Group>
                     )}
                   </div>
-                  <Tiptap content = {content} id = {currentNoteId} onChange={setContent} />
+                  <Tiptap
+                    content={content}
+                    id={currentNoteId}
+                    onChange={setContent}
+                  />
                   <div className="text-center my-3">
                     <Button variant="primary w-75 mt-4" size="lg" type="submit">
                       Save Changes

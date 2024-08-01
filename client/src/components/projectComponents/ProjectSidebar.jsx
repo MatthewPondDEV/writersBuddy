@@ -49,7 +49,7 @@ export default function ProjectSidebar({
 
   useEffect(() => {
     const loginCheck = async () => {
-      const response = await fetch("http://localhost:5000/profile", {
+      const response = await fetch("http://localhost:4000/profile", {
         credentials: "include",
       });
 
@@ -68,7 +68,7 @@ export default function ProjectSidebar({
 
 async function logout() {
   setUserInfo(null)
-    await fetch("http://localhost:5000/logout", {
+    await fetch("http://localhost:4000/logout", {
       credentials: "include",
       method: "POST",
     });

@@ -23,7 +23,7 @@ const [logCheck, setLogCheck] = useState(false)
 
   useEffect(() => {
     const loginCheck = async () => {
-      const response = await fetch("http://localhost:5000/profile", {
+      const response = await fetch("http://localhost:4000/profile", {
         credentials: "include",
       });
 
@@ -46,7 +46,7 @@ const [logCheck, setLogCheck] = useState(false)
 
   async function logout() {
     setUserInfo(null)
-    await fetch("http://localhost:5000/logout", {
+    await fetch("http://localhost:4000/logout", {
       credentials: "include",
       method: "POST",
     });

@@ -13,7 +13,7 @@ export default function Register({setLoadRegister, setLoadLogin}) {
     async function register(event) {
         console.log('hey')
         event.preventDefault();
-        const response = await fetch('http://localhost:5000/register', {
+        const response = await fetch('http://localhost:4000/register', {
             method: 'POST',
             body: JSON.stringify({email, username, password}),
             headers: {'Content-Type': 'application/json'},
