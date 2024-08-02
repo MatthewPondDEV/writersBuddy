@@ -89,7 +89,7 @@ export default function IndexPage() {
       >
         <Navbar className="justify-content-space-between">
           <Container>
-            <Navbar.Brand href="#home">
+            <Navbar.Brand href="/">
               <Image src={logo} width="80px" rounded />
             </Navbar.Brand>
             <Col className="d-none d-lg-block text-end" id="head-icons">
