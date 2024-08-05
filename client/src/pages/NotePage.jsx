@@ -10,6 +10,7 @@ import Button from "react-bootstrap/Button";
 import Tiptap from "../components/Tiptap";
 
 export default function NotePage() {
+  const [showMessage, setShowMessage] = useState(true);
   const [notes, setNotes] = useState([
     {
       title: "",
@@ -25,20 +26,19 @@ export default function NotePage() {
   );
 
   const createNote = async () => {
-    const nextNote = notes.length === 1 ? notes.length : notes.length + 1;
+    setShowMessage(false);
     const create = await fetch("http://localhost:5000/createNewNote", {
       method: "Post",
-      body: JSON.stringify({ title: "New Note " + nextNote }),
+      body: JSON.stringify({ title: "New Note" }),
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
 
     if (create.ok) {
       const noteDoc = await create.json();
-      setCurrentNoteId(noteDoc._id);
       const updatedNotes = [...notes, noteDoc];
       setNotes(updatedNotes);
-      setUpdated(false);
+      setCurrentNoteId(noteDoc._id);
     }
   };
 
@@ -53,8 +53,11 @@ export default function NotePage() {
       if (noteArray.length > 0) {
         setNotes(noteArray);
         setUpdated(true);
+        setShowMessage(false)
       } else {
-        createNote();
+        setShowMessage(true);
+        setCurrentNoteId(null);
+         window.localStorage.setItem("currentNoteId", null);
       }
     };
     retrieveNotes();
@@ -94,9 +97,17 @@ export default function NotePage() {
       credentials: "include",
     });
     if (deleteFunction.ok) {
+      if (notes.length === 1) {
+      const updatedNotes = [];
+      setNotes(updatedNotes);
+      setCurrentNoteId(null)
+      window.localStorage.setItem("currentNoteId", null);
+      setUpdated(false);
+    } else {
       const updatedNoteId = notes[Math.floor(notes.length - 2)]?._id;
       setCurrentNoteId(updatedNoteId);
       setUpdated(false);
+    }
     }
   }
   return (
@@ -107,31 +118,33 @@ export default function NotePage() {
           notes={notes}
           createNote={createNote}
           setCurrentNoteId={setCurrentNoteId}
+          showMessage={showMessage}
         />
         <Col xs={12} xxl={10} id="papyrus">
-          <div className="d-flex justify-content-between mt-4">
+          <div className="mt-4">
             <h5 className="mx-2">Notes</h5>
-            <Button variant="primary" onClick={deleteNote}>
-              <i className="bi bi-trash"></i> Delete Note
-            </Button>
           </div>
-          <Container>
-            <Row>
-              <Col className="my-5 py-5">
-                <Form onSubmit={updateNote}>
-                  <div className="mb-3 d-flex align-items-center flex-column text-center">
-                    <h1 className="text-center">{title}</h1>
-                    <Button
-                      variant="primary"
-                      onClick={() => {
-                        showEditTitle
-                          ? setShowEditTitle(false)
-                          : setShowEditTitle(true);
-                      }}
-                    >
-                      <i className="bi bi-pencil-square mx-2" />
-                    </Button>
-                    {showEditTitle && (
+          {showMessage ? (
+            <>
+              <h2 className="text-center">Select or Create a note to begin</h2>
+            </>
+          ) : (
+            <Container>
+              <Row>
+                <Col className="my-5 py-5">
+                  <Form onSubmit={updateNote}>
+                    <div className="mb-3 d-flex align-items-center flex-column text-center">
+                      <h1 className="text-center">{title}</h1>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          showEditTitle
+                            ? setShowEditTitle(false)
+                            : setShowEditTitle(true);
+                        }}
+                      >
+                        <i className="bi bi-pencil-square mx-2" />
+                      </Button>
                       <Form.Group className="mb-1 text-start">
                         <Form.Label>Title:</Form.Label>
                         <Form.Control
@@ -146,22 +159,29 @@ export default function NotePage() {
                           </Button>
                         </div>
                       </Form.Group>
-                    )}
-                  </div>
-                  <Tiptap
-                    content={content}
-                    id={currentNoteId}
-                    onChange={setContent}
-                  />
-                  <div className="text-center my-3">
-                    <Button variant="primary w-75 mt-4" size="lg" type="submit">
-                      Save Changes
-                    </Button>
-                  </div>
-                </Form>
-              </Col>
-            </Row>
-          </Container>
+                    </div>
+                    <Tiptap
+                      content={content}
+                      id={currentNoteId}
+                      onChange={setContent}
+                    />
+                    <div className="text-center d-flex flex-column align-items-center my-3">
+                      <Button
+                        variant="primary w-75 mt-4"
+                        size="lg"
+                        type="submit"
+                      >
+                        Save Changes
+                      </Button>
+                      <Button variant="danger mt-3 w-50" onClick={deleteNote}>
+                        <i className="bi bi-trash"></i> Delete Note
+                      </Button>
+                    </div>
+                  </Form>
+                </Col>
+              </Row>
+            </Container>
+          )}
         </Col>
       </Row>
     </Container>

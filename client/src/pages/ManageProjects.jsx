@@ -40,7 +40,7 @@ export default function ManagePojects() {
         setProjects(userProjects);
         setUpdated(true);
       } else {
-        alert("failed to load projects");
+        console.error("failed to load projects");
       }
     }
 
