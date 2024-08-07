@@ -271,7 +271,7 @@ export default function EditArc({
                           + Add New Protagonist
                         </Button>
                         {protagonists.map((character, index) => (
-                          <Form.Group key={index}>
+                          <Form.Group key={character._id}>
                             <h5 className="my-1">{character.name}</h5>
                             <div className="d-flex justify-content-between">
                               <Form.Control
@@ -306,7 +306,7 @@ export default function EditArc({
                           + Add New Antagonist
                         </Button>
                         {antagonists.map((character, index) => (
-                          <Form.Group key={index}>
+                          <Form.Group key={character._id}>
                             <h5 className="my-1">{character.name}</h5>
                             <div className="d-flex justify-content-between">
                               <Form.Control
@@ -338,7 +338,7 @@ export default function EditArc({
                           + Add New Tertiary Character
                         </Button>
                         {tertiary.map((character, index) => (
-                          <Form.Group key={index}>
+                          <Form.Group key={character._id}>
                             <h5 className="my-1">{character.name}</h5>
                             <div className="d-flex justify-content-between">
                               <Form.Control
@@ -455,7 +455,7 @@ export default function EditArc({
                           {obstacles.length > 0 &&
                             obstacles.map((obstacle, index) => (
                               <Accordion.Item
-                                key={index}
+                                key={obstacle._id}
                                 className="border-bottom"
                               >
                                 <Accordion.Header>
@@ -649,7 +649,7 @@ export default function EditArc({
                   >
                     {subplots.map((subplot, subplotIndex) => (
                       <Accordion.Item
-                        key={subplotIndex}
+                        key={subplot._id}
                         eventKey={subplotIndex.toString()}
                         className="border-bottom"
                       >
@@ -724,7 +724,7 @@ export default function EditArc({
                           </Form.Group>
                           {subplot.obstacles.length > 0 &&
                             subplot.obstacles.map((obstacle, obstacleIndex) => (
-                              <Form.Group className="mt-3" key={obstacleIndex}>
+                              <Form.Group className="mt-3" key={obstacle._id}>
                                 <Form.Label>Obstacle:</Form.Label>
                                 <Form.Control
                                   as="textarea"

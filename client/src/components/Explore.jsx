@@ -76,8 +76,8 @@ export default function Explore() {
               </thead>
               <tbody>
                 {projects.length > 0 ? (
-                  projects.map((project, index) => (
-                    <tr key={index}>
+                  projects.map((project) => (
+                    <tr key={project._id}>
                       <td className="text-white" >
                         <Button
                           variant="outline-primary w-100 text-white border-white"

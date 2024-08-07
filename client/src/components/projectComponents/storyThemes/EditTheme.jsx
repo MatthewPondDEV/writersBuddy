@@ -140,7 +140,7 @@ export default function EditTheme({ projectInfo, _id, setViewNumber }) {
               <h1 className="my-3 mt-5">Secondary</h1>
               {secondary.length > 0 &&
                 secondary.map((theme, index) => (
-                  <Col md={6} key={index}>
+                  <Col md={6} key={theme._id}>
                     <Form.Group className="my-2">
                       <h3>{theme.name}</h3>
                       <Form.Label>Name: </Form.Label>

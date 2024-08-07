@@ -111,7 +111,7 @@ export default function NoteSidebar({
                         notes.map((note, index) => {
                           if (note._id) {
                             return (
-                              <div key={index} className="border-bottom">
+                              <div key={note._id} className="border-bottom">
                                 <Button
                                   variant="none pe-2"
                                   onClick={() => {

@@ -737,7 +737,7 @@ export default function EditCharacter({
                   <Row>
                     {family.length > 0 &&
                       family.map((member, index) => (
-                        <Col md={6} key={index}>
+                        <Col md={6} key={member._id}>
                           <h2>{member.name}</h2>
                           <Form.Label>Name: </Form.Label>
                           <Form.Control

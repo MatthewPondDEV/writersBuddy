@@ -240,7 +240,6 @@ async function logout() {
                                         projectInfo.setting.bodiesOfWater.map(
                                           (body) => (
                                             <Button
-                                              {...body}
                                               key={body._id}
                                               variant="none"
                                               className="border-top w-100 text-start p-3"

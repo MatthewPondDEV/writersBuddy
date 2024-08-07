@@ -394,7 +394,7 @@ export default function EditCountry({
                     {projectInfo._id &&
                       cities.map((city, cityIndex) => (
                         <Accordion.Item
-                          key={cityIndex}
+                          key={city._id}
                           eventKey={cityIndex.toString()}
                           className="border-bottom"
                         >
