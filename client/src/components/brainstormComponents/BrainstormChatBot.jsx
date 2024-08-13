@@ -4,7 +4,6 @@ import Button from "react-bootstrap/Button";
 import { useState } from "react";
 import { useEffect } from "react";
 import Form from "react-bootstrap/Form";
-import axios from "axios";
 import ClearChatModal from "./ClearChatModal";
 import SaveChatModal from "./SaveChatModal";
 import Spinner from "react-bootstrap/Spinner";

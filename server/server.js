@@ -14,8 +14,8 @@ const bodyParser = require("body-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
-const axios = require("axios");
 require("dotenv").config();
+const fetch = require("node-fetch")
 const { OAuth2Client } = require("google-auth-library");
 
 const secret = process.env.JWT_SECRET;
@@ -1391,9 +1391,14 @@ app.post("/chatbot", verifyTokens, async (req, res) => {
   try {
     const { updatedChat } = req.body;
     let chatHistory = updatedChat;
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${openAIAPIKey}`,
+      },
+      body: JSON.stringify({
         model: "gpt-3.5-turbo", // Specify the model you want to use if needed
         messages: chatHistory.map((msg) => ({
           role: msg.role,
@@ -1404,16 +1409,15 @@ app.post("/chatbot", verifyTokens, async (req, res) => {
               "Help the user to brainstorm for writing their next story, manga, play-write, or movie script",
           },
         })),
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openAIAPIKey}`,
-        },
-      }
-    );
+      }),
+    });
 
-    const botResponse = await response.data.choices[0].message.content;
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const botResponse = data.choices[0].message.content;
     console.log(botResponse);
     res.json(botResponse);
   } catch (error) {
