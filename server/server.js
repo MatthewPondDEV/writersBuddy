@@ -15,7 +15,6 @@ const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 require("dotenv").config();
-const fetch = require("node-fetch")
 const { OAuth2Client } = require("google-auth-library");
 
 const secret = process.env.JWT_SECRET;
