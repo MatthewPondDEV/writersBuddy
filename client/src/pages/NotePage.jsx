@@ -10,6 +10,7 @@ import Button from "react-bootstrap/Button";
 import Tiptap from "../components/Tiptap";
 
 export default function NotePage() {
+  const serverRoute = import.meta.VITE_MAIN_API_ROUTE
   const [showMessage, setShowMessage] = useState(true);
   const [notes, setNotes] = useState([
     {
@@ -44,7 +45,7 @@ export default function NotePage() {
 
   useEffect(() => {
     const retrieveNotes = async () => {
-      const response = await fetch("http://localhost:5000/getUserNotes", {
+      const response = await fetch(`${serverRoute}/getUserNotes`, {
         method: "GET",
         credentials: "include",
       });
