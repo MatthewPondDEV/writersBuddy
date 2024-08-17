@@ -9,8 +9,9 @@ export default function DeleteCharacterModal({
   currentCharacterId,
   id,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   async function deleteCharacter() {
-    const response = await fetch("http://localhost:5000/deleteCharacter", {
+    const response = await fetch(`${serverRoute}/deleteCharacter`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

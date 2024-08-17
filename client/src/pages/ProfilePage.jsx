@@ -15,6 +15,7 @@ import twitter from "../cssImages/icons/twitter.png";
 import tiktok from "../cssImages/icons/tiktok.png";
 
 export default function ProfilePage() {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [userData, setUserData] = useState({
     name: "",
     profilePicture: "",
@@ -39,7 +40,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchUserInfo() {
-      const response = await fetch("http://localhost:5000/getUserInfo", {
+      const response = await fetch(`${serverRoute}/getUserInfo`, {
         method: "GET",
         credentials: "include",
       });
@@ -100,7 +101,7 @@ export default function ProfilePage() {
       data.set("file", files?.[0]);
     }
 
-    const response = await fetch("http://localhost:5000/updateUserInfo", {
+    const response = await fetch(`${serverRoute}/updateUserInfo`, {
       method: "PUT",
       body: data,
       credentials: "include",
@@ -126,7 +127,7 @@ export default function ProfilePage() {
                     <h2 className="mt-5">{userData.name}</h2>
                     {userData.profilePicture ? (
                       <Image
-                        src={`http://localhost:5000/${userData.profilePicture}`}
+                        src={`${serverRoute}/${userData.profilePicture}`}
                         alt="Avatar"
                         className="mt-2"
                         style={{ height: "200px", borderRadius: "60%", border: '2px solid black' }}

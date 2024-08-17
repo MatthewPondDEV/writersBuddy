@@ -21,6 +21,7 @@ export default function Sidebar() {
   const { userInfo, setUserInfo } = useContext(UserContext);
   const [loggedOutRedirect, setLoggedOutRedirect] = useState(false);
   const [logCheck, setLogCheck] = useState(false);
+  const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE
 
   setInterval(() => {
     setLogCheck(false);
@@ -28,7 +29,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     const loginCheck = async () => {
-      const response = await fetch("http://localhost:4000/profile", {
+      const response = await fetch(`${serverRoute}/profile`, {
         credentials: "include",
       });
 
@@ -51,7 +52,7 @@ export default function Sidebar() {
   }
 
   async function logout() {
-    await fetch("http://localhost:4000/logout", {
+    await fetch(`${serverRoute}/logout`, {
       credentials: "include",
       method: "POST",
     });

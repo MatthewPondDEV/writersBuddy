@@ -6,10 +6,11 @@ import { useEffect, useState } from 'react';
 export default function CreateCharacterModal({showModal, handleClose, setViewNumber, id, setCurrentCharacterId}) {
     const [characterName, setCharacterName] = useState('')
     const [characterType, setCharacterType] = useState('')
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
 
     async function createCharacter(event) {
         event.preventDefault();
-        const response = await fetch('http://localhost:5000/createCharacter', {
+        const response = await fetch(`${serverRoute}/createCharacter`, {
             method: 'PUT',
             body: JSON.stringify({characterName, characterType, id}),
             headers: {'Content-Type': 'application/json'},
@@ -17,7 +18,7 @@ export default function CreateCharacterModal({showModal, handleClose, setViewNum
         })
         if (response.ok) {
         
-            const idResponse = await fetch(`http://localhost:5000/getCharacterId/${id}`, {
+            const idResponse = await fetch(`${serverRoute}/getCharacterId/${id}`, {
                 credentials: 'include',
             })
 

@@ -14,7 +14,7 @@ export default function EditProjectOverview({
 }) {
   //<a href="https://www.freepik.com/free-vector/aged-paper-texture-background-design_14765966.htm#query=old%20paper&position=3&from_view=search&track=ais">Image by boggus</a> on Freepik
   //<a href="https://www.freepik.com/free-vector/watercolour-background-with-leaves_15206849.htm#query=old%20paper&position=9&from_view=search&track=ais">Image by VecMes</a> on Freepik
-
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -46,7 +46,7 @@ export default function EditProjectOverview({
     if (files?.[0]) {
       data.set("file", files?.[0]);
     }
-    const response = await fetch("http://localhost:5000/projectOverview", {
+    const response = await fetch(`${serverRoute}/projectOverview`, {
       method: "PUT",
       body: data,
       credentials: "include",
@@ -66,7 +66,7 @@ export default function EditProjectOverview({
             <h1 className="mt-3">{title} Overview</h1>
               {picture ? (
                 <Image
-                  src={`http://localhost:5000/${picture}`}
+                  src={`${serverRoute}/${picture}`}
                   alt= 'Avatar'
                   style={{ maxHeight: "300px", maxWidth: '100%', borderRadius: '3%'}}
                 />

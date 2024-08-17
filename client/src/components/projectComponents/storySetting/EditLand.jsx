@@ -14,6 +14,7 @@ export default function EditLands({
   _id,
   currentLandId,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -57,7 +58,7 @@ export default function EditLands({
     if (files?.[0]) {
       data.set("files", files?.[0]);
     }
-    const response = await fetch("http://localhost:5000/updateLand", {
+    const response = await fetch(`${serverRoute}/updateLand`, {
       method: "PUT",
       body: data,
       credentials: "include",
@@ -91,7 +92,7 @@ export default function EditLands({
                 pictures.map((picture) => (
                   <Col xs={12} md={6} className="text-center">
                     <Image
-                      src={`http://localhost:5000/${picture}`}
+                      src={`${serverRoute}/${picture}`}
                       alt="Avatar"
                       style={{
                         height: "300px",

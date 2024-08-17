@@ -13,13 +13,13 @@ export default function Explore() {
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
   const [projects, setProjects] = useState([]);
   const [projectId, setProjectId] = useState("");
-
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const handleClose = () => setShowCreateProjectModal(false);
   const handleShow = () => setShowCreateProjectModal(true);
 
   useEffect(() => {
     async function fetchProjects() {
-      const response = await fetch("http://localhost:5000/getProjects", {
+      const response = await fetch(`${serverRoute}/getProjects`, {
         method: "GET",
         credentials: "include",
       });

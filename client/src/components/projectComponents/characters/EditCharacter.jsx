@@ -15,6 +15,7 @@ export default function EditCharacter({
   _id,
   currentCharacterId,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
   const [name, setName] = useState(" ");
   const [abilities, setAbilities] = useState("");
@@ -175,7 +176,7 @@ export default function EditCharacter({
       data.set("family", JSON.stringify(family)); // Assuming it's an array of objects
     }
 
-    const response = await fetch("http://localhost:5000/updateCharacter", {
+    const response = await fetch(`${serverRoute}/updateCharacter`, {
       method: "PUT",
       body: data,
       credentials: "include",
@@ -208,7 +209,7 @@ export default function EditCharacter({
             <div className="d-flex justify-content-center">
               {picture ? (
                 <Image
-                  src={`http://localhost:5000/${picture}`}
+                  src={`${serverRoute}/${picture}`}
                   alt="Avatar"
                   style={{ height: "300px", borderRadius: "60%" }}
                 />

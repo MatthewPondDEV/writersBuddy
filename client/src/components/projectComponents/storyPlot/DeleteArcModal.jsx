@@ -9,8 +9,9 @@ export default function DeleteArcModal({
   currentArcId,
   id,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   async function deleteArc() {
-    const response = await fetch("http://localhost:5000/deleteArc", {
+    const response = await fetch(`${serverRoute}/deleteArc`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

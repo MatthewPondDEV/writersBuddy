@@ -29,10 +29,11 @@ export default function IndexPage() {
   const [loadLogin, setLoadLogin] = useState(false);
   const [loadRegister, setLoadRegister] = useState(false);
   const [logOrReg, setLogOrReg] = useState(true);
+  const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE
 
   useEffect(() => {
     const loginCheck = async () => {
-      const response = await fetch("http://localhost:4000/profile", {
+      const response = await fetch(`${serverRoute}/profile`, {
         credentials: "include",
       });
 
@@ -59,7 +60,7 @@ export default function IndexPage() {
 
   const handleGoogleSuccess = async (response) => {
     // Send the response token to your backend to authenticate the user
-    const res = await fetch("http://localhost:4000/auth/google/token", {
+    const res = await fetch(`${serverRoute}/auth/google/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

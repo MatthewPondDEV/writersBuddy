@@ -9,10 +9,11 @@ export default function CreateProjectModal({ handleClose, showModal }) {
     const [title,setTitle] = useState('');
     const [redirect, setRedirect] = useState(false)
     const [id,setId] = useState(null)
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
 
     async function createProject(event) {
         event.preventDefault();
-        const response = await fetch('http://localhost:5000/createProject', {
+        const response = await fetch(`${serverRoute}/createProject`, {
             method: 'Post',
             body: JSON.stringify({title}),
             headers: {'Content-Type': 'application/json'},
@@ -24,7 +25,7 @@ export default function CreateProjectModal({ handleClose, showModal }) {
     }
 
     if (showModal && redirect) {
-        const getId = fetch('http://localhost:5000/getProjectID', {
+        const getId = fetch(`${serverRoute}/getProjectID`, {
             credentials: 'include',
             }).then(res => {
               res.json().then(project => {

@@ -14,6 +14,7 @@ export default function EditChapter({
   _id,
   currentChapterId,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [chapterNumber, setChapterNumber] = useState(Number);
@@ -46,7 +47,7 @@ export default function EditChapter({
 
     console.log(content)
 
-    const response = await fetch("http://localhost:5000/updateChapter", {
+    const response = await fetch(`${serverRoute}/updateChapter`, {
       method: "PUT",
       body: data,
       credentials: "include",

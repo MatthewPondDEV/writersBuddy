@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 
 export default function EditPlotOverview({ projectInfo, setViewNumber, _id }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [introduction, setIntroduction] = useState("");
   const [development, setDevelopment] = useState("");
   const [obstacles, setObstacles] = useState([""]);
@@ -53,7 +54,7 @@ export default function EditPlotOverview({ projectInfo, setViewNumber, _id }) {
     if (files?.[0]) {
       data.set("file", files?.[0]);
     }
-    const response = await fetch("http://localhost:5000/editPlotOverview", {
+    const response = await fetch(`${serverRoute}/editPlotOverview`, {
       method: "PUT",
       body: data,
       credentials: "include",

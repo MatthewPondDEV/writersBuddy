@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 
 export default function CreateNewLandModal({showModal,handleClose, id, setViewNumber, setIsUpdated, setCurrentLandId}) {
     const [landName,setLandName] = useState('')
-    
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
     async function createLand(event) {
         event.preventDefault();
-        const response = await fetch('http://localhost:5000/createLand', {
+        const response = await fetch(`${serverRoute}/createLand`, {
             method: 'PUT',
             body: JSON.stringify({landName, id}),
             headers: {'Content-Type': 'application/json'},
@@ -17,7 +17,7 @@ export default function CreateNewLandModal({showModal,handleClose, id, setViewNu
         if (response.ok) {
           setIsUpdated(false)
 
-        const idResponse = await fetch(`http://localhost:5000/getLandId/${id}`, {
+        const idResponse = await fetch(`${serverRoute}/getLandId/${id}`, {
             credentials: 'include',
         })
 

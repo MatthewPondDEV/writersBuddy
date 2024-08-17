@@ -9,7 +9,8 @@ export default function DeleteProjectModal({
   setUpdated
 }) {
   async function deleteProject() {
-    const deleteFunction = await fetch('http://localhost:5000/deleteProject', {
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
+    const deleteFunction = await fetch(`${serverRoute}/deleteProject`, {
       method:'Delete',
       body: JSON.stringify({ id }),
       headers: { "Content-Type": "application/json"},

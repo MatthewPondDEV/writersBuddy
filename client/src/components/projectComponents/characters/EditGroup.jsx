@@ -16,6 +16,7 @@ export default function EditGroup({
   _id,
   currentGroupId,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
   const [name, setName] = useState("");
   const [business, setBusiness] = useState("");
@@ -72,7 +73,7 @@ export default function EditGroup({
       data.set("files", files?.[0]);
     }
 
-    const response = await fetch("http://localhost:5000/updateGroup", {
+    const response = await fetch(`${serverRoute}/updateGroup`, {
       method: "PUT",
       body: data,
       credentials: "include",
@@ -107,7 +108,7 @@ export default function EditGroup({
                 pictures.map((picture) => (
                   <Col xs={12} md={6} className="text-center">
                     <Image
-                      src={`http://localhost:5000/${picture}`}
+                      src={`${serverRoute}/${picture}`}
                       alt="Avatar"
                       style={{
                         height: "300px",

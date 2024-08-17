@@ -12,10 +12,10 @@ export default function Login() {
     const [password, setPassword] = useState('')
     const [redirect, setRedirect] = useState(false)
     const {setUserInfo} = useContext(UserContext)
-
+    const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE
     async function login(event) {
         event.preventDefault()
-        const response = await fetch('http://localhost:4000/login', {
+        const response = await fetch(`${serverRoute}/login`, {
             method: 'POST',
             body: JSON.stringify({username, password}),
             headers: {'Content-Type': 'application/json'},

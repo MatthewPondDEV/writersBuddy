@@ -3,9 +3,9 @@ import Modal from "react-bootstrap/Modal";
 import { useEffect, useState } from "react";
 
 export default function DeleteGroupModal({showModal, setViewNumber, handleClose, currentGroupId, id}) {
-
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
     async function deleteGroup() {
-            const response = await fetch("http://localhost:5000/deleteGroup", {
+            const response = await fetch(`${serverRoute}/deleteGroup`, {
               method: "DELETE",
               headers: {
                 "Content-Type": "application/json",

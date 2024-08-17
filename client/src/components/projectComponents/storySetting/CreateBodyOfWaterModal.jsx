@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 
 export default function CreateBodyOfWaterModal({showModal,handleClose, id, setViewNumber, setIsUpdated, setCurrentBodyOfWaterId}) {
     const [bodyOfWaterName, setBodyOfWaterName] = useState('')
-
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
     async function createBodyOfWater(event) {
         event.preventDefault();
-        const response = await fetch('http://localhost:5000/createBodyOfWater', {
+        const response = await fetch(`${serverRoute}/createBodyOfWater`, {
             method: 'PUT',
             body: JSON.stringify({bodyOfWaterName, id}),
             headers: {'Content-Type': 'application/json'},
@@ -17,7 +17,7 @@ export default function CreateBodyOfWaterModal({showModal,handleClose, id, setVi
         if (response.ok) {
           setIsUpdated(false)
 
-        const idResponse = await fetch(`http://localhost:5000/getBodyOfWaterId/${id}`, {
+        const idResponse = await fetch(`${serverRoute}/getBodyOfWaterId/${id}`, {
             credentials: 'include',
         })
 

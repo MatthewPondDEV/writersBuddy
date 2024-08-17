@@ -9,11 +9,12 @@ export default function Register({setLoadRegister, setLoadLogin}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [redirect, setRedirect] = useState(false);
+    const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE
 
     async function register(event) {
         console.log('hey')
         event.preventDefault();
-        const response = await fetch('http://localhost:4000/register', {
+        const response = await fetch(`${serverRoute}/register`, {
             method: 'POST',
             body: JSON.stringify({email, username, password}),
             headers: {'Content-Type': 'application/json'},

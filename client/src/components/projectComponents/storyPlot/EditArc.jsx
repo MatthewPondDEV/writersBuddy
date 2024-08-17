@@ -14,6 +14,7 @@ export default function EditArc({
   _id,
   currentArcId,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
   const [name, setName] = useState("");
   const [chapters, setChapters] = useState("");
@@ -96,7 +97,7 @@ export default function EditArc({
     data.set("obstacles", JSON.stringify(obstacles));
     data.set("subplots", JSON.stringify(subplots));
 
-    const response = await fetch("http://localhost:5000/updateArc", {
+    const response = await fetch(`${serverRoute}/updateArc`, {
       method: "PUT",
       body: data,
       credentials: "include",
@@ -223,7 +224,7 @@ export default function EditArc({
             <div className="text-center">
               {picture && (
                 <Image
-                  src={`http://localhost:5000/${picture}`}
+                  src={`${serverRoute}/${picture}`}
                   alt="Avatar"
                   style={{
                     height: "300px",

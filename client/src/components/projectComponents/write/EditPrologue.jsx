@@ -9,6 +9,7 @@ import TipTap from "../../Tiptap";
 
 export default function EditPrologue({projectInfo, setViewNumber, id}) {
   const [prologue, setPrologue] = useState('')
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
 
   useEffect(() => {
       if (projectInfo._id) setPrologue(projectInfo.write.prologue)
@@ -18,7 +19,7 @@ export default function EditPrologue({projectInfo, setViewNumber, id}) {
    const data = new FormData();
    data.set("prologue", prologue);
    data.set("id", id);
-   const response = await fetch("http://localhost:5000/updatePrologue", {
+   const response = await fetch(`${serverRoute}/updatePrologue`, {
      method: "PUT",
      body: data,
      credentials: "include",

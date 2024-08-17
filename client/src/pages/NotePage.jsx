@@ -29,7 +29,7 @@ export default function NotePage() {
 
   const createNote = async () => {
     setShowMessage(false);
-    const create = await fetch("http://localhost:5000/createNewNote", {
+    const create = await fetch(`${serverRoute}/createNewNote`, {
       method: "Post",
       body: JSON.stringify({ title: "New Note" }),
       headers: { "Content-Type": "application/json" },
@@ -79,7 +79,7 @@ export default function NotePage() {
 
   async function updateNote(ev) {
     ev.preventDefault();
-    const response = await fetch("http://localhost:5000/updateNote", {
+    const response = await fetch(`${serverRoute}/updateNote`, {
       method: "Put",
       body: JSON.stringify({ title, content, currentNoteId }),
       headers: { "Content-Type": "application/json" },
@@ -92,7 +92,7 @@ export default function NotePage() {
   }
 
   async function deleteNote() {
-    const deleteFunction = await fetch("http://localhost:5000/deleteNote", {
+    const deleteFunction = await fetch(`${serverRoute}/deleteNote`, {
       method: "Delete",
       body: JSON.stringify({ currentNoteId }),
       headers: { "Content-Type": "application/json" },

@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 
 export default function EditTheme({ projectInfo, _id, setViewNumber }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [primary, setPrimary] = useState({
     name: "Primary Theme",
     description: "",
@@ -62,7 +63,7 @@ export default function EditTheme({ projectInfo, _id, setViewNumber }) {
       data.set("secondary", JSON.stringify(secondary));
     }
 
-    const response = await fetch("http://localhost:5000/updateThemes", {
+    const response = await fetch(`${serverRoute}/updateThemes`, {
       method: "PUT",
       body: data,
       credentials: "include",

@@ -22,13 +22,14 @@ export default function NoteSidebar({
   setCurrentNoteId,
   showMessage,
 }) {
+  const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE
   const { userInfo, setUserInfo } = useContext(UserContext);
   const [loggedOutRedirect, setLoggedOutRedirect] = useState(false);
   const [logCheck, setLogCheck] = useState(false);
 
   useEffect(() => {
     const loginCheck = async () => {
-      const response = await fetch("http://localhost:4000/profile", {
+      const response = await fetch(`${serverRoute}/profile`, {
         credentials: "include",
       });
 
@@ -50,7 +51,7 @@ export default function NoteSidebar({
 
   async function logout() {
     setUserInfo(null);
-    await fetch("http://localhost:4000/logout", {
+    await fetch(`${serverRoute}/logout`, {
       credentials: "include",
       method: "POST",
     });

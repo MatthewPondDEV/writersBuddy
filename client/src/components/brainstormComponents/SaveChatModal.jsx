@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export default function SaveChatModal({ handleClose, showModal, currentChat }) {
   const [title, setTitle] = useState("");
-
+const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const createNote = async (e) => {
     e.preventDefault()
     let content = JSON.parse(window.sessionStorage.getItem("currentChat"))

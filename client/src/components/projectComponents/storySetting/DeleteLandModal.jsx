@@ -9,8 +9,9 @@ export default function DeleteLandModal({
   currentLandId,
   id,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   async function deleteLand() {
-    const response = await fetch("http://localhost:5000/deleteLand", {
+    const response = await fetch(`${serverRoute}/deleteLand`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

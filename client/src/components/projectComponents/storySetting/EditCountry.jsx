@@ -14,6 +14,7 @@ export default function EditCountry({
   currentCountryId,
   _id,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [loadData, setLoadData] = useState(false);
   const [files, setFiles] = useState("");
   const [name, setName] = useState(" ");
@@ -103,7 +104,7 @@ export default function EditCountry({
     if (files?.[0]) {
       data.set("files", files?.[0]);
     }
-    const response = await fetch("http://localhost:5000/updateCountry", {
+    const response = await fetch(`${serverRoute}/updateCountry`, {
       method: "PUT",
       body: data,
       credentials: "include",
@@ -206,7 +207,7 @@ export default function EditCountry({
                 pictures.map((picture) => (
                   <Col xs={12} md={6} className="text-center">
                     <Image
-                      src={`http://localhost:5000/${picture}`}
+                      src={`${serverRoute}/${picture}`}
                       alt="Avatar"
                       style={{
                         height: "300px",

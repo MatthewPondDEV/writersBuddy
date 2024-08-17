@@ -6,10 +6,11 @@ import { useEffect, useState } from "react";
 
 export default function CreateGroupModal({showModal, handleClose, setViewNumber, id, setCurrentGroupId}) {
     const [groupName, setGroupName] = useState('')
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
     
     async function createGroup(event) {
       event.preventDefault();
-      const response = await fetch("http://localhost:5000/createGroup", {
+      const response = await fetch(`${serverRoute}/createGroup`, {
         method: "PUT",
         body: JSON.stringify({ groupName, id }),
         headers: { "Content-Type": "application/json" },
@@ -17,7 +18,7 @@ export default function CreateGroupModal({showModal, handleClose, setViewNumber,
       });
       if (response.ok) {
         const idResponse = await fetch(
-          `http://localhost:5000/getGroupId/${id}`,
+          `${serverRoute}/getGroupId/${id}`,
           {
             credentials: "include",
           }

@@ -12,6 +12,7 @@ export default function CreateChapterModal({
   setCurrentChapterId,
   setViewNumber,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [title, setTitle] = useState("");
   const [loadData, setLoadData] = useState(false)
   const [chapterNumber, setChapterNumber] = useState(Number);
@@ -32,7 +33,7 @@ export default function CreateChapterModal({
 
   async function createChapter(ev) {
     ev.preventDefault();
-    const response = await fetch("http://localhost:5000/createChapter", {
+    const response = await fetch(`${serverRoute}/createChapter`, {
       method: "PUT",
       body: JSON.stringify({ title, chapterNumber, id }),
       headers: { "Content-Type": "application/json" },
@@ -42,7 +43,7 @@ export default function CreateChapterModal({
       setIsUpdated(false);
 
       const idResponse = await fetch(
-        `http://localhost:5000/getChapterId/${id}`,
+        `${serverRoute}/getChapterId/${id}`,
         {
           credentials: "include",
         }

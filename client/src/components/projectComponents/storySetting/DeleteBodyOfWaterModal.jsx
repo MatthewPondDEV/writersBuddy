@@ -9,8 +9,9 @@ export default function DeleteBodyOfWaterModal({
   currentBodyOfWaterId,
   id,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   async function deleteBodyOfWater() {
-    const response = await fetch("http://localhost:5000/deleteBodyOfWater", {
+    const response = await fetch(`${serverRoute}/deleteBodyOfWater`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

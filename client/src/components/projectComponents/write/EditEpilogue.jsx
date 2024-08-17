@@ -8,7 +8,7 @@ import TipTap from "../../Tiptap";
 
 export default function EditEpilogue({projectInfo, setViewNumber, id}) {
 const [epilogue, setEpilogue] = useState("");
-
+const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
 useEffect(() => {
   if (projectInfo._id) setEpilogue(projectInfo.write.epilogue);
 }, [projectInfo._id]);
@@ -17,7 +17,7 @@ async function updateData() {
   const data = new FormData();
   data.set('epilogue', epilogue)
   data.set("id", id);
-  const response = await fetch("http://localhost:5000/updateEpilogue", {
+  const response = await fetch(`${serverRoute}/updateEpilogue`, {
     method: "PUT",
     body: data,
     credentials: "include",

@@ -40,6 +40,7 @@ import EditChapter from '../components/projectComponents/write/EditChapter'
 import CreateChapterModal from "../components/projectComponents/write/CreateChapterModal";
 
 export default function ProjectsPage() {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const { id } = useParams();
   const [projectInfo, setProjectInfo] = useState({});
   const [isUpdated, setIsUpdated] = useState(false);
@@ -221,7 +222,7 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const retrieveProject = async () => {
-      const response = await fetch(`http://localhost:5000/project/${id}`, {
+      const response = await fetch(`${serverRoute}/project/${id}`, {
         method: "GET",
         credentials: "include",
       });

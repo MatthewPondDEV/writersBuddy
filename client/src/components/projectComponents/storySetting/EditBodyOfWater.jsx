@@ -13,6 +13,7 @@ export default function EditBodyOfWater({
   setViewNumber,
   currentBodyOfWaterId,
 }) {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
   const [name, setName] = useState(" ");
   const [description, setDescription] = useState("");
@@ -55,7 +56,7 @@ export default function EditBodyOfWater({
       data.set("files", files?.[0]);
     }
 
-    const response = await fetch("http://localhost:5000/updateBodyOfWater", {
+    const response = await fetch(`${serverRoute}/updateBodyOfWater`, {
       method: "PUT",
       body: data,
       credentials: "include",
@@ -90,7 +91,7 @@ export default function EditBodyOfWater({
                 pictures.map((picture) => (
                   <Col xs={12} md={6} className="text-center">
                     <Image
-                      src={`http://localhost:5000/${picture}`}
+                      src={`${serverRoute}/${picture}`}
                       alt="Avatar"
                       style={{
                         height: "300px",

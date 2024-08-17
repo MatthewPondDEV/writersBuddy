@@ -11,17 +11,17 @@ export default function CreateArcModal({
   setCurrentArcId,
 }) {
   const [arcName, setArcName] = useState("");
-
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   async function createArc(ev) {
     ev.preventDefault();
-    const response = await fetch("http://localhost:5000/createArc", {
+    const response = await fetch(`${serverRoute}/createArc`, {
       method: "PUT",
       body: JSON.stringify({ arcName, id }),
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
     if (response.ok) {
-      const idResponse = await fetch(`http://localhost:5000/getArcId/${id}`, {
+      const idResponse = await fetch(`${serverRoute}/getArcId/${id}`, {
         credentials: "include",
       });
 

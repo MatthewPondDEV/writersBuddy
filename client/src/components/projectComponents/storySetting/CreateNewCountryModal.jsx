@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 
 export default function CreateNewCountryModal({showModal,handleClose, id, setViewNumber, setIsUpdated, setCurrentCountryId}) {
     const [countryName,setCountryName] = useState('')
-    
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
     async function createCountry(event) {
         event.preventDefault();
-        const response = await fetch('http://localhost:5000/createCountry', {
+        const response = await fetch(`${serverRoute}/createCountry`, {
             method: 'PUT',
             body: JSON.stringify({countryName, id}),
             headers: {'Content-Type': 'application/json'},
@@ -17,7 +17,7 @@ export default function CreateNewCountryModal({showModal,handleClose, id, setVie
         if (response.ok) {
           setIsUpdated(false)
 
-        const idResponse = await fetch(`http://localhost:5000/getCountryId/${id}`, {
+        const idResponse = await fetch(`${serverRoute}/getCountryId/${id}`, {
             credentials: 'include',
         })
 

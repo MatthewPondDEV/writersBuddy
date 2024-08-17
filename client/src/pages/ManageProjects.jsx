@@ -21,6 +21,7 @@ export default function ManagePojects() {
   const [deleteId, setDeleteId] = useState("");
   const [updated, setUpdated] = useState(false);
   const [redirect, setRedirect] = useState(false);
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
 
   const handleClose = () => setShowCreateProjectModal(false);
   const handleShow = () => setShowCreateProjectModal(true);
@@ -30,7 +31,7 @@ export default function ManagePojects() {
 
   useEffect(() => {
     async function fetchProjects() {
-      const response = await fetch("http://localhost:5000/getProjects", {
+      const response = await fetch(`${serverRoute}/getProjects`, {
         method: "GET",
         credentials: "include",
       });
@@ -91,7 +92,7 @@ export default function ManagePojects() {
                           <Col xs={12} xl={6} className="py-3 text-center">
                             {project.cover ? (
                               <Image
-                                src={`http://localhost:5000/${project.cover}`}
+                                src={`${serverRoute}/${project.cover}`}
                                 alt="Avatar"
                                 style={{
                                   maxHeight: "300px",

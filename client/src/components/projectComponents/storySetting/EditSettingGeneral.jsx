@@ -7,7 +7,7 @@ import { useState } from "react";
 import Image from "react-bootstrap/Image";
 
 export default function EditSettingGeneral({settingInfo, setViewNumber,setIsUpdated, _id}) {
-
+    const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
     const [files,setFiles] = useState('')
     const [location,setLocation] = useState('')
     const [timePeriod, setTimePeriod] = useState('')
@@ -41,7 +41,7 @@ export default function EditSettingGeneral({settingInfo, setViewNumber,setIsUpda
             if (files?.[0]) {
                 data.set('files', files?.[0])
             }
-            const response = await fetch('http://localhost:5000/settingGeneral', {
+            const response = await fetch(`${serverRoute}/settingGeneral`, {
                 method: 'PUT',
                 body: data,
                 credentials: 'include',
@@ -64,7 +64,7 @@ export default function EditSettingGeneral({settingInfo, setViewNumber,setIsUpda
                   pictures.map((picture) => (
                     <Col xs={12} md={6} className="text-center">
                       <Image
-                        src={`http://localhost:5000/${picture}`}
+                        src={`${serverRoute}/${picture}`}
                         alt="Avatar"
                         style={{
                           height: "300px",
