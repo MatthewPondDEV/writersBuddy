@@ -25,10 +25,12 @@
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "dayjs": "^1.11.11",
+    "dotenv": "^16.4.5",
     "quill": "^2.0.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.2",
     "react-dom": "^18.2.0",
+    "react-dotenv": "^0.1.3",
     "react-quill": "^2.0.0",
     "react-quilljs": "^1.3.3",
     "react-router-dom": "^6.23.0",
@@ -44,5 +46,8 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "sass": "^1.77.1",
     "vite": "^5.2.0"
+  },
+  "react-dotenv": {
+    "whitelist": ["VITE_GOOGLE_CLIENT_ID"]
   }
 }

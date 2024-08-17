@@ -18,7 +18,7 @@ export default function SaveChatModal({ handleClose, showModal, currentChat }) {
   }
     content = content.join(' ')
 
-    const create = await fetch("http://localhost:5000/saveChat", {
+    const create = await fetch(`${serverRoute}/saveChat`, {
       method: "Post",
       body: JSON.stringify({ title, content, currentChat }),
       headers: { "Content-Type": "application/json" },

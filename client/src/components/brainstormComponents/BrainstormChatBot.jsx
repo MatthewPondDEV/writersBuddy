@@ -9,6 +9,7 @@ import SaveChatModal from "./SaveChatModal";
 import Spinner from "react-bootstrap/Spinner";
 
 export default function BrainstormChatBot() {
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [showSaveChatModal, setSaveChatModal] = useState(false);
   const [showClearChatModal, setShowClearChatModal] = useState(false);
   const [message, setMessage] = useState("");
@@ -44,7 +45,7 @@ export default function BrainstormChatBot() {
     setMessage("");
     setShowSpinner(true)
     try {
-      const res = await fetch("http://localhost:5000/chatbot", {
+      const res = await fetch(`${serverRoute}/chatbot`, {
         method: "POST",
         credentials: "include", // Include credentials (cookies)
         headers: {

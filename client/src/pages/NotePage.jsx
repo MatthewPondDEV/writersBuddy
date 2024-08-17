@@ -9,8 +9,9 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Tiptap from "../components/Tiptap";
 
+
 export default function NotePage() {
-  const serverRoute = import.meta.VITE_MAIN_API_ROUTE
+  const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [showMessage, setShowMessage] = useState(true);
   const [notes, setNotes] = useState([
     {
