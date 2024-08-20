@@ -14,6 +14,7 @@ const bodyParser = require("body-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
+const s3 = require('./s3Image.js')
 require("dotenv").config();
 const { OAuth2Client } = require("google-auth-library");
 
@@ -1441,5 +1442,10 @@ app.post("/saveChat", verifyTokens, async (req, res) => {
     res.status(500).json({ error: "Failed to save chat" });
   }
 });
+
+app.get('/s3url', async (req, res) => {
+  const url = s3.generateUploadURL()
+  res.send({url})
+})
 
 app.listen(5000);
