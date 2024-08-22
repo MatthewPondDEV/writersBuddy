@@ -14,6 +14,7 @@ export default function EditCharacter({
   setViewNumber,
   _id,
   currentCharacterId,
+  setIsUpdated
 }) {
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
@@ -61,52 +62,51 @@ export default function EditCharacter({
   const handleClose = () => setShowDeleteModal(false);
   const handleOpen = () => setShowDeleteModal(true);
 
-  useEffect(() => {
-    if (projectInfo._id) {
-      projectInfo.characters.forEach((character) => {
-        if (currentCharacterId === character._id) {
-          setName(character.name);
-          setAbilities(character.abilities);
-          setBirthDate(dayjs(character.birthDate).add(1, "day"));
-          setBirthPlace(character.birthPlace);
-          setBodyType(character.bodyType);
-          setClothes(character.clothes);
-          setCharacterType(character.characterType);
-          setChildhood(character.childhood);
-          setCriminalRecord(character.criminalRecord);
-          setDevelopment(character.development);
-          setDreams(character.dreams);
-          setEducation(character.education);
-          setEmployment(character.employment);
-          setEyesight(character.eyesight);
-          setEyeColor(character.eyeColor);
-          setFamily(character.family);
-          setFears(character.fears);
-          setGender(character.gender);
-          setHairColor(character.hairColor);
-          setHairstyle(character.hairstyle);
-          setHandedness(character.handedness);
-          setHeight(character.height);
-          setHobbies(character.hobbies);
-          setMedicalHistory(character.medicalHistory);
-          setMoneyHabits(character.moneyHabits);
-          setMotivations(character.motivations);
-          setPersonality(character.personality);
-          setPets(character.pets);
-          setPhysicalDistinctions(character.physicalDistinctions);
-          setPicture(character.picture);
-          setRelationships(character.relationships);
-          setRomanticHistory(character.romanticHistory);
-          setGender(character.gender);
-          setSkills(character.skills);
-          setStrengths(character.strengths);
-          setVoice(character.voice);
-          setWeaknesses(character.weaknesses);
-          setWeight(character.weight);
-        }
-      });
-    }
-  }, [currentCharacterId, projectInfo._id]);
+ useEffect(() => {
+  if (projectInfo && projectInfo._id && projectInfo.characters) {
+    projectInfo.characters.forEach((character) => {
+      if (character && currentCharacterId === character._id) {
+        setName(character.name || '');
+        setAbilities(character.abilities || '');
+        setBirthDate(character.birthDate ? dayjs(character.birthDate).add(1, "day") : null);
+        setBirthPlace(character.birthPlace || '');
+        setBodyType(character.bodyType || '');
+        setClothes(character.clothes || '');
+        setCharacterType(character.characterType || '');
+        setChildhood(character.childhood || '');
+        setCriminalRecord(character.criminalRecord || '');
+        setDevelopment(character.development || '');
+        setDreams(character.dreams || '');
+        setEducation(character.education || '');
+        setEmployment(character.employment || '');
+        setEyesight(character.eyesight || '');
+        setEyeColor(character.eyeColor || '');
+        setFamily(character.family || []);
+        setFears(character.fears || '');
+        setGender(character.gender || '');
+        setHairColor(character.hairColor || '');
+        setHairstyle(character.hairstyle || '');
+        setHandedness(character.handedness || '');
+        setHeight(character.height || '');
+        setHobbies(character.hobbies || '');
+        setMedicalHistory(character.medicalHistory || '');
+        setMoneyHabits(character.moneyHabits || '');
+        setMotivations(character.motivations || '');
+        setPersonality(character.personality || '');
+        setPets(character.pets || '');
+        setPhysicalDistinctions(character.physicalDistinctions || '');
+        setPicture(character.picture || '');
+        setRelationships(character.relationships || '');
+        setRomanticHistory(character.romanticHistory || '');
+        setSkills(character.skills || '');
+        setStrengths(character.strengths || '');
+        setVoice(character.voice || '');
+        setWeaknesses(character.weaknesses || '');
+        setWeight(character.weight || '');
+      }
+    });
+  }
+}, [currentCharacterId, projectInfo]);
 
   // Define a function to handle changes in the family array
   const handleFamilyChange = (index, field, value) => {
@@ -129,63 +129,109 @@ export default function EditCharacter({
     setFamily(updatedFamily);
   };
 
-  async function updateCharacter(ev) {
+  const deleteFamilyMember = (index) => {
+    const newFamily = [...family];
+    newFamily.splice(index, 1);
+    setFamily(newFamily);
+  };
+
+  async function uploadPicture(ev) {
     ev.preventDefault();
-    const data = new FormData();
-    data.set("name", name);
-    data.set("abilities", abilities);
-    data.set("birthDate", birthDate);
-    data.set("birthPlace", birthPlace);
-    data.set("bodyType", bodyType);
-    data.set("clothes", clothes);
-    data.set("characterType", characterType);
-    data.set("childhood", childhood);
-    data.set("criminalRecord", criminalRecord);
-    data.set("development", development);
-    data.set("dreams", dreams);
-    data.set("education", education);
-    data.set("employment", employment);
-    data.set("eyesight", eyesight);
-    data.set("eyeColor", eyeColor);
-    data.set("fears", fears);
-    data.set("gender", gender);
-    data.set("hairColor", hairColor);
-    data.set("hairstyle", hairstyle);
-    data.set("handedness", handedness);
-    data.set("height", height);
-    data.set("hobbies", hobbies);
-    data.set("medicalHistory", medicalHistory);
-    data.set("moneyHabits", moneyHabits);
-    data.set("motivations", motivations);
-    data.set("personality", personality);
-    data.set("pets", pets);
-    data.set("physicalDistinctions", physicalDistinctions);
-    data.set("relationships", relationships);
-    data.set("romanticHistory", romanticHistory);
-    data.set("skills", skills);
-    data.set("strengths", strengths);
-    data.set("voice", voice);
-    data.set("weaknesses", weaknesses);
-    data.set("weight", weight);
-    data.set("characterId", currentCharacterId);
-    data.set("id", _id);
-    if (files?.[0]) {
-      data.set("files", files?.[0]);
-    }
-    if (family?.[0]) {
-      data.set("family", JSON.stringify(family)); // Assuming it's an array of objects
-    }
-
-    const response = await fetch(`${serverRoute}/updateCharacter`, {
-      method: "PUT",
-      body: data,
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      window.location.reload(); // You might want to handle the response in a more specific way
+      if (files?.[0]) {
+      const response = await fetch(`${serverRoute}/s3url`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+      if (response.ok) {
+       const url = await response.json()
+       const bucketUpload = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": 'multipart/form-data'
+        },
+        body: files?.[0]
+       })
+       if (bucketUpload.ok) {
+          const imageURL = url.split('?')[0]
+          setPicture(imageURL)
+          updateCharacter(imageURL)
+       }
+      }
+    } else {
+    updateCharacter()
     }
   }
+
+  async function updateCharacter(imageURL) {
+
+    // Create a JavaScript object with the data
+    const data = {
+        name: name,
+        abilities: abilities,
+        birthDate: birthDate,
+        birthPlace: birthPlace,
+        bodyType: bodyType,
+        clothes: clothes,
+        characterType: characterType,
+        childhood: childhood,
+        criminalRecord: criminalRecord,
+        development: development,
+        dreams: dreams,
+        education: education,
+        employment: employment,
+        eyesight: eyesight,
+        eyeColor: eyeColor,
+        fears: fears,
+        gender: gender,
+        hairColor: hairColor,
+        hairstyle: hairstyle,
+        handedness: handedness,
+        height: height,
+        hobbies: hobbies,
+        medicalHistory: medicalHistory,
+        moneyHabits: moneyHabits,
+        motivations: motivations,
+        personality: personality,
+        pets: pets,
+        physicalDistinctions: physicalDistinctions,
+        relationships: relationships,
+        romanticHistory: romanticHistory,
+        skills: skills,
+        strengths: strengths,
+        voice: voice,
+        weaknesses: weaknesses,
+        weight: weight,
+        characterId: currentCharacterId,
+        id: _id,
+        picture: imageURL ? imageURL : null
+    };
+
+    // Include the family data if it exists
+    if (family?.length) {
+        data.family = family; // Assuming family is an array of objects
+    }
+
+    // Convert the object to a JSON string
+    const jsonData = JSON.stringify(data);
+
+    // Perform the fetch request
+    const response = await fetch(`${serverRoute}/updateCharacter`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: jsonData,
+        credentials: 'include',
+    });
+
+    // Check if the request was successful
+    if (response.ok) {
+        setIsUpdated(false);
+    } else {
+        // Handle the error if the response is not OK
+        console.error('Failed to update character:', response.statusText);
+    }
+}
 
   return (
     <Col id="papyrus" xs={12} xxl={9}>
@@ -209,7 +255,7 @@ export default function EditCharacter({
             <div className="d-flex justify-content-center">
               {picture ? (
                 <Image
-                  src={`${serverRoute}/${picture}`}
+                  src={picture}
                   alt="Avatar"
                   style={{ height: "300px", borderRadius: "60%" }}
                 />
@@ -222,7 +268,7 @@ export default function EditCharacter({
                 />
               )}
             </div>
-            <Form className="my-5" onSubmit={updateCharacter}>
+            <Form className="my-5" onSubmit={uploadPicture}>
               <Row>
                 <h1 className="my-3">Basic Info/Characteristics</h1>
                 <Col xs={12} md={6}>
@@ -738,7 +784,7 @@ export default function EditCharacter({
                   <Row>
                     {family.length > 0 &&
                       family.map((member, index) => (
-                        <Col md={6} key={member._id}>
+                        <Col md={6} key={index}>
                           <h2>{member.name}</h2>
                           <Form.Label>Name: </Form.Label>
                           <Form.Control
@@ -785,15 +831,8 @@ export default function EditCharacter({
                             <Button
                               variant="primary my-3"
                               size="sm"
-                              onClick={async () => {
-                                if (index === 0) {
-                                  await setFamily(family.shift());
-                                } else if (index === family.length - 1) {
-                                  await setFamily(family.pop());
-                                } else {
-                                  await setFamily(family.splice(index, 1));
-                                }
-                                setFamily(family);
+                              onClick={() => {
+                                deleteFamilyMember(index)
                               }}
                             >
                               Delete

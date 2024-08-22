@@ -117,6 +117,7 @@ export default function ProjectsPage() {
     <EditCountry
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       currentCountryId={currentCountryId}
       _id={id}
     />,
@@ -124,6 +125,7 @@ export default function ProjectsPage() {
     <EditLand
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       _id={id}
       currentLandId={currentLandId}
     />,
@@ -131,6 +133,7 @@ export default function ProjectsPage() {
     <EditBodyOfWater
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       _id={id}
       currentBodyOfWaterId={currentBodyOfWaterId}
     />,
@@ -138,6 +141,7 @@ export default function ProjectsPage() {
     <EditCharacter
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       _id={id}
       currentCharacterId={currentCharacterId}
     />,
@@ -145,6 +149,7 @@ export default function ProjectsPage() {
     <EditGroup
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       _id={id}
       currentGroupId={currentGroupId}
     />,
@@ -152,18 +157,21 @@ export default function ProjectsPage() {
     <EditTheme
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       _id={id}
     />,
     <PlotOverview projectInfo={projectInfo} setViewNumber={setViewNumber} />,
     <EditPlotOverview
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       _id={id}
     />,
     <Arc projectInfo={projectInfo} setViewNumber={setViewNumber} />,
     <EditArc
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       _id={id}
       currentArcId={currentArcId}
     />,
@@ -171,11 +179,13 @@ export default function ProjectsPage() {
     <EditPrologue
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       id={id}
     />,
     <Epilogue projectInfo={projectInfo} setViewNumber={setViewNumber} />,
     <EditEpilogue
       projectInfo={projectInfo}
+      setIsUpdated={setIsUpdated}
       setViewNumber={setViewNumber}
       id={id}
     />,
@@ -183,6 +193,7 @@ export default function ProjectsPage() {
     <EditChapter
       projectInfo={projectInfo}
       setViewNumber={setViewNumber}
+      setIsUpdated={setIsUpdated}
       _id={id}
       currentChapterId={currentChapterId}
     />,

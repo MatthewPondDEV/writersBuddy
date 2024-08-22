@@ -7,12 +7,14 @@ import { useState, useEffect } from "react";
 import Accordion from "react-bootstrap/Accordion";
 import Image from "react-bootstrap/Image";
 import DeleteCountryModal from "./DeleteCountryModal";
+import { set } from "mongoose";
 
 export default function EditCountry({
   projectInfo,
   setViewNumber,
   currentCountryId,
   _id,
+  setIsUpdated
 }) {
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [loadData, setLoadData] = useState(false);
@@ -67,7 +69,7 @@ export default function EditCountry({
       
       if (country) {
         setName(country.name || '');
-        setBorders(country.borders || []);
+        setBorders(country.borders || '');
         setCapital(country.capital || '');
         setCities(country.cities || []);
         setLandmarks(country.landmarks || []);
@@ -79,41 +81,83 @@ export default function EditCountry({
         setPopulation(country.population || '');
         setWeather(country.weather || '');
         setWildlife(country.wildlife || '');
+        setLoadData(true)
       }
     }
   }, [currentCountryId, projectInfo]);
 
-
-  async function updateCountry(ev) {
+  async function uploadPicture(ev) {
     ev.preventDefault();
-    const data = new FormData();
-    data.set("name", name);
-    data.set("borders", borders);
-    data.set("capital", capital);
-    data.set("cities", JSON.stringify(cities));
-    data.set("landmarks", JSON.stringify(landmarks));
-    data.set("culture", culture);
-    data.set("economy", economy);
-    data.set("food", food);
-    data.set("location", location);
-    data.set("population", population);
-    data.set("weather", weather);
-    data.set("wildlife", wildlife);
-    data.set("countryId", currentCountryId);
-    data.set("id", _id);
-    if (files?.[0]) {
-      data.set("files", files?.[0]);
-    }
-    const response = await fetch(`${serverRoute}/updateCountry`, {
-      method: "PUT",
-      body: data,
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      window.location.reload();
+      if (files?.[0]) {
+      const response = await fetch(`${serverRoute}/s3url`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+      if (response.ok) {
+       const url = await response.json()
+       const bucketUpload = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": 'multipart/form-data'
+        },
+        body: files?.[0]
+       })
+       if (bucketUpload.ok) {
+          const imageURL = url.split('?')[0]
+          setPictures((prev) => [...prev, imageURL]);
+          updateCountry(imageURL)
+       }
+      }
+    } else {
+    updateCountry()
     }
   }
+
+
+
+async function updateCountry(imageURL) {
+
+    // Create a JavaScript object with the data
+    const data = {
+        name: name,
+        borders: borders,
+        capital: capital,
+        cities: JSON.stringify(cities), // Convert arrays/objects to JSON strings
+        landmarks: JSON.stringify(landmarks),
+        culture: culture,
+        economy: economy,
+        food: food,
+        location: location,
+        population: population,
+        weather: weather,
+        wildlife: wildlife,
+        countryId: currentCountryId,
+        id: _id,
+        picture: imageURL ? imageURL : null
+    };
+
+    // Convert the object to a JSON string
+    const jsonData = JSON.stringify(data);
+
+    // Perform the fetch request
+    const response = await fetch(`${serverRoute}/updateCountry`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: jsonData,
+        credentials: 'include',
+    });
+
+    // Check if the request was successful
+    if (response.ok) {
+        setLoadData(false)
+        setIsUpdated(false)
+    } else {
+        // Handle the error if the response is not OK
+        console.error('Failed to update country:', response.statusText);
+    }
+}
 
   const handleCityChange = (cityIndex, field, value) => {
     setCities((prevCities) => {
@@ -205,9 +249,9 @@ export default function EditCountry({
             <div className="d-flex justify-content-center flex-wrap">
               {pictures[0] &&
                 pictures.map((picture) => (
-                  <Col xs={12} md={6} className="text-center">
+                  <Col key={picture} xs={12} md={6} className="text-center">
                     <Image
-                      src={`${serverRoute}/${picture}`}
+                      src={picture}
                       alt="Avatar"
                       style={{
                         height: "300px",
@@ -219,7 +263,7 @@ export default function EditCountry({
                   </Col>
                 ))}
             </div>
-            <Form className="my-4" onSubmit={updateCountry}>
+            <Form className="my-4" onSubmit={uploadPicture}>
               <Row>
                 <Col xs={12} md={6}>
                   <Form.Group className="mb-3">
@@ -392,10 +436,10 @@ export default function EditCountry({
                     className="border-bottom border-top border-dark"
                     flush
                   >
-                    {projectInfo._id &&
+                    {cities.length > 0 &&
                       cities.map((city, cityIndex) => (
                         <Accordion.Item
-                          key={city._id}
+                          key={cityIndex}
                           eventKey={cityIndex.toString()}
                           className="border-bottom"
                         >
@@ -743,7 +787,7 @@ export default function EditCountry({
                     className="border-bottom border-top border-dark"
                     flush
                   >
-                    {projectInfo._id &&
+                    {landmarks.length > 0 &&
                       landmarks.map((landmark, landmarkIndex) => (
                         <Accordion.Item
                           key={landmarkIndex}

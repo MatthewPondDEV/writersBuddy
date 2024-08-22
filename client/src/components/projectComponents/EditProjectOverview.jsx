@@ -33,30 +33,67 @@ export default function EditProjectOverview({
       setPicture(projectInfo.cover)
       setLoadData(true)
     }
-  }, [projectInfo._id])
+  }, [projectInfo])
 
-  async function updatePost(ev) {
+  async function uploadPicture(ev) {
     ev.preventDefault();
-    const data = new FormData();
-    data.set("title", title);
-    data.set("summary", summary);
-    data.set("genre", genre);
-    data.set("author", author);
-    data.set("id", id);
-    if (files?.[0]) {
-      data.set("file", files?.[0]);
-    }
-    const response = await fetch(`${serverRoute}/projectOverview`, {
-      method: "PUT",
-      body: data,
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      setIsUpdated(false);
-      window.location.reload();
+      if (files?.[0]) {
+      const response = await fetch(`${serverRoute}/s3url`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+      if (response.ok) {
+       const url = await response.json()
+       const bucketUpload = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": 'multipart/form-data'
+        },
+        body: files?.[0]
+       })
+       if (bucketUpload.ok) {
+          const imageURL = url.split('?')[0]
+          setPicture(imageURL)
+          updatePost(imageURL)
+       }
+      }
+    } else {
+    updatePost()
     }
   }
+
+  async function updatePost(imageURL) {
+
+  // Create a JavaScript object with the data
+  const data = {
+    title: title,
+    summary: summary,
+    genre: genre,
+    author: author,
+    id: id,
+    cover: imageURL ? imageURL : null
+  };
+
+  // Convert the object to a JSON string
+  const jsonData = JSON.stringify(data);
+
+  // Perform the fetch request
+  const response = await fetch(`${serverRoute}/projectOverview`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: jsonData,
+    credentials: "include",
+  });
+
+  if (response.ok) {
+    setIsUpdated(false);
+    setLoadData(false)
+  } else {
+    console.error('Failed to update the post:', response.statusText);
+  }
+}
 
   return (
     <Col id="papyrus" xs={12} xxl={9}>
@@ -66,7 +103,7 @@ export default function EditProjectOverview({
             <h1 className="mt-3">{title} Overview</h1>
               {picture ? (
                 <Image
-                  src={`${serverRoute}/${picture}`}
+                  src={picture}
                   alt= 'Avatar'
                   style={{ maxHeight: "300px", maxWidth: '100%', borderRadius: '3%'}}
                 />
@@ -78,7 +115,7 @@ export default function EditProjectOverview({
                   style={{ maxHeight: "300px", maxWidth: '100%', borderRadius: '3%'}}
                 />
             )}
-            <Form className="my-4" onSubmit={updatePost}>
+            <Form className="my-4" onSubmit={uploadPicture}>
               <Form.Group className="mb-3">
                 <Form.Label>Title:</Form.Label>
                 <Form.Control

@@ -13,6 +13,7 @@ export default function EditLands({
   setViewNumber,
   _id,
   currentLandId,
+  setIsUpdated,
 }) {
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
@@ -43,32 +44,69 @@ export default function EditLands({
       }
     }
   }, [currentLandId, projectInfo]);
-  
-  async function updateLand(ev) {
-    ev.preventDefault();
-    const data = new FormData();
-    data.set("name", name);
-    data.set("description", description);
-    data.set("terrain", terrain);
-    data.set("location", location);
-    data.set("weather", weather);
-    data.set("wildlife", wildlife);
-    data.set("landId", currentLandId);
-    data.set("id", _id);
-    if (files?.[0]) {
-      data.set("files", files?.[0]);
-    }
-    const response = await fetch(`${serverRoute}/updateLand`, {
-      method: "PUT",
-      body: data,
-      credentials: "include",
-    });
 
-    if (response.ok) {
-      window.location.reload();
+  async function uploadPicture(ev) {
+    ev.preventDefault();
+    if (files?.[0]) {
+      const response = await fetch(`${serverRoute}/s3url`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (response.ok) {
+        const url = await response.json();
+        const bucketUpload = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          body: files?.[0],
+        });
+        if (bucketUpload.ok) {
+          const imageURL = url.split("?")[0];
+          setPictures((prev) => [...prev, imageURL]);
+          updateLand(imageURL);
+        }
+      }
+    } else {
+      updateLand();
     }
   }
+  
+  async function updateLand(imageURL) {
+      // Create a JavaScript object with the data
+    const data = {
+        name: name,
+        description: description,
+        terrain: terrain,
+        location: location,
+        weather: weather,
+        wildlife: wildlife,
+        landId: currentLandId,
+        id: _id,
+        picture: imageURL ? imageURL : null
+    };
 
+    // Convert the object to a JSON string
+    const jsonData = JSON.stringify(data);
+
+    // Perform the fetch request
+    const response = await fetch(`${serverRoute}/updateLand`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: jsonData,
+        credentials: 'include',
+    });
+
+    // Check if the request was successful
+    if (response.ok) {
+        setIsUpdated(false);
+    } else {
+        // Handle the error if the response is not OK
+        console.error('Failed to update land:', response.statusText);
+    }
+}
   return (
     <Col id="papyrus" xs={12} xxl={9}>
       <DeleteLandModal showModal={showDeleteModal}
@@ -90,9 +128,9 @@ export default function EditLands({
             <div className="d-flex justify-content-center justify-content-space between flex-wrap">
               {pictures[0] &&
                 pictures.map((picture) => (
-                  <Col xs={12} md={6} className="text-center">
+                  <Col key={picture} xs={12} md={6} className="text-center">
                     <Image
-                      src={`${serverRoute}/${picture}`}
+                      src={picture}
                       alt="Avatar"
                       style={{
                         height: "300px",
@@ -104,7 +142,7 @@ export default function EditLands({
                   </Col>
                 ))}
             </div>
-            <Form className="my-4" onSubmit={updateLand}>
+            <Form className="my-4" onSubmit={uploadPicture}>
               <Form.Group className="mb-3">
                 <Form.Label>Name:</Form.Label>
                 <Form.Control

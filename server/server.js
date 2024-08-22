@@ -14,7 +14,7 @@ const bodyParser = require("body-parser");
 const multer = require("multer");
 const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
-const s3 = require('./s3Image.js')
+const s3 = require("./s3Image.js");
 require("dotenv").config();
 const { OAuth2Client } = require("google-auth-library");
 
@@ -33,7 +33,6 @@ app.use("/uploads", express.static(__dirname + "/uploads"));
 mongoose.connect(
   `mongodb+srv://mattypond00:${key}@cluster0.32pnilj.mongodb.net/WritersBuddy?retryWrites=true&w=majority`
 );
-
 
 // Middleware to verify access token and handle refresh token if needed
 const verifyTokens = async (req, res, next) => {
@@ -94,7 +93,6 @@ const verifyTokens = async (req, res, next) => {
     }
   });
 };
-
 
 app.get("/getProjects", verifyTokens, async (req, res) => {
   try {
@@ -197,83 +195,60 @@ app.delete("/deleteProject", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/projectOverview",
-  uploadMiddleware.single("file"),
-  verifyTokens,
-  async (req, res) => {
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
+app.put("/projectOverview", verifyTokens, async (req, res) => {
+  try {
+    const { id, title, summary, genre, author, cover } = req.body;
+    console.log(cover);
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
-
-    try {
-      const { id, title, summary, genre, author } = req.body;
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
-      await projectDoc.updateOne({
-        title,
-        summary,
-        genre,
-        author,
-        cover: newPath ? newPath : projectDoc.cover,
-      });
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing project:", error);
-      res.status(500).json({ error: "Failed to edit project" });
-    }
+    await projectDoc.updateOne({
+      title,
+      summary,
+      genre,
+      author,
+      cover: cover ? cover : projectDoc.cover,
+    });
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing project:", error);
+    res.status(500).json({ error: "Failed to edit project" });
   }
-);
+});
 
-app.put(
-  "/settingGeneral",
-  uploadMiddleware.single("files"),
-  verifyTokens,
-  async (req, res) => {
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
+app.put("/settingGeneral", verifyTokens, async (req, res) => {
+  try {
+    const { id, location, timePeriod, description, picture } = req.body;
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
-
-    try {
-      const { id, location, timePeriod, description } = req.body;
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
+    await projectDoc.updateOne({
+      $set: {
+        "setting.location": location,
+        "setting.timePeriod": timePeriod,
+        "setting.description": description,
+      },
+    });
+    if (picture) {
       await projectDoc.updateOne({
-        $set: {
-          "setting.location": location,
-          "setting.timePeriod": timePeriod,
-          "setting.description": description,
-        },
         $push: {
-          "setting.pictures": newPath,
+          "setting.pictures": picture,
         },
       });
-
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing setting:", error);
-      res.status(500).json({ error: "Failed to edit setting" });
     }
+
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing setting:", error);
+    res.status(500).json({ error: "Failed to edit setting" });
   }
-);
+});
 
 app.put("/createCountry", verifyTokens, async (req, res) => {
   try {
@@ -311,82 +286,68 @@ app.get("/getCountryId/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateCountry",
-  verifyTokens,
-  uploadMiddleware.single("files"),
-  async (req, res) => {
-    const { token } = req.cookies;
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
+app.put("/updateCountry", verifyTokens, async (req, res) => {
+  try {
+    const {
+      name,
+      borders,
+      capital,
+      culture,
+      economy,
+      food,
+      location,
+      population,
+      weather,
+      wildlife,
+      countryId,
+      id,
+      picture,
+    } = req.body;
+    const landmarks = JSON.parse(req.body.landmarks);
+    const cities = JSON.parse(req.body.cities);
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
 
-    try {
-      const {
-        name,
-        borders,
-        capital,
-        culture,
-        economy,
-        food,
-        location,
-        population,
-        weather,
-        wildlife,
-        countryId,
-        id,
-      } = req.body;
-      const landmarks = JSON.parse(req.body.landmarks);
-      const cities = JSON.parse(req.body.cities);
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
+    await projectDoc.updateOne(
+      {
+        $set: {
+          "setting.countries.$[inner].name": name,
+          "setting.countries.$[inner].borders": borders,
+          "setting.countries.$[inner].capital": capital,
+          "setting.countries.$[inner].culture": culture,
+          "setting.countries.$[inner].economy": economy,
+          "setting.countries.$[inner].food": food,
+          "setting.countries.$[inner].location": location,
+          "setting.countries.$[inner].population": population,
+          "setting.countries.$[inner].weather": weather,
+          "setting.countries.$[inner].wildlife": wildlife,
+          "setting.countries.$[inner].cities": cities,
+          "setting.countries.$[inner].landmarks": landmarks,
+        },
+      },
+      { arrayFilters: [{ "inner._id": countryId }] }
+    );
 
+    if (picture) {
       await projectDoc.updateOne(
         {
-          $set: {
-            "setting.countries.$[inner].name": name,
-            "setting.countries.$[inner].borders": borders,
-            "setting.countries.$[inner].capital": capital,
-            "setting.countries.$[inner].culture": culture,
-            "setting.countries.$[inner].economy": economy,
-            "setting.countries.$[inner].food": food,
-            "setting.countries.$[inner].location": location,
-            "setting.countries.$[inner].population": population,
-            "setting.countries.$[inner].weather": weather,
-            "setting.countries.$[inner].wildlife": wildlife,
-            "setting.countries.$[inner].cities": cities,
-            "setting.countries.$[inner].landmarks": landmarks,
+          $push: {
+            "setting.countries.$[inner].pictures": picture,
           },
         },
         { arrayFilters: [{ "inner._id": countryId }] }
       );
-
-      if (newPath) {
-        await projectDoc.updateOne(
-          {
-            $push: {
-              "setting.countries.$[inner].pictures": newPath,
-            },
-          },
-          { arrayFilters: [{ "inner._id": countryId }] }
-        );
-      }
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing country:", error);
-      res.status(500).json({ error: "Failed to edit country" });
     }
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing country:", error);
+    res.status(500).json({ error: "Failed to edit country" });
   }
-);
+});
 
 app.delete("/deleteCountry", verifyTokens, async (req, res) => {
   try {
@@ -437,69 +398,56 @@ app.get("/getLandId/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateLand",
-  uploadMiddleware.single("files"),
-  verifyTokens,
-  async (req, res) => {
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
+app.put("/updateLand", verifyTokens, async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      terrain,
+      location,
+      weather,
+      wildlife,
+      landId,
+      id,
+      picture,
+    } = req.body;
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
 
-    try {
-      const {
-        name,
-        description,
-        terrain,
-        location,
-        weather,
-        wildlife,
-        landId,
-        id,
-      } = req.body;
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
+    await projectDoc.updateOne(
+      {
+        $set: {
+          "setting.lands.$[inner].name": name,
+          "setting.lands.$[inner].description": description,
+          "setting.lands.$[inner].terrain": terrain,
+          "setting.lands.$[inner].location": location,
+          "setting.lands.$[inner].weather": weather,
+          "setting.lands.$[inner].wildlife": wildlife,
+        },
+      },
+      { arrayFilters: [{ "inner._id": landId }] }
+    );
 
+    if (picture) {
       await projectDoc.updateOne(
         {
-          $set: {
-            "setting.lands.$[inner].name": name,
-            "setting.lands.$[inner].description": description,
-            "setting.lands.$[inner].terrain": terrain,
-            "setting.lands.$[inner].location": location,
-            "setting.lands.$[inner].weather": weather,
-            "setting.lands.$[inner].wildlife": wildlife,
+          $push: {
+            "setting.lands.$[inner].pictures": picture,
           },
         },
         { arrayFilters: [{ "inner._id": landId }] }
       );
-
-      if (newPath) {
-        await projectDoc.updateOne(
-          {
-            $push: {
-              "setting.lands.$[inner].pictures": newPath,
-            },
-          },
-          { arrayFilters: [{ "inner._id": landId }] }
-        );
-      }
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing land:", error);
-      res.status(500).json({ error: "Failed to edit land" });
     }
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing land:", error);
+    res.status(500).json({ error: "Failed to edit land" });
   }
-);
+});
 
 app.delete("/deleteLand", verifyTokens, async (req, res) => {
   try {
@@ -550,61 +498,45 @@ app.get("/getBodyOfWaterId/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateBodyOfWater",
-  uploadMiddleware.single("files"),
-  verifyTokens,
-  async (req, res) => {
-    const { token } = req.cookies;
-    console.log(req.file);
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
+app.put("/updateBodyOfWater", verifyTokens, async (req, res) => {
+  try {
+    const { name, location, wildlife, description, size, id, bodyOfWaterId, picture } =
+      req.body;
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
 
-    try {
-      const { name, location, wildlife, description, size, id, bodyOfWaterId } =
-        req.body;
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
-
+    await projectDoc.updateOne(
+      {
+        $set: {
+          "setting.bodiesOfWater.$[inner].name": name,
+          "setting.bodiesOfWater.$[inner].location": location,
+          "setting.bodiesOfWater.$[inner].wildlife": wildlife,
+          "setting.bodiesOfWater.$[inner].description": description,
+          "setting.bodiesOfWater.$[inner].size": size,
+        },
+      },
+      { arrayFilters: [{ "inner._id": bodyOfWaterId }] }
+    );
+    if (picture) {
       await projectDoc.updateOne(
         {
-          $set: {
-            "setting.bodiesOfWater.$[inner].name": name,
-            "setting.bodiesOfWater.$[inner].location": location,
-            "setting.bodiesOfWater.$[inner].wildlife": wildlife,
-            "setting.bodiesOfWater.$[inner].description": description,
-            "setting.bodiesOfWater.$[inner].size": size,
+          $push: {
+            "setting.bodiesOfWater.$[inner].pictures": picture,
           },
         },
         { arrayFilters: [{ "inner._id": bodyOfWaterId }] }
       );
-      if (newPath) {
-        await projectDoc.updateOne(
-          {
-            $push: {
-              "setting.bodiesOfWater.$[inner].pictures": newPath,
-            },
-          },
-          { arrayFilters: [{ "inner._id": bodyOfWaterId }] }
-        );
-      }
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing body of water:", error);
-      res.status(500).json({ error: "Failed to edit body of water" });
     }
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing body of water:", error);
+    res.status(500).json({ error: "Failed to edit body of water" });
   }
-);
+});
 
 app.delete("/deleteBodyOfWater", verifyTokens, async (req, res) => {
   try {
@@ -659,17 +591,8 @@ app.get("/getCharacterId/:id", verifyTokens, async (req, res) => {
 
 app.put(
   "/updateCharacter",
-  uploadMiddleware.single("files"),
   verifyTokens,
   async (req, res) => {
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
-    }
 
     try {
       const {
@@ -711,6 +634,7 @@ app.put(
         weight,
         characterId,
         id,
+        picture
       } = req.body;
 
       const projectDoc = await Project.findById(id);
@@ -777,11 +701,11 @@ app.put(
         );
       }
 
-      if (newPath) {
+      if (picture) {
         await projectDoc.updateOne(
           {
             $set: {
-              "characters.$[inner].picture": newPath,
+              "characters.$[inner].picture": picture,
             },
           },
           {
@@ -1443,9 +1367,9 @@ app.post("/saveChat", verifyTokens, async (req, res) => {
   }
 });
 
-app.get('/s3url', async (req, res) => {
-  const url = s3.generateUploadURL()
-  res.send({url})
-})
+app.get("/s3url", async (req, res) => {
+  const url = await s3.generateUploadURL();
+  res.json(url);
+});
 
 app.listen(5000);

@@ -12,6 +12,7 @@ export default function EditBodyOfWater({
   projectInfo,
   setViewNumber,
   currentBodyOfWaterId,
+  setIsUpdated
 }) {
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
@@ -37,35 +38,74 @@ export default function EditBodyOfWater({
         setDescription(water.description || "");
         setLocation(water.location || "");
         setSize(water.size || '')
-        setWildlife(water.wildlife || []);
+        setWildlife(water.wildlife || '');
+        setPictures(water.pictures || [])
       }
     }
   }, [currentBodyOfWaterId, projectInfo]);
 
-  async function updateBodyOfWater(ev) {
+   async function uploadPicture(ev) {
     ev.preventDefault();
-    const data = new FormData();
-    data.set("name", name);
-    data.set("location", location);
-    data.set("wildlife", wildlife);
-    data.set("description", description);
-    data.set("size", size);
-    data.set("id", _id);
-    data.set("bodyOfWaterId", currentBodyOfWaterId);
     if (files?.[0]) {
-      data.set("files", files?.[0]);
-    }
-
-    const response = await fetch(`${serverRoute}/updateBodyOfWater`, {
-      method: "PUT",
-      body: data,
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      window.location.reload();
+      const response = await fetch(`${serverRoute}/s3url`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (response.ok) {
+        const url = await response.json();
+        const bucketUpload = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          body: files?.[0],
+        });
+        if (bucketUpload.ok) {
+          const imageURL = url.split("?")[0];
+          setPictures((prev) => [...prev, imageURL]);
+          updateBodyOfWater(imageURL);
+        }
+      }
+    } else {
+      updateBodyOfWater();
     }
   }
+
+ async function updateBodyOfWater(imageURL) {
+
+    // Create a JavaScript object with the data
+    const data = {
+        name: name,
+        location: location,
+        wildlife: wildlife,
+        description: description,
+        size: size,
+        id: _id,
+        bodyOfWaterId: currentBodyOfWaterId,
+        picture: imageURL ? imageURL : null
+    };
+
+    // Convert the object to a JSON string
+    const jsonData = JSON.stringify(data);
+
+    // Perform the fetch request
+    const response = await fetch(`${serverRoute}/updateBodyOfWater`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: jsonData,
+        credentials: 'include',
+    });
+
+    // Check if the request was successful
+    if (response.ok) {
+        setIsUpdated(false)
+    } else {
+        // Handle the error if the response is not OK
+        console.error('Failed to update body of water:', response.statusText);
+    }
+}
 
   return (
     <Col id="papyrus" xs={12} xxl={9}>
@@ -89,9 +129,9 @@ export default function EditBodyOfWater({
             <div className="d-flex justify-content-center flex-wrap">
               {pictures[0] &&
                 pictures.map((picture) => (
-                  <Col xs={12} md={6} className="text-center">
+                  <Col key= {picture} xs={12} md={6} className="text-center">
                     <Image
-                      src={`${serverRoute}/${picture}`}
+                      src={picture}
                       alt="Avatar"
                       style={{
                         height: "300px",
@@ -103,7 +143,7 @@ export default function EditBodyOfWater({
                   </Col>
                 ))}
             </div>
-            <Form className="my-4" onSubmit={updateBodyOfWater}>
+            <Form className="my-4" onSubmit={uploadPicture}>
               <Form.Group className="mb-3">
                 <Form.Label>Name:</Form.Label>
                 <Form.Control

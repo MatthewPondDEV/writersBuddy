@@ -1,24 +1,22 @@
-import aws from 'aws-sdk'
-import crypto from 'crypto'
-import { promisify } from 'util'
+const aws = require('aws-sdk')
+const crypto = require('crypto')
 require("dotenv").config();
 
-const randomBytes = promisify(crypto.randomBytes)
+const randomBytes = crypto.randomBytes
 
 const region = 'us-east-2'
 const bucketName = 'writers-buddy-img'
 const accessKeyId = process.env.AWS_ACCESS_KEY;
 const secretAccessKey = process.env.AWS_SECRET_KEY;
 
-const s3 = new aws.S3({
+const s3 = new aws.S3({ 
     region,
     accessKeyId,
     secretAccessKey,
     signatureVersion: 'v4'
 })
-
-export async function generateUploadURL() {
-    const rawBytes = await randomBytes(16)
+async function generateUploadURL() {
+    const rawBytes = randomBytes(32)
     const imageName = rawBytes.toString('hex')
 
     const params = ({
@@ -28,5 +26,7 @@ export async function generateUploadURL() {
     })
 
     const uploadURL = await s3.getSignedUrlPromise('putObject', params)
-    return up
+    return uploadURL
 }
+
+module.exports = {generateUploadURL}
