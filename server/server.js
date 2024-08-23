@@ -16,7 +16,6 @@ const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 const s3 = require("./s3Image.js");
 require("dotenv").config();
-const { OAuth2Client } = require("google-auth-library");
 
 const secret = process.env.JWT_SECRET;
 const secretRefresh = process.env.JWT_REFRESH_SECRET;
@@ -27,7 +26,6 @@ app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use("/uploads", express.static(__dirname + "/uploads"));
 
 // MongoDB connection
 mongoose.connect(

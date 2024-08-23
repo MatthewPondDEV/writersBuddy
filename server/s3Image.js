@@ -1,32 +1,38 @@
-const aws = require('aws-sdk')
-const crypto = require('crypto')
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const crypto = require("crypto");
 require("dotenv").config();
 
-const randomBytes = crypto.randomBytes
+const randomBytes = crypto.randomBytes;
 
-const region = 'us-east-2'
-const bucketName = 'writers-buddy-img'
+const region = "us-east-2";
+const bucketName = "writers-buddy-img";
 const accessKeyId = process.env.AWS_ACCESS_KEY;
 const secretAccessKey = process.env.AWS_SECRET_KEY;
 
-const s3 = new aws.S3({ 
-    region,
+// Create an S3 client with v3
+const s3 = new S3Client({
+  region,
+  credentials: {
     accessKeyId,
     secretAccessKey,
-    signatureVersion: 'v4'
-})
+  },
+  signatureVersion: "v4",
+});
+
 async function generateUploadURL() {
-    const rawBytes = randomBytes(32)
-    const imageName = rawBytes.toString('hex')
+  const rawBytes = randomBytes(32);
+  const imageName = rawBytes.toString("hex");
 
-    const params = ({
-        Bucket: bucketName,
-        Key: imageName,
-        Expires: 60
-    })
+  const command = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: imageName,
+    // You can set additional parameters here if needed
+  });
 
-    const uploadURL = await s3.getSignedUrlPromise('putObject', params)
-    return uploadURL
+  // Get the signed URL
+  const uploadURL = await getSignedUrl(s3, command, { expiresIn: 60 });
+  return uploadURL;
 }
 
-module.exports = {generateUploadURL}
+module.exports = { generateUploadURL };
