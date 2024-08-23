@@ -92,7 +92,7 @@ export default function ManagePojects() {
                           <Col xs={12} xl={6} className="py-3 text-center">
                             {project.cover ? (
                               <Image
-                                src={`${serverRoute}/${project.cover}`}
+                                src={project.cover}
                                 alt="Avatar"
                                 style={{
                                   maxHeight: "300px",

@@ -22,7 +22,7 @@ export default function NoteSidebar({
   setCurrentNoteId,
   showMessage,
 }) {
-  const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE
+  const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE;
   const { userInfo, setUserInfo } = useContext(UserContext);
   const [loggedOutRedirect, setLoggedOutRedirect] = useState(false);
   const [logCheck, setLogCheck] = useState(false);
@@ -108,24 +108,25 @@ export default function NoteSidebar({
                   <h2>Notes</h2>
                   <Col xs={12} className="border-top border-dark py-3">
                     <div id="note-btn">
-                      {!showMessage &&
-                        notes.map((note, index) => {
-                          if (note._id) {
-                            return (
-                              <div key={note._id} className="border-bottom">
-                                <Button
-                                  variant="none pe-2"
-                                  onClick={() => {
-                                    setCurrentNoteId(note._id);
-                                    handleClose();
-                                  }}
-                                >
-                                  {note.title}
-                                </Button>
-                              </div>
-                            );
-                          }
-                        })}
+                      {notes.length > 0 &&
+                        notes.map((note, index) => (
+                            <div key={note._id} className="border-bottom">
+                              <Button
+                                variant="none pe-2"
+                                onClick={() => {
+                                  setCurrentNoteId(note._id);
+                                  window.sessionStorage.setItem(
+                                    "currentNoteId",
+                                    note._id
+                                  );
+                                  handleClose();
+                                }}
+                              >
+                                {note.title}
+                              </Button>
+                            </div>
+                          )
+                        )}
                       <Button
                         variant="outline-primary"
                         onClick={() => {

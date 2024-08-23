@@ -6,7 +6,7 @@ import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 import TipTap from "../../Tiptap";
 
-export default function EditEpilogue({projectInfo, setViewNumber, id}) {
+export default function EditEpilogue({projectInfo, setIsUpdated, id}) {
 const [epilogue, setEpilogue] = useState("");
 const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
 useEffect(() => {
@@ -14,16 +14,30 @@ useEffect(() => {
 }, [projectInfo._id]);
 
 async function updateData() {
-  const data = new FormData();
-  data.set('epilogue', epilogue)
-  data.set("id", id);
-  const response = await fetch(`${serverRoute}/updateEpilogue`, {
-    method: "PUT",
-    body: data,
-    credentials: "include",
-  });
-  if (response.ok) {
-    alert("Successfully saved");
+  const payload = {
+    epilogue: epilogue,
+    id: id
+  };
+
+  const jsonPayload = JSON.stringify(payload);
+
+  try {
+    const response = await fetch(`${serverRoute}/updateEpilogue`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: jsonPayload,
+      credentials: "include"
+    });
+
+    if (response.ok) {
+      setIsUpdated(false);
+    } else {
+      console.error('Update failed:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error updating data:', error);
   }
 }
 

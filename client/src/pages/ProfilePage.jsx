@@ -79,39 +79,76 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const data = new FormData();
-    data.set("user_id", userData.user_id);
-    data.set("name", userData.name);
-    data.set("bio", userData.bio);
-    data.set("experience", userData.experience);
-    data.set("favoriteBooks", userData.favoriteBooks);
-    data.set("favoriteAuthors", userData.favoriteAuthors);
-    data.set("favoriteGenre", userData.favoriteGenre);
-    data.set("goals", userData.goals);
-    data.set("instagram", userData.socialMediaLinks.instagram);
-    data.set("facebook", userData.socialMediaLinks.facebook);
-    data.set("pinterest", userData.socialMediaLinks.pinterest);
-    data.set("twitter", userData.socialMediaLinks.twitter);
-    data.set("tiktok", userData.socialMediaLinks.tiktok);
-    data.set('id', userData._id)
-
-    if (files?.[0]) {
-      data.set("file", files?.[0]);
+    async function uploadPicture(ev) {
+    ev.preventDefault();
+      if (files?.[0]) {
+      const response = await fetch(`${serverRoute}/s3url`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+      if (response.ok) {
+       const url = await response.json()
+       const bucketUpload = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": 'multipart/form-data'
+        },
+        body: files?.[0]
+       })
+       if (bucketUpload.ok) {
+          const imageURL = url.split('?')[0]
+          setUserData({
+        ...userData,
+        profilePicture: imageURL,
+      })
+          handleSubmit(imageURL)
+       }
+      }
+    } else {
+    handleSubmit()
     }
+  }
 
+ const handleSubmit = async (imageURL) => {
+  const payload = {
+    user_id: userData.user_id,
+    name: userData.name,
+    bio: userData.bio,
+    experience: userData.experience,
+    favoriteBooks: userData.favoriteBooks,
+    favoriteAuthors: userData.favoriteAuthors,
+    favoriteGenre: userData.favoriteGenre,
+    goals: userData.goals,
+    instagram: userData.socialMediaLinks.instagram,
+    facebook: userData.socialMediaLinks.facebook,
+    pinterest: userData.socialMediaLinks.pinterest,
+    twitter: userData.socialMediaLinks.twitter,
+    tiktok: userData.socialMediaLinks.tiktok,
+    id: userData._id,
+    picture: imageURL ? imageURL : null
+  };
+
+  const jsonPayload = JSON.stringify(payload);
+
+  try {
     const response = await fetch(`${serverRoute}/updateUserInfo`, {
       method: "PUT",
-      body: data,
-      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: jsonPayload,
+      credentials: "include"
     });
 
     if (response.ok) {
-      setUpdated(false)
+      setUpdated(false);
+    } else {
+      console.error('Update failed:', response.statusText);
     }
-  };
-
+  } catch (error) {
+    console.error('Error updating user info:', error);
+  }
+};
   return (
     <>
       <Container fluid>
@@ -127,7 +164,7 @@ export default function ProfilePage() {
                     <h2 className="mt-5">{userData.name}</h2>
                     {userData.profilePicture ? (
                       <Image
-                        src={`${serverRoute}/${userData.profilePicture}`}
+                        src={userData.profilePicture}
                         alt="Avatar"
                         className="mt-2"
                         style={{ height: "200px", borderRadius: "60%", border: '2px solid black' }}
@@ -192,7 +229,7 @@ export default function ProfilePage() {
                       <h2 className="mt-5">{userData.name}</h2>
                       {userData.profilePicture ? (
                         <Image
-                          src={`http://localhost:5000/${userData.profilePicture}`}
+                          src={userData.profilePicture}
                           alt="Avatar"
                           className="mt-2"
                           style={{ height: "200px", borderRadius: "60%", border: '2px solid black' }}
@@ -245,7 +282,7 @@ export default function ProfilePage() {
                   </Col>
                   <Col className="pe-4">
                     <h1 className="mx-1 mt-5">Edit Profile</h1>
-                    <Form className="my-5 mx-3 me-5" onSubmit={handleSubmit}>
+                    <Form className="my-5 mx-3 me-5" onSubmit={uploadPicture}>
                       <Form.Group className="mb-3">
                         <Form.Label>Name: </Form.Label>
                         <Form.Control

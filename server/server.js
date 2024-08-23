@@ -11,8 +11,6 @@ const RefreshToken = require("./models/RefreshToken");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const multer = require("multer");
-const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 const s3 = require("./s3Image.js");
 require("dotenv").config();
@@ -772,17 +770,8 @@ app.get("/getGroupId/:id", verifyTokens, async (req, res) => {
 
 app.put(
   "/updateGroup",
-  uploadMiddleware.single("files"),
   verifyTokens,
   async (req, res) => {
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
-    }
 
     try {
       const {
@@ -797,6 +786,7 @@ app.put(
         size,
         id,
         groupId,
+        picture
       } = req.body;
 
       const projectDoc = await Project.findById(id);
@@ -824,12 +814,11 @@ app.put(
         }
       );
 
-      if (newPath) {
-        console.log(newPath);
+      if (picture) {
         await projectDoc.updateOne(
           {
             $push: {
-              "groups.$[inner].pictures": newPath,
+              "groups.$[inner].pictures": picture,
             },
           },
           {
@@ -850,8 +839,7 @@ app.put(
           }
         );
       }
-      res.json(projectDoc);
-      console.log(projectDoc.groups);
+      res.json(projectDoc)
     } catch (error) {
       console.error("Error editing group:", error);
       res.status(500).json({ error: "Failed to edit group" });
@@ -874,7 +862,6 @@ app.delete("/deleteGroup", verifyTokens, async (req, res) => {
 
 app.put(
   "/updateThemes",
-  uploadMiddleware.single("files"),
   verifyTokens,
   async (req, res) => {
     try {
@@ -939,17 +926,8 @@ app.get("/getArcId/:id", verifyTokens, async (req, res) => {
 
 app.put(
   "/updateArc",
-  uploadMiddleware.single("files"),
   verifyTokens,
   async (req, res) => {
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
-    }
     try {
       const {
         name,
@@ -962,13 +940,14 @@ app.put(
         development,
         resolution,
         id,
+        picture,
+        protagonists,
+        antagonists,
+        tertiary,
+        obstacles,
+        subplots
       } = req.body;
-      const protagonists = JSON.parse(req.body.protagonists);
-      const antagonists = JSON.parse(req.body.antagonists);
-      const tertiary = JSON.parse(req.body.tertiary);
-      const obstacles = JSON.parse(req.body.obstacles);
-      const subplots = JSON.parse(req.body.subplots);
-
+     
       const projectDoc = await Project.findById(id);
       const isAuthor =
         JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
@@ -999,12 +978,11 @@ app.put(
         },
         { new: true }
       );
-      if (newPath) {
-        console.log(newPath);
+      if (picture) {
         await projectDoc.updateOne(
           {
             $set: {
-              "plot.arcs.$[inner].picture": newPath,
+              "plot.arcs.$[inner].picture": picture,
             },
           },
           {
@@ -1013,7 +991,6 @@ app.put(
         );
       }
       res.json(projectDoc);
-      console.log(projectDoc.plot.arcs);
     } catch (error) {
       console.error("Error editing group:", error);
       res.status(500).json({ error: "Failed to edit group" });
@@ -1091,7 +1068,6 @@ app.get("/getChapterId/:id", verifyTokens, async (req, res) => {
 
 app.put(
   "/updateChapter",
-  uploadMiddleware.single("file"),
   verifyTokens,
   async (req, res) => {
     try {
@@ -1151,11 +1127,9 @@ app.delete("/deleteChapter", verifyTokens, async (req, res) => {
 
 app.put(
   "/updateEpilogue",
-  uploadMiddleware.single(""),
   verifyTokens,
   async (req, res) => {
     try {
-      console.log(req.body);
       const { epilogue, id } = req.body;
       const projectDoc = await Project.findById(id);
       const isAuthor =
@@ -1180,10 +1154,8 @@ app.put(
 app.put(
   "/updatePrologue",
   verifyTokens,
-  uploadMiddleware.single(""),
   async (req, res) => {
     try {
-      console.log(req.body);
       const { prologue, id } = req.body;
       const projectDoc = await Project.findById(id);
       const isAuthor =
@@ -1268,25 +1240,16 @@ app.get("/getUserInfo", verifyTokens, async (req, res) => {
 
 app.put(
   "/updateUserInfo",
-  uploadMiddleware.single("file"),
   verifyTokens,
   async (req, res) => {
-    let newPath = null;
-    if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
-    }
 
     try {
-      const { id } = req.body;
+      const { id, picture } = req.body;
       const data = req.body;
       const userInfo = await UserInfo.findById(id);
       await userInfo.updateOne({
         name: data.name,
-        profilePicture: newPath ? newPath : userInfo.profilePicture,
+        profilePicture: picture ? picture : userInfo.profilePicture,
         bio: data.bio,
         experience: data.experience,
         favoriteBooks: data.favoriteBooks,
@@ -1301,7 +1264,6 @@ app.put(
       });
 
       res.json(userInfo);
-      console.log(userInfo);
     } catch (error) {
       console.error("Error editing user profile:", error);
       res.status(500).json({ error: "Failed to edit user profile" });

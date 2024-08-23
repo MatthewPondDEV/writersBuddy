@@ -143,7 +143,7 @@ export default function EditPlotOverview({ projectInfo, setViewNumber, _id }) {
               </Form.Group>
               {obstacles.length > 0 &&
                 obstacles.map((obstacle, index) => (
-                  <Form.Group className="mt-3" key={obstacle._id}>
+                  <Form.Group className="mt-3" key={index}>
                     <Form.Label>Obstacle:</Form.Label>
                     <Form.Control
                       as="textarea"

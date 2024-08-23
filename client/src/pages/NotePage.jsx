@@ -23,26 +23,11 @@ export default function NotePage() {
   const [showEditTitle, setShowEditTitle] = useState(false);
   const [content, setContent] = useState("");
   const [updated, setUpdated] = useState(false);
+  const [findNote, setFindNote] = useState(false)
   const [currentNoteId, setCurrentNoteId] = useState(
-    window.localStorage.getItem("currentNoteId")
+    window.sessionStorage.getItem("currentNoteId")
   );
 
-  const createNote = async () => {
-    setShowMessage(false);
-    const create = await fetch(`${serverRoute}/createNewNote`, {
-      method: "Post",
-      body: JSON.stringify({ title: "New Note" }),
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    });
-
-    if (create.ok) {
-      const noteDoc = await create.json();
-      const updatedNotes = [...notes, noteDoc];
-      setNotes(updatedNotes);
-      setCurrentNoteId(noteDoc._id);
-    }
-  };
 
   useEffect(() => {
     const retrieveNotes = async () => {
@@ -50,32 +35,26 @@ export default function NotePage() {
         method: "GET",
         credentials: "include",
       });
-
+      if (response.ok) {
       const noteArray = await response.json();
-      if (noteArray.length > 0) {
         setNotes(noteArray);
         setUpdated(true);
-        setShowMessage(false)
-      } else {
-        setShowMessage(true);
-        setCurrentNoteId(null);
-         window.localStorage.setItem("currentNoteId", null);
+        setFindNote(true)
       }
     };
     retrieveNotes();
   }, [updated]);
 
-  useEffect(() => {
-    window.localStorage.setItem("currentNoteId", currentNoteId);
-    if (notes?.length > 0) {
-      notes.forEach((note) => {
-        if (note._id === currentNoteId) {
-          setTitle(note.title);
-          setContent(note.content);
-        }
-      });
+ useEffect(() => {
+    // Use find to get the note with the currentNoteId
+    const currentNote = notes.find((note) => note._id === currentNoteId);
+
+    if (currentNote) {
+      setTitle(currentNote.title);
+      setContent(currentNote.content);
+      setShowMessage(false);
     }
-  }, [currentNoteId, updated]);
+}, [currentNoteId, findNote]);
 
   async function updateNote(ev) {
     ev.preventDefault();
@@ -91,6 +70,22 @@ export default function NotePage() {
     }
   }
 
+  const createNote = async () => {
+    const create = await fetch(`${serverRoute}/createNewNote`, {
+      method: "Post",
+      body: JSON.stringify({ title: "New Note" }),
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+
+    if (create.ok) {
+      const noteDoc = await create.json();
+      const updatedNotes = [...notes, noteDoc];
+      setNotes(updatedNotes);
+      setCurrentNoteId(noteDoc._id);
+    }
+  };
+
   async function deleteNote() {
     const deleteFunction = await fetch(`${serverRoute}/deleteNote`, {
       method: "Delete",
@@ -99,17 +94,10 @@ export default function NotePage() {
       credentials: "include",
     });
     if (deleteFunction.ok) {
-      if (notes.length === 1) {
-      const updatedNotes = [];
-      setNotes(updatedNotes);
       setCurrentNoteId(null)
-      window.localStorage.setItem("currentNoteId", null);
+      window.sessionStorage.setItem("currentNoteId", null);
       setUpdated(false);
-    } else {
-      const updatedNoteId = notes[Math.floor(notes.length - 2)]?._id;
-      setCurrentNoteId(updatedNoteId);
-      setUpdated(false);
-    }
+      setShowMessage(true)
     }
   }
   return (
@@ -126,7 +114,7 @@ export default function NotePage() {
           <div className="mt-4">
             <h5 className="mx-2">Notes</h5>
           </div>
-          {showMessage ? (
+          {showMessage === true ? (
             <>
               <h2 className="text-center">Select or Create a note to begin</h2>
             </>

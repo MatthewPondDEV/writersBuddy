@@ -13,6 +13,7 @@ export default function EditChapter({
   setViewNumber,
   _id,
   currentChapterId,
+  setIsUpdated
 }) {
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [title, setTitle] = useState("");
@@ -34,30 +35,40 @@ export default function EditChapter({
         }
       });
     }
-  }, [currentChapterId, projectInfo._id]);
+  }, [currentChapterId, projectInfo]);
 
-  async function updateChapter(ev) {
-    ev.preventDefault();
-    const data = new FormData();
-    data.set("title", title);
-    data.set("content", content);
-    data.set("chapterNumber", chapterNumber);
-    data.set("id", _id);
-    data.set("chapterId", currentChapterId);
+ async function updateChapter(ev) {
+  ev.preventDefault();
 
-    console.log(content)
+  const payload = {
+    title: title,
+    content: content,
+    chapterNumber: chapterNumber,
+    id: _id,
+    chapterId: currentChapterId
+  };
 
+  const jsonPayload = JSON.stringify(payload);
+
+  try {
     const response = await fetch(`${serverRoute}/updateChapter`, {
       method: "PUT",
-      body: data,
-      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: jsonPayload,
+      credentials: "include"
     });
 
     if (response.ok) {
-      window.location.reload();
+      setIsUpdated(false);
+    } else {
+      console.error('Update failed:', response.statusText);
     }
+  } catch (error) {
+    console.error('Error updating chapter:', error);
   }
-
+}
   return (
     <Col id="papyrus" xs={12} xxl={9}>
       <DeleteChapterModal

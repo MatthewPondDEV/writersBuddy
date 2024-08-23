@@ -13,6 +13,7 @@ export default function EditArc({
   setViewNumber,
   _id,
   currentArcId,
+  setIsUpdated
 }) {
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
@@ -73,40 +74,76 @@ export default function EditArc({
       setAntagonists(Array.isArray(arc.antagonists) ? arc.antagonists : []);
     }
   }
-}, [currentArcId, projectInfo._id]);
+}, [currentArcId, projectInfo]);
 
-  async function updateArc(ev) {
+  async function uploadPicture(ev) {
     ev.preventDefault();
-    const data = new FormData();
-    data.set("id", _id);
-    data.set("arcId", currentArcId);
-    data.set("files", files?.[0]);
-    data.set("name", name);
-    data.set("chapters", chapters);
-    data.set("foreshadowing", foreshadowing);
-    data.set("twists", twists);
-    data.set("characterDevelopment", characterDevelopment);
-    data.set("introduction", introduction);
-    data.set("development", development);
-    data.set("resolution", resolution);
+      if (files?.[0]) {
+      const response = await fetch(`${serverRoute}/s3url`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+      if (response.ok) {
+       const url = await response.json()
+       const bucketUpload = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": 'multipart/form-data'
+        },
+        body: files?.[0]
+       })
+       if (bucketUpload.ok) {
+          const imageURL = url.split('?')[0]
+          setPicture(imageURL)
+          updateArc(imageURL)
+       }
+      }
+    } else {
+    updateArc()
+    }
+  }
 
-    // Stringify arrays before appending to FormData
-    data.set("protagonists", JSON.stringify(protagonists));
-    data.set("antagonists", JSON.stringify(antagonists));
-    data.set("tertiary", JSON.stringify(tertiary));
-    data.set("obstacles", JSON.stringify(obstacles));
-    data.set("subplots", JSON.stringify(subplots));
+async function updateArc(imageURL) {
 
+  const payload = {
+    id: _id,
+    arcId: currentArcId,
+    name: name,
+    chapters: chapters,
+    foreshadowing: foreshadowing,
+    twists: twists,
+    characterDevelopment: characterDevelopment,
+    introduction: introduction,
+    development: development,
+    resolution: resolution,
+    protagonists: protagonists,
+    antagonists: antagonists,
+    tertiary: tertiary,
+    obstacles: obstacles,
+    subplots: subplots,
+    picture: imageURL ? imageURL : null
+  };
+  const jsonPayload = JSON.stringify(payload);
+
+  try {
     const response = await fetch(`${serverRoute}/updateArc`, {
       method: "PUT",
-      body: data,
-      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: jsonPayload,
+      credentials: "include" 
     });
 
     if (response.ok) {
-      window.location.reload();
+      setIsUpdated(false);
+    } else {
+      console.error('Update failed:', response.statusText);
     }
+  } catch (error) {
+    console.error('Error updating arc:', error);
   }
+}
 
   const handleObstacleChange = (index, value) => {
     const newObstacles = [...obstacles];
@@ -224,7 +261,7 @@ export default function EditArc({
             <div className="text-center">
               {picture && (
                 <Image
-                  src={`${serverRoute}/${picture}`}
+                  src={picture}
                   alt="Avatar"
                   style={{
                     height: "300px",
@@ -234,7 +271,7 @@ export default function EditArc({
                 />
               )}
             </div>
-            <Form className="my-5" onSubmit={updateArc}>
+            <Form className="my-5" onSubmit={uploadPicture}>
               <Row>
                 <Col xs={12} md={6}>
                   <h2>Basic Info</h2>

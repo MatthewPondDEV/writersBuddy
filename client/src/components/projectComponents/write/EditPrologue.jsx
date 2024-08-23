@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import "react-quill/dist/quill.snow.css";
 import TipTap from "../../Tiptap";
 
-export default function EditPrologue({projectInfo, setViewNumber, id}) {
+export default function EditPrologue({projectInfo, setIsUpdated, id}) {
   const [prologue, setPrologue] = useState('')
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
 
@@ -15,19 +15,34 @@ export default function EditPrologue({projectInfo, setViewNumber, id}) {
       if (projectInfo._id) setPrologue(projectInfo.write.prologue)
   }, [projectInfo._id])
 
- async function update() {
-   const data = new FormData();
-   data.set("prologue", prologue);
-   data.set("id", id);
-   const response = await fetch(`${serverRoute}/updatePrologue`, {
-     method: "PUT",
-     body: data,
-     credentials: "include",
-   });
-   if (response.ok) {
-     alert("Successfully saved");
-   }
- }
+async function update(ev) {
+  ev.preventDefault();
+  const payload = {
+    prologue: prologue,
+    id: id
+  };
+
+  const jsonPayload = JSON.stringify(payload);
+
+  try {
+    const response = await fetch(`${serverRoute}/updatePrologue`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: jsonPayload,
+      credentials: "include"
+    });
+
+    if (response.ok) {
+      setIsUpdated(false);
+    } else {
+      console.error('Update failed:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error updating:', error);
+  }
+}
   return (
     <Col id="papyrus" xs={12} xxl={9}>
       <h5 className="mt-4 mx-2">Prologue</h5>

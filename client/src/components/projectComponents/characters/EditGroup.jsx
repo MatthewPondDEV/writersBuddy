@@ -15,6 +15,7 @@ export default function EditGroup({
   setViewNumber,
   _id,
   currentGroupId,
+  setIsUpdated
 }) {
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [files, setFiles] = useState("");
@@ -41,48 +42,79 @@ export default function EditGroup({
       if (group) {
         setName(group.name || '');
         setBusiness(group.business || '');
-        setCapital(group.capital || 0); // Assuming capital is a number
-        setConnections(group.connections || []);
+        setCapital(group.capital || ''); 
+        setConnections(group.connections || '');
         setDescription(group.description || '');
         setEstablished(
           group.established ? dayjs(group.established).add(1, 'day') : dayjs()
         );
         setLocation(group.location || '');
-        setNotableMembers(group.notableMembers || []);
+        setNotableMembers(group.notableMembers || '');
         setPictures(group.pictures || []);
         setSize(group.size || 0); // Assuming size is a number
       }
     }
   }, [currentGroupId, projectInfo]);
 
-  async function updateGroup(ev) {
+    async function uploadPicture(ev) {
     ev.preventDefault();
-    const data = new FormData();
-    data.set("name", name);
-    data.set("business", business);
-    data.set("capital", capital);
-    data.set("connections", connections);
-    data.set("description", description);
-    data.set("established", established);
-    data.set("location", location);
-    data.set("notableMembers", notableMembers);
-    data.set("size", size);
-    data.set("id", _id);
-    data.set("groupId", currentGroupId);
     if (files?.[0]) {
-      data.set("files", files?.[0]);
-    }
-
-    const response = await fetch(`${serverRoute}/updateGroup`, {
-      method: "PUT",
-      body: data,
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      window.location.reload();
+      const response = await fetch(`${serverRoute}/s3url`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (response.ok) {
+        const url = await response.json();
+        const bucketUpload = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          body: files?.[0],
+        });
+        if (bucketUpload.ok) {
+          const imageURL = url.split("?")[0];
+          setPictures((prev) => [...prev, imageURL]);
+          updateGroup(imageURL);
+        }
+      }
+    } else {
+      updateGroup();
     }
   }
+
+async function updateGroup(imageURL) {
+
+  // Create a JavaScript object with the data
+  const payload = {
+    name: name,
+    business: business,
+    capital: capital,
+    connections: connections,
+    description: description,
+    established: established,
+    location: location,
+    notableMembers: notableMembers,
+    size: size,
+    id: _id,
+    groupId: currentGroupId,
+    picture: imageURL ? imageURL : null
+  };
+
+  // Convert the object to a JSON string
+  const response = await fetch(`${serverRoute}/updateGroup`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"  // Set the Content-Type header to application/json
+    },
+    body: JSON.stringify(payload),  // Send the JSON payload as a string
+    credentials: "include"  // Include credentials if needed
+  });
+
+  if (response.ok) {
+    setIsUpdated(false);
+  }
+}
 
   return (
     <Col id="papyrus" xs={12} xxl={9}>
@@ -106,9 +138,9 @@ export default function EditGroup({
             <div className="d-flex justify-content-center flex-wrap">
               {pictures[0] ? (
                 pictures.map((picture) => (
-                  <Col xs={12} md={6} className="text-center">
+                  <Col key={picture} xs={12} md={6} className="text-center">
                     <Image
-                      src={`${serverRoute}/${picture}`}
+                      src={picture}
                       alt="Avatar"
                       style={{
                         height: "300px",
@@ -128,7 +160,7 @@ export default function EditGroup({
                 />
               )}
             </div>
-            <Form className="my-5" onSubmit={updateGroup}>
+            <Form className="my-5" onSubmit={uploadPicture}>
               <Row>
                 <h1 className="my-3">Basic Info</h1>
                 <Col xs={12} md={6}>

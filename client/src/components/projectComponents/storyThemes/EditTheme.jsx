@@ -5,7 +5,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { useState, useEffect } from "react";
 
-export default function EditTheme({ projectInfo, _id, setViewNumber }) {
+export default function EditTheme({ projectInfo, _id, setViewNumber, setIsUpdated }) {
   const serverRoute = import.meta.env.VITE_MAIN_API_ROUTE
   const [primary, setPrimary] = useState({
     name: "Primary Theme",
@@ -55,24 +55,36 @@ export default function EditTheme({ projectInfo, _id, setViewNumber }) {
   }, [projectInfo._id]);
 
   async function updateThemes(ev) {
-    ev.preventDefault();
-    const data = new FormData();
-    data.set("primary", JSON.stringify(primary));
-    data.set("id", _id);
-    if (secondary?.[0]) {
-      data.set("secondary", JSON.stringify(secondary));
-    }
+  ev.preventDefault();
 
+  const payload = {
+    primary: primary,
+    id: _id,
+    secondary: secondary ? JSON.stringify(secondary) : undefined
+  };
+
+  const jsonPayload = JSON.stringify(payload);
+
+  try {
     const response = await fetch(`${serverRoute}/updateThemes`, {
       method: "PUT",
-      body: data,
-      credentials: "include",
+      headers: {
+        "Content-Type": "application/json" 
+      },
+      body: jsonPayload,  
+      credentials: "include"  
     });
 
+    // Check if the response was successful
     if (response.ok) {
-      window.location.reload();
+      setIsUpdated(false);
+    } else {
+      console.error('Update failed:', response.statusText);
     }
+  } catch (error) {
+    console.error('Error updating themes:', error);
   }
+}
 
   return (
     <Col id="papyrus" xs={12} xxl={9}>
