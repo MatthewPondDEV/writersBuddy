@@ -8,6 +8,7 @@ import NotePage from './pages/NotePage';
 import ManageProjects from './pages/ManageProjects';
 import ProfilePage from './pages/ProfilePage';
 import BrainstormPage from './pages/BrainstormPage';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path='/manageProjects' element={<ManageProjects />} />
         <Route path='/profile' element={<ProfilePage />} />
         <Route path='/brainstorm' element={<BrainstormPage />} />
+        <Route path='/reset-password/:token' element={<ResetPassword />} />
       </Route>
     </Routes>
   )

@@ -3,6 +3,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Login from "../components/Login";
 import Register from "../components/Register";
+import RequestReset from "../components/RequestReset";
 import Button from "react-bootstrap/Button";
 import { useState } from "react";
 import { useEffect, useContext } from "react";
@@ -28,6 +29,7 @@ export default function IndexPage() {
   const { userInfo, setUserInfo } = useContext(UserContext);
   const [loadLogin, setLoadLogin] = useState(false);
   const [loadRegister, setLoadRegister] = useState(false);
+  const [resetPass, setResetPass] = useState(false)
   const [logOrReg, setLogOrReg] = useState(true);
   const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE
 
@@ -176,7 +178,8 @@ export default function IndexPage() {
             </div>
             {loadLogin && (
               <>
-                <Login />
+                <Login setResetPass = {setResetPass}
+                      setLoadLogin = {setLoadLogin}/>
                 <Button
                   variant="link"
                   onClick={() => {
@@ -200,6 +203,20 @@ export default function IndexPage() {
                   onClick={() => {
                     setLoadRegister(false);
                     setLogOrReg(true);
+                  }}
+                >
+                  Go Back
+                </Button>
+              </>
+            )}
+            {resetPass && (
+              <>
+              <RequestReset setLoadLogin={setLoadLogin}/>
+              <Button
+                  variant="link"
+                  onClick={() => {
+                    setResetPass(false);
+                    setLoadLogin(true);
                   }}
                 >
                   Go Back

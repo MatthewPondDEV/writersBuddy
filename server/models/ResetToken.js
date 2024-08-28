@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
-const RefreshTokenSchema = new Schema({
+const ResetTokenSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   token: { type: String, required: true },
   createdAt: {
@@ -10,8 +10,8 @@ const RefreshTokenSchema = new Schema({
   },
 });
 
-RefreshTokenSchema.index({ createdAt: 1 }, { expireAfterSeconds: 172800 }); // Expires in 1 hour
+ResetTokenSchema.index({ createdAt: 1 }, { expireAfterSeconds: 1800 }); // Expires in 30 min
 
-const RefreshTokenModel = model("RefreshToken", RefreshTokenSchema);
+const ResetTokenModel = model("ResetToken", ResetTokenSchema);
 
-module.exports = RefreshTokenModel;
+module.exports = ResetTokenModel;

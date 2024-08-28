@@ -8,7 +8,6 @@ export default function Register({setLoadRegister, setLoadLogin}) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [redirect, setRedirect] = useState(false);
     const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE
 
     async function register(event) {
@@ -23,7 +22,6 @@ export default function Register({setLoadRegister, setLoadLogin}) {
             alert('Registration Successful')
             setLoadLogin(true)
             setLoadRegister(false)
-            setRedirect(true)
         } else {
             alert('Registration Failed')
         }

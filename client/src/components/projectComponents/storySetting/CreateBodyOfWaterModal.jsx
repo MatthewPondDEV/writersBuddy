@@ -24,7 +24,6 @@ export default function CreateBodyOfWaterModal({showModal,handleClose, id, setVi
             const bodyOfWater = await idResponse.json()
             setCurrentBodyOfWaterId(bodyOfWater._id)
             setViewNumber('9')
-            setBodyOfWaterName('')
             handleClose()
             window.location.reload()
     }
