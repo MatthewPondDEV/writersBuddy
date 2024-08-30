@@ -5,30 +5,37 @@ import { Navigate } from "react-router-dom";
 import { useContext } from "react";
 import { UserContext } from "../UserContext";
 
-export default function Login({setResetPass, setLoadLogin}) {
+export default function Login({ setResetPass, setLoadLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [redirect, setRedirect] = useState(false);
   const { setUserInfo } = useContext(UserContext);
   const serverRoute = import.meta.env.VITE_AUTH_API_ROUTE;
-  
-  async function login(event) {
-    event.preventDefault();
+
+async function login(event) {
+  event.preventDefault();
+
+  try {
     const response = await fetch(`${serverRoute}/login`, {
       method: "POST",
       body: JSON.stringify({ email, password }),
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
+
     if (response.ok) {
-      response.json().then((userInfo) => {
-        setUserInfo(userInfo);
-        setRedirect(true);
-      });
+    const userInfo = await response.json();
+    setUserInfo(userInfo);
+    setRedirect(true);
     } else {
-      alert("wrong credentials");
+      const result = await response.text()
+      setMessage(result)
     }
+  } catch (error) {
+    setMessage(error)
   }
+}
 
   if (redirect) {
     return <Navigate to="/home" />;
@@ -58,17 +65,16 @@ export default function Login({setResetPass, setLoadLogin}) {
       <Button variant="primary w-100" type="submit">
         Submit
       </Button>
+      {message && <p className='text-center text-danger mt-2'>{message}</p>}
       <Button
         variant="link"
-        className="my-2 pb-3"
         onClick={() => {
           setLoadLogin(false);
-          setResetPass(true)
+          setResetPass(true);
         }}
       >
         Forgot password? Click here
       </Button>
     </Form>
-
   );
 }

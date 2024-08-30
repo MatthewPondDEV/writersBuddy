@@ -14,7 +14,6 @@ const { sendMail } = require("./mailService");
 const crypto = require("crypto");
 require("dotenv").config();
 const { OAuth2Client } = require("google-auth-library");
-const { reset } = require("nodemon");
 
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
@@ -170,7 +169,7 @@ app.post("/auth/google/token", async (req, res) => {
 // Registration and Login routes
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
-  const email = req.body.toLowercase()
+  const email = req.body.email.toLowerCase();
   try {
     const userDoc = await User.create({
       email,
@@ -198,22 +197,23 @@ app.post("/register", async (req, res) => {
     });
     res.json(userDoc);
   } catch (e) {
-    res.status(400).json(e);
+    res.status(400).send(e);
   }
 });
 
 app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = req.body.email.toLowerCase();
   const userDoc = await User.findOne({ email });
 
   if (!userDoc) {
-    return res.status(400).json({ error: "User not found" });
+    return res.status(400).send("Sorry, we cannot find that email.");
   }
 
   const passOk = bcrypt.compareSync(password, userDoc.password);
 
   if (!passOk) {
-    return res.status(400).json({ error: "Wrong credentials" });
+    return res.status(400).send("Password is incorrect.");
   }
 
   // User authenticated, generate tokens
@@ -234,7 +234,7 @@ app.post("/login", async (req, res) => {
     await RefreshToken.create({ userId: userDoc._id, token: refreshToken });
   } catch (error) {
     console.error("Error managing refresh tokens:", error);
-    return res.status(500).json({ error: "Failed to manage refresh tokens" });
+    return res.status(500).send("Failed to manage tokens. Sorry, please log in after a short wait.");
   }
 
   res.cookie("token", accessToken, { httpOnly: true });
@@ -284,7 +284,7 @@ app.post("/logout", async (req, res) => {
 
 //Route to request a password reset
 app.post("/reset-password-request", async (req, res) => {
-  const { email } = req.body;
+  const email = req.body.email.toLowerCase();
 
   const resetToken = crypto.randomBytes(20).toString("hex");
 
@@ -294,8 +294,8 @@ app.post("/reset-password-request", async (req, res) => {
       .status(404)
       .send("We could not find a user with that email address");
   }
-      
-      console.log(user)
+
+  console.log(user);
 
   try {
     await ResetToken.create({ userId: user._id, token: resetToken });
@@ -311,34 +311,38 @@ app.post("/reset-password-request", async (req, res) => {
   const html = `<p>You requested a password reset. Click <a href="${resetURL}">here</a> to reset your password.</p>`;
 
   try {
-    await sendMail(email, "Writer's Buddy Password Reset", 'NO-REPLY', html)
-    res.send('Password reset email sent successfully. Check spam folder if you do not see it.')
+    await sendMail(email, "NO REPLY: Writer's Buddy Password Reset", "NO-REPLY", html);
+    res.send(
+      "Password reset email sent successfully. Check spam folder if you do not see it."
+    );
   } catch (error) {
-    res.status(500).send('Error sending email')
+    res.status(500).send("Error sending email");
   }
 });
 
 //reset the password for the user
-app.post('/reset-password/:token', async (req, res) => {
+app.post("/reset-password/:token", async (req, res) => {
   const { token } = req.params;
   const { newPassword } = req.body;
 
   // Find user by reset token
-  const tokenDoc = await ResetToken.findOne({token});
+  const tokenDoc = await ResetToken.findOne({ token });
 
-  if (!tokenDoc) {return res.status(400).send('Invalid or expired token');}
+  if (!tokenDoc) {
+    return res.status(400).send("Invalid or expired token");
+  }
 
-  const user = User.findOne({_id: tokenDoc.userId})
+  const user = User.findOne({ _id: tokenDoc.userId });
 
-  tokenDoc.deleteOne()
+  tokenDoc.deleteOne();
 
   try {
     await user.updateOne({
-      password: bcrypt.hashSync(newPassword, salt)
-    })
+      password: bcrypt.hashSync(newPassword, salt),
+    });
     res.send("Password has been reset");
   } catch (error) {
-    return res.status(500).send('Error changing password')
+    return res.status(500).send("Error changing password");
   }
 });
 
