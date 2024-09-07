@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.637.0",
+    "@aws-sdk/s3-request-presigner": "^3.637.0",
+    "aws-sdk": "^2.1678.0",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "cookieparser": "^0.1.0",
+    "cors": "^2.8.5",
+    "create-react-app": "^1.2.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "google-auth-library": "^9.12.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.6.11",
+    "node": "^20.2.0",
+    "nodemailer": "^6.9.14",
+    "nodemon": "^3.0.3",
+    "openai": "^4.52.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "tar": "^6.1.15",
+    "util": "^0.12.5",
+    "yarn": "^1.22.19"
+  }
+}

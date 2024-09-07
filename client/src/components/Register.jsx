@@ -65,7 +65,7 @@ export default function Register({ setLoadRegister, setLoadLogin }) {
           onChange={(event) => setPassword(event.target.value)}
         />
         <Form.Text className="text-white">
-          Password must be at least 8 characters longs
+          Password must be at least 8 characters long
         </Form.Text>
       </Form.Group>
 
