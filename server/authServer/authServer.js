@@ -21,7 +21,7 @@ const secretRefresh = process.env.JWT_REFRESH_SECRET;
 const key = process.env.MDB_API_KEY;
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(cors({ credentials: true, origin: process.env.ORIGIN}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -70,7 +70,11 @@ const verifyTokens = async (req, res, next) => {
           );
 
           // Update the access token in the response cookies
-          res.cookie("token", newAccessToken, { httpOnly: true });
+          res.cookie("token", newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // Only set secure flag in production
+            sameSite: "Strict",
+          });
           // Attach decoded token payload to request object
           req.user = decodedRefreshToken;
 
@@ -152,9 +156,15 @@ app.post("/auth/google/token", async (req, res) => {
     }
 
     // Send tokens to frontend
-    res.cookie("token", accessToken, { httpOnly: true });
+    res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Only set secure flag in production
+      sameSite: "Strict",
+    });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Only set secure flag in production
+      sameSite: "Strict",
       maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
     });
     res.json({
@@ -216,17 +226,6 @@ app.post("/login", async (req, res) => {
     return res.status(400).send("Password is incorrect.");
   }
 
-  // User authenticated, generate tokens
-  const accessToken = jwt.sign(
-    { id: userDoc._id, username: userDoc.username },
-    secret,
-    { expiresIn: "15m" }
-  );
-  const refreshToken = jwt.sign(
-    { id: userDoc._id, username: userDoc.username },
-    secretRefresh,
-    { expiresIn: "2d" }
-  );
 
   // Delete previous refresh tokens and store new one
   try {
@@ -237,9 +236,15 @@ app.post("/login", async (req, res) => {
     return res.status(500).send("Failed to manage tokens. Sorry, please log in after a short wait.");
   }
 
-  res.cookie("token", accessToken, { httpOnly: true });
+  res.cookie("token", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // Only set secure flag in production
+    sameSite: "Strict",
+  });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Only set secure flag in production
+    sameSite: 'Strict',
     maxAge: 2 * 24 * 60 * 60 * 1000,
   });
   res.json({ id: userDoc._id, username: userDoc.username });

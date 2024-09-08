@@ -6,12 +6,10 @@ const User = require("./models/User");
 const Project = require("./models/Project");
 const Note = require("./models/Note");
 const UserInfo = require("./models/UserInfo");
-const BrainstormChat = require("./models/BrainstormChat");
 const RefreshToken = require("./models/RefreshToken");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const fs = require("fs");
 const s3 = require("./s3Image.js");
 require("dotenv").config();
 
@@ -69,7 +67,11 @@ const verifyTokens = async (req, res, next) => {
           );
 
           // Update the access token in the response cookies
-          res.cookie("token", newAccessToken, { httpOnly: true });
+          res.cookie("token", newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // Only set secure flag in production
+            sameSite: "Strict",
+          });
           // Attach decoded token payload to request object
           req.user = decodedRefreshToken;
 
