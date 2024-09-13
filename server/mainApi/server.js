@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const serverless = require("serverless-http");
 const cors = require("cors");
 const User = require("./models/User");
 const Project = require("./models/Project");
@@ -15,7 +16,7 @@ require("dotenv").config();
 
 const secret = process.env.JWT_SECRET;
 const secretRefresh = process.env.JWT_REFRESH_SECRET;
-const key = process.env.MDB_API_KEY;
+const mongoStr = process.env.MDB_API_KEY;
 const openAIAPIKey = process.env.OPEN_AI_PROJECT_KEY;
 
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
@@ -24,9 +25,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 // MongoDB connection
-mongoose.connect(
-  `mongodb+srv://mattypond00:${key}@cluster0.32pnilj.mongodb.net/WritersBuddy?retryWrites=true&w=majority`
-);
+mongoose.connect(mongoStr);
 
 // Middleware to verify access token and handle refresh token if needed
 const verifyTokens = async (req, res, next) => {
@@ -498,8 +497,16 @@ app.get("/getBodyOfWaterId/:id", verifyTokens, async (req, res) => {
 
 app.put("/updateBodyOfWater", verifyTokens, async (req, res) => {
   try {
-    const { name, location, wildlife, description, size, id, bodyOfWaterId, picture } =
-      req.body;
+    const {
+      name,
+      location,
+      wildlife,
+      description,
+      size,
+      id,
+      bodyOfWaterId,
+      picture,
+    } = req.body;
     const projectDoc = await Project.findById(id);
     const isAuthor =
       JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
@@ -587,138 +594,133 @@ app.get("/getCharacterId/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateCharacter",
-  verifyTokens,
-  async (req, res) => {
+app.put("/updateCharacter", verifyTokens, async (req, res) => {
+  try {
+    const {
+      name,
+      abilities,
+      birthDate,
+      birthPlace,
+      bodyType,
+      clothes,
+      characterType,
+      childhood,
+      criminalRecord,
+      development,
+      dreams,
+      education,
+      employment,
+      eyesight,
+      eyeColor,
+      family,
+      fears,
+      gender,
+      hairColor,
+      hairstyle,
+      handedness,
+      height,
+      hobbies,
+      medicalHistory,
+      moneyHabits,
+      motivations,
+      personality,
+      pets,
+      physicalDistinctions,
+      relationships,
+      romanticHistory,
+      skills,
+      strengths,
+      voice,
+      weaknesses,
+      weight,
+      characterId,
+      id,
+      picture,
+    } = req.body;
 
-    try {
-      const {
-        name,
-        abilities,
-        birthDate,
-        birthPlace,
-        bodyType,
-        clothes,
-        characterType,
-        childhood,
-        criminalRecord,
-        development,
-        dreams,
-        education,
-        employment,
-        eyesight,
-        eyeColor,
-        family,
-        fears,
-        gender,
-        hairColor,
-        hairstyle,
-        handedness,
-        height,
-        hobbies,
-        medicalHistory,
-        moneyHabits,
-        motivations,
-        personality,
-        pets,
-        physicalDistinctions,
-        relationships,
-        romanticHistory,
-        skills,
-        strengths,
-        voice,
-        weaknesses,
-        weight,
-        characterId,
-        id,
-        picture
-      } = req.body;
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
+    }
 
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
+    await projectDoc.updateOne(
+      {
+        $set: {
+          "characters.$[inner].name": name,
+          "characters.$[inner].abilities": abilities,
+          "characters.$[inner].birthPlace": birthPlace,
+          "characters.$[inner].bodyType": bodyType,
+          "characters.$[inner].clothes": clothes,
+          "characters.$[inner].characterType": characterType,
+          "characters.$[inner].childhood": childhood,
+          "characters.$[inner].criminalRecord": criminalRecord,
+          "characters.$[inner].development": development,
+          "characters.$[inner].dreams": dreams,
+          "characters.$[inner].education": education,
+          "characters.$[inner].employment": employment,
+          "characters.$[inner].eyesight": eyesight,
+          "characters.$[inner].eyeColor": eyeColor,
+          "characters.$[inner].family": family ? JSON.parse(family) : [],
+          "characters.$[inner].fears": fears,
+          "characters.$[inner].gender": gender,
+          "characters.$[inner].hairColor": hairColor,
+          "characters.$[inner].hairstyle": hairstyle,
+          "characters.$[inner].handedness": handedness,
+          "characters.$[inner].height": height,
+          "characters.$[inner].hobbies": hobbies,
+          "characters.$[inner].medicalHistory": medicalHistory,
+          "characters.$[inner].moneyHabits": moneyHabits,
+          "characters.$[inner].motivations": motivations,
+          "characters.$[inner].personality": personality,
+          "characters.$[inner].pets": pets,
+          "characters.$[inner].physicalDistinctions": physicalDistinctions,
+          "characters.$[inner].relationships": relationships,
+          "characters.$[inner].romanticHistory": romanticHistory,
+          "characters.$[inner].skills": skills,
+          "characters.$[inner].strengths": strengths,
+          "characters.$[inner].voice": voice,
+          "characters.$[inner].weaknesses": weaknesses,
+          "characters.$[inner].weight": weight,
+        },
+      },
+      {
+        arrayFilters: [{ "inner._id": characterId }],
       }
-
+    );
+    if (birthDate != "undefined") {
       await projectDoc.updateOne(
         {
           $set: {
-            "characters.$[inner].name": name,
-            "characters.$[inner].abilities": abilities,
-            "characters.$[inner].birthPlace": birthPlace,
-            "characters.$[inner].bodyType": bodyType,
-            "characters.$[inner].clothes": clothes,
-            "characters.$[inner].characterType": characterType,
-            "characters.$[inner].childhood": childhood,
-            "characters.$[inner].criminalRecord": criminalRecord,
-            "characters.$[inner].development": development,
-            "characters.$[inner].dreams": dreams,
-            "characters.$[inner].education": education,
-            "characters.$[inner].employment": employment,
-            "characters.$[inner].eyesight": eyesight,
-            "characters.$[inner].eyeColor": eyeColor,
-            "characters.$[inner].family": family ? JSON.parse(family) : [],
-            "characters.$[inner].fears": fears,
-            "characters.$[inner].gender": gender,
-            "characters.$[inner].hairColor": hairColor,
-            "characters.$[inner].hairstyle": hairstyle,
-            "characters.$[inner].handedness": handedness,
-            "characters.$[inner].height": height,
-            "characters.$[inner].hobbies": hobbies,
-            "characters.$[inner].medicalHistory": medicalHistory,
-            "characters.$[inner].moneyHabits": moneyHabits,
-            "characters.$[inner].motivations": motivations,
-            "characters.$[inner].personality": personality,
-            "characters.$[inner].pets": pets,
-            "characters.$[inner].physicalDistinctions": physicalDistinctions,
-            "characters.$[inner].relationships": relationships,
-            "characters.$[inner].romanticHistory": romanticHistory,
-            "characters.$[inner].skills": skills,
-            "characters.$[inner].strengths": strengths,
-            "characters.$[inner].voice": voice,
-            "characters.$[inner].weaknesses": weaknesses,
-            "characters.$[inner].weight": weight,
+            "characters.$[inner].birthDate": birthDate,
           },
         },
         {
           arrayFilters: [{ "inner._id": characterId }],
         }
       );
-      if (birthDate != "undefined") {
-        await projectDoc.updateOne(
-          {
-            $set: {
-              "characters.$[inner].birthDate": birthDate,
-            },
-          },
-          {
-            arrayFilters: [{ "inner._id": characterId }],
-          }
-        );
-      }
-
-      if (picture) {
-        await projectDoc.updateOne(
-          {
-            $set: {
-              "characters.$[inner].picture": picture,
-            },
-          },
-          {
-            arrayFilters: [{ "inner._id": characterId }],
-          }
-        );
-      }
-      res.json(projectDoc);
-      console.log(projectDoc);
-    } catch (error) {
-      console.error("Error editing character:", error);
-      res.status(500).json({ error: "Failed to edit character" });
     }
+
+    if (picture) {
+      await projectDoc.updateOne(
+        {
+          $set: {
+            "characters.$[inner].picture": picture,
+          },
+        },
+        {
+          arrayFilters: [{ "inner._id": characterId }],
+        }
+      );
+    }
+    res.json(projectDoc);
+    console.log(projectDoc);
+  } catch (error) {
+    console.error("Error editing character:", error);
+    res.status(500).json({ error: "Failed to edit character" });
   }
-);
+});
 
 app.delete("/deleteCharacter", verifyTokens, async (req, res) => {
   try {
@@ -770,84 +772,79 @@ app.get("/getGroupId/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateGroup",
-  verifyTokens,
-  async (req, res) => {
+app.put("/updateGroup", verifyTokens, async (req, res) => {
+  try {
+    const {
+      name,
+      business,
+      capital,
+      connections,
+      description,
+      established,
+      location,
+      notableMembers,
+      size,
+      id,
+      groupId,
+      picture,
+    } = req.body;
 
-    try {
-      const {
-        name,
-        business,
-        capital,
-        connections,
-        description,
-        established,
-        location,
-        notableMembers,
-        size,
-        id,
-        groupId,
-        picture
-      } = req.body;
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
+    }
 
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
+    await projectDoc.updateOne(
+      {
+        $set: {
+          "groups.$[inner].name": name,
+          "groups.$[inner].business": business,
+          "groups.$[inner].capital": capital,
+          "groups.$[inner].connections": connections,
+          "groups.$[inner].description": description,
+          "groups.$[inner].location": location,
+          "groups.$[inner].notableMembers": notableMembers,
+          "groups.$[inner].size": size,
+        },
+      },
+      {
+        arrayFilters: [{ "inner._id": groupId }],
       }
+    );
 
+    if (picture) {
       await projectDoc.updateOne(
         {
-          $set: {
-            "groups.$[inner].name": name,
-            "groups.$[inner].business": business,
-            "groups.$[inner].capital": capital,
-            "groups.$[inner].connections": connections,
-            "groups.$[inner].description": description,
-            "groups.$[inner].location": location,
-            "groups.$[inner].notableMembers": notableMembers,
-            "groups.$[inner].size": size,
+          $push: {
+            "groups.$[inner].pictures": picture,
           },
         },
         {
           arrayFilters: [{ "inner._id": groupId }],
         }
       );
-
-      if (picture) {
-        await projectDoc.updateOne(
-          {
-            $push: {
-              "groups.$[inner].pictures": picture,
-            },
-          },
-          {
-            arrayFilters: [{ "inner._id": groupId }],
-          }
-        );
-      }
-
-      if (established != "undefined") {
-        await projectDoc.updateOne(
-          {
-            $set: {
-              "groups.$[inner].established": established,
-            },
-          },
-          {
-            arrayFilters: [{ "inner._id": groupId }],
-          }
-        );
-      }
-      res.json(projectDoc)
-    } catch (error) {
-      console.error("Error editing group:", error);
-      res.status(500).json({ error: "Failed to edit group" });
     }
+
+    if (established != "undefined") {
+      await projectDoc.updateOne(
+        {
+          $set: {
+            "groups.$[inner].established": established,
+          },
+        },
+        {
+          arrayFilters: [{ "inner._id": groupId }],
+        }
+      );
+    }
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing group:", error);
+    res.status(500).json({ error: "Failed to edit group" });
   }
-);
+});
 
 app.delete("/deleteGroup", verifyTokens, async (req, res) => {
   try {
@@ -862,32 +859,28 @@ app.delete("/deleteGroup", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateThemes",
-  verifyTokens,
-  async (req, res) => {
-    try {
-      const { primary, secondary, id } = req.body;
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
-
-      await projectDoc.updateOne({
-        $set: {
-          "themes.primary": primary ? JSON.parse(primary) : {},
-          "themes.secondary": secondary ? JSON.parse(secondary) : [],
-        },
-      });
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing themes:", error);
-      res.status(500).json({ error: "Failed to edit themes" });
+app.put("/updateThemes", verifyTokens, async (req, res) => {
+  try {
+    const { primary, secondary, id } = req.body;
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
+
+    await projectDoc.updateOne({
+      $set: {
+        "themes.primary": primary ? JSON.parse(primary) : {},
+        "themes.secondary": secondary ? JSON.parse(secondary) : [],
+      },
+    });
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing themes:", error);
+    res.status(500).json({ error: "Failed to edit themes" });
   }
-);
+});
 
 app.put("/createArc", verifyTokens, async (req, res) => {
   try {
@@ -926,79 +919,75 @@ app.get("/getArcId/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateArc",
-  verifyTokens,
-  async (req, res) => {
-    try {
-      const {
-        name,
-        arcId,
-        chapters,
-        foreshadowing,
-        twists,
-        characterDevelopment,
-        introduction,
-        development,
-        resolution,
-        id,
-        picture,
-        protagonists,
-        antagonists,
-        tertiary,
-        obstacles,
-        subplots
-      } = req.body;
-     
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
+app.put("/updateArc", verifyTokens, async (req, res) => {
+  try {
+    const {
+      name,
+      arcId,
+      chapters,
+      foreshadowing,
+      twists,
+      characterDevelopment,
+      introduction,
+      development,
+      resolution,
+      id,
+      picture,
+      protagonists,
+      antagonists,
+      tertiary,
+      obstacles,
+      subplots,
+    } = req.body;
 
-      await Project.findOneAndUpdate(
-        {
-          "plot.arcs._id": arcId,
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
+    }
+
+    await Project.findOneAndUpdate(
+      {
+        "plot.arcs._id": arcId,
+      },
+      {
+        $set: {
+          "plot.arcs.$.name": name,
+          "plot.arcs.$.chapters": chapters,
+          "plot.arcs.$.foreshadowing": foreshadowing,
+          "plot.arcs.$.twists": twists,
+          "plot.arcs.$.characterDevelopment": characterDevelopment,
+          "plot.arcs.$.introduction": introduction,
+          "plot.arcs.$.development": development,
+          "plot.arcs.$.resolution": resolution,
+          "plot.arcs.$.protagonists": protagonists,
+          "plot.arcs.$.antagonists": antagonists,
+          "plot.arcs.$.tertiary": tertiary,
+          "plot.arcs.$.obstacles": obstacles,
+          "plot.arcs.$.subplots": subplots,
         },
+      },
+      { new: true }
+    );
+    if (picture) {
+      await projectDoc.updateOne(
         {
           $set: {
-            "plot.arcs.$.name": name,
-            "plot.arcs.$.chapters": chapters,
-            "plot.arcs.$.foreshadowing": foreshadowing,
-            "plot.arcs.$.twists": twists,
-            "plot.arcs.$.characterDevelopment": characterDevelopment,
-            "plot.arcs.$.introduction": introduction,
-            "plot.arcs.$.development": development,
-            "plot.arcs.$.resolution": resolution,
-            "plot.arcs.$.protagonists": protagonists,
-            "plot.arcs.$.antagonists": antagonists,
-            "plot.arcs.$.tertiary": tertiary,
-            "plot.arcs.$.obstacles": obstacles,
-            "plot.arcs.$.subplots": subplots,
+            "plot.arcs.$[inner].picture": picture,
           },
         },
-        { new: true }
+        {
+          arrayFilters: [{ "inner._id": arcId }],
+        }
       );
-      if (picture) {
-        await projectDoc.updateOne(
-          {
-            $set: {
-              "plot.arcs.$[inner].picture": picture,
-            },
-          },
-          {
-            arrayFilters: [{ "inner._id": arcId }],
-          }
-        );
-      }
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing group:", error);
-      res.status(500).json({ error: "Failed to edit group" });
     }
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing group:", error);
+    res.status(500).json({ error: "Failed to edit group" });
   }
-);
+});
 
 app.delete("/deleteArc", verifyTokens, async (req, res) => {
   try {
@@ -1068,51 +1057,47 @@ app.get("/getChapterId/:id", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateChapter",
-  verifyTokens,
-  async (req, res) => {
-    try {
-      const { title, id, content, chapterId } = req.body;
+app.put("/updateChapter", verifyTokens, async (req, res) => {
+  try {
+    const { title, id, content, chapterId } = req.body;
 
-      const chapterNumber = Number(req.body.chapterNumber);
-      console.log(title, chapterNumber);
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
-
-      await projectDoc.updateOne(
-        {
-          $set: {
-            "write.chapters.$[inner].title": title,
-            "write.chapters.$[inner].chapterNumber": chapterNumber,
-            "write.chapters.$[inner].content": content,
-          },
-        },
-        {
-          arrayFilters: [{ "inner._id": chapterId }],
-        }
-      );
-      await projectDoc.updateOne({
-        $push: {
-          "write.chapters": {
-            $each: [],
-            $sort: {
-              chapterNumber: 1,
-            },
-          },
-        },
-      });
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing chapter:", error);
-      res.status(500).json({ error: "Failed to edit chapter" });
+    const chapterNumber = Number(req.body.chapterNumber);
+    console.log(title, chapterNumber);
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
+
+    await projectDoc.updateOne(
+      {
+        $set: {
+          "write.chapters.$[inner].title": title,
+          "write.chapters.$[inner].chapterNumber": chapterNumber,
+          "write.chapters.$[inner].content": content,
+        },
+      },
+      {
+        arrayFilters: [{ "inner._id": chapterId }],
+      }
+    );
+    await projectDoc.updateOne({
+      $push: {
+        "write.chapters": {
+          $each: [],
+          $sort: {
+            chapterNumber: 1,
+          },
+        },
+      },
+    });
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing chapter:", error);
+    res.status(500).json({ error: "Failed to edit chapter" });
   }
-);
+});
 
 app.delete("/deleteChapter", verifyTokens, async (req, res) => {
   try {
@@ -1127,57 +1112,49 @@ app.delete("/deleteChapter", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateEpilogue",
-  verifyTokens,
-  async (req, res) => {
-    try {
-      const { epilogue, id } = req.body;
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
-
-      await projectDoc.updateOne({
-        $set: {
-          "write.epilogue": epilogue,
-        },
-      });
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing epilogue:", error);
-      res.status(500).json({ error: "Failed to edit epilogue" });
+app.put("/updateEpilogue", verifyTokens, async (req, res) => {
+  try {
+    const { epilogue, id } = req.body;
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
+
+    await projectDoc.updateOne({
+      $set: {
+        "write.epilogue": epilogue,
+      },
+    });
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing epilogue:", error);
+    res.status(500).json({ error: "Failed to edit epilogue" });
   }
-);
+});
 
-app.put(
-  "/updatePrologue",
-  verifyTokens,
-  async (req, res) => {
-    try {
-      const { prologue, id } = req.body;
-      const projectDoc = await Project.findById(id);
-      const isAuthor =
-        JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
-      if (!isAuthor) {
-        return res.status(400).json("you are not the author");
-      }
-
-      await projectDoc.updateOne({
-        $set: {
-          "write.prologue": prologue,
-        },
-      });
-      res.json(projectDoc);
-    } catch (error) {
-      console.error("Error editing prologue:", error);
-      res.status(500).json({ error: "Failed to edit prologue" });
+app.put("/updatePrologue", verifyTokens, async (req, res) => {
+  try {
+    const { prologue, id } = req.body;
+    const projectDoc = await Project.findById(id);
+    const isAuthor =
+      JSON.stringify(projectDoc.createdBy) === JSON.stringify(req.user.id);
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author");
     }
+
+    await projectDoc.updateOne({
+      $set: {
+        "write.prologue": prologue,
+      },
+    });
+    res.json(projectDoc);
+  } catch (error) {
+    console.error("Error editing prologue:", error);
+    res.status(500).json({ error: "Failed to edit prologue" });
   }
-);
+});
 
 app.post("/createNewNote", verifyTokens, async (req, res) => {
   try {
@@ -1240,38 +1217,33 @@ app.get("/getUserInfo", verifyTokens, async (req, res) => {
   }
 });
 
-app.put(
-  "/updateUserInfo",
-  verifyTokens,
-  async (req, res) => {
+app.put("/updateUserInfo", verifyTokens, async (req, res) => {
+  try {
+    const { id, picture } = req.body;
+    const data = req.body;
+    const userInfo = await UserInfo.findById(id);
+    await userInfo.updateOne({
+      name: data.name,
+      profilePicture: picture ? picture : userInfo.profilePicture,
+      bio: data.bio,
+      experience: data.experience,
+      favoriteBooks: data.favoriteBooks,
+      favoriteAuthors: data.favoriteAuthors,
+      favoriteGenre: data.favoriteGenre,
+      goals: data.goals,
+      "socialMediaLinks.instagram": data.instagram,
+      "socialMediaLinks.facebook": data.facebook,
+      "socialMediaLinks.pinterest": data.pinterest,
+      "socialMediaLinks.twitter": data.twitter,
+      "socialMediaLinks.tiktok": data.tiktok,
+    });
 
-    try {
-      const { id, picture } = req.body;
-      const data = req.body;
-      const userInfo = await UserInfo.findById(id);
-      await userInfo.updateOne({
-        name: data.name,
-        profilePicture: picture ? picture : userInfo.profilePicture,
-        bio: data.bio,
-        experience: data.experience,
-        favoriteBooks: data.favoriteBooks,
-        favoriteAuthors: data.favoriteAuthors,
-        favoriteGenre: data.favoriteGenre,
-        goals: data.goals,
-        "socialMediaLinks.instagram": data.instagram,
-        "socialMediaLinks.facebook": data.facebook,
-        "socialMediaLinks.pinterest": data.pinterest,
-        "socialMediaLinks.twitter": data.twitter,
-        "socialMediaLinks.tiktok": data.tiktok,
-      });
-
-      res.json(userInfo);
-    } catch (error) {
-      console.error("Error editing user profile:", error);
-      res.status(500).json({ error: "Failed to edit user profile" });
-    }
+    res.json(userInfo);
+  } catch (error) {
+    console.error("Error editing user profile:", error);
+    res.status(500).json({ error: "Failed to edit user profile" });
   }
-);
+});
 
 app.post("/chatbot", verifyTokens, async (req, res) => {
   try {
@@ -1334,4 +1306,6 @@ app.get("/s3url", async (req, res) => {
   res.json(url);
 });
 
-app.listen(5000);
+module.exports.handler = serverless(app);
+
+//app.listen(5000);

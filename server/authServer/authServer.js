@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const serverless = require("serverless-http");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
@@ -18,7 +19,7 @@ const { OAuth2Client } = require("google-auth-library");
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
 const secretRefresh = process.env.JWT_REFRESH_SECRET;
-const key = process.env.MDB_API_KEY;
+const mongoStr = process.env.MDB_API_KEY;
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 app.use(cors({ credentials: true, origin: process.env.ORIGIN}));
@@ -27,9 +28,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 // MongoDB connection
-mongoose.connect(
-  `mongodb+srv://mattypond00:${key}@cluster0.32pnilj.mongodb.net/WritersBuddy?retryWrites=true&w=majority`
-);
+mongoose.connect(mongoStr);
 
 // Middleware to verify access token and handle refresh token if needed
 const verifyTokens = async (req, res, next) => {
@@ -351,4 +350,6 @@ app.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-app.listen(4000);
+module.exports.handler = serverless(app);
+
+//app.listen(4000);
