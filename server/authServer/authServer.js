@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
-const serverless = require("serverless-http");
 const mongoose = require("mongoose");
+const serverless = require("serverless-http");
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
 const User = require("./models/User");
@@ -26,7 +26,6 @@ app.use(cors({ credentials: true, origin: process.env.ORIGIN}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
-
 // MongoDB connection
 mongoose.connect(mongoStr);
 
@@ -311,7 +310,7 @@ app.post("/reset-password-request", async (req, res) => {
       );
   }
 
-  const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+  const resetURL = `${process.env.ORIGIN}/reset-password/${resetToken}`;
   const html = `<p>You requested a password reset. Click <a href="${resetURL}">here</a> to reset your password.</p>`;
 
   try {

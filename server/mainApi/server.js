@@ -23,7 +23,6 @@ app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
-
 // MongoDB connection
 mongoose.connect(mongoStr);
 
@@ -1308,4 +1307,4 @@ app.get("/s3url", async (req, res) => {
 
 module.exports.handler = serverless(app);
 
-//app.listen(5000);
+//
