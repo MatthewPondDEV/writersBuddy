@@ -19,7 +19,7 @@ const secretRefresh = process.env.JWT_REFRESH_SECRET;
 const mongoStr = process.env.MDB_API_KEY;
 const openAIAPIKey = process.env.OPEN_AI_PROJECT_KEY;
 
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(cors({ credentials: true, origin: process.env.ORIGIN }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());

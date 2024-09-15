@@ -22,7 +22,7 @@ const secretRefresh = process.env.JWT_REFRESH_SECRET;
 const mongoStr = process.env.MDB_API_KEY;
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-app.use(cors({ credentials: true, origin: process.env.ORIGIN}));
+app.use(cors({ credentials: true, origin: process.env.ORIGIN }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -224,14 +224,17 @@ app.post("/login", async (req, res) => {
     return res.status(400).send("Password is incorrect.");
   }
 
-
   // Delete previous refresh tokens and store new one
   try {
     await RefreshToken.findOneAndDelete({ userId: userDoc._id });
     await RefreshToken.create({ userId: userDoc._id, token: refreshToken });
   } catch (error) {
     console.error("Error managing refresh tokens:", error);
-    return res.status(500).send("Failed to manage tokens. Sorry, please log in after a short wait.");
+    return res
+      .status(500)
+      .send(
+        "Failed to manage tokens. Sorry, please log in after a short wait."
+      );
   }
 
   res.cookie("token", accessToken, {
@@ -241,8 +244,8 @@ app.post("/login", async (req, res) => {
   });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Only set secure flag in production
-    sameSite: 'Strict',
+    secure: process.env.NODE_ENV === "production", // Only set secure flag in production
+    sameSite: "Strict",
     maxAge: 2 * 24 * 60 * 60 * 1000,
   });
   res.json({ id: userDoc._id, username: userDoc.username });
@@ -314,7 +317,12 @@ app.post("/reset-password-request", async (req, res) => {
   const html = `<p>You requested a password reset. Click <a href="${resetURL}">here</a> to reset your password.</p>`;
 
   try {
-    await sendMail(email, "NO REPLY: Writer's Buddy Password Reset", "NO-REPLY", html);
+    await sendMail(
+      email,
+      "NO REPLY: Writer's Buddy Password Reset",
+      "NO-REPLY",
+      html
+    );
     res.send(
       "Password reset email sent successfully. Check spam folder if you do not see it."
     );
