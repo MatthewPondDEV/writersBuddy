@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const serverless = require("serverless-http");
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
 const User = require("./models/User");
@@ -16,6 +15,7 @@ const crypto = require("crypto");
 require("dotenv").config();
 const { OAuth2Client } = require("google-auth-library");
 
+const PORT = process.env.PORT;
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
 const secretRefresh = process.env.JWT_REFRESH_SECRET;
@@ -357,6 +357,6 @@ app.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-module.exports.handler = serverless(app);
-
-//app.listen(4000);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+});

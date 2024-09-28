@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const serverless = require("serverless-http");
 const cors = require("cors");
 const User = require("./models/User");
 const Project = require("./models/Project");
@@ -14,6 +13,7 @@ const bodyParser = require("body-parser");
 const s3 = require("./s3Image.js");
 require("dotenv").config();
 
+const PORT = process.env.PORT;
 const secret = process.env.JWT_SECRET;
 const secretRefresh = process.env.JWT_REFRESH_SECRET;
 const mongoStr = process.env.MDB_API_KEY;
@@ -1305,6 +1305,6 @@ app.get("/s3url", async (req, res) => {
   res.json(url);
 });
 
-module.exports.handler = serverless(app);
-
-//
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+});
