@@ -48,6 +48,8 @@
     "vite": "^5.2.0"
   },
   "react-dotenv": {
-    "whitelist": ["VITE_GOOGLE_CLIENT_ID"]
+    "whitelist": [
+      "VITE_GOOGLE_CLIENT_ID"
+    ]
   }
 }
