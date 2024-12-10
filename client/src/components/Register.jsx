@@ -22,9 +22,11 @@ export default function Register({ setLoadRegister, setLoadLogin }) {
           body: JSON.stringify({ email, username, password }),
           headers: { "Content-Type": "application/json" },
         });
-        alert("Registration Successful");
-        setLoadLogin(true);
-        setLoadRegister(false);
+        if (response.ok) {
+          alert("Registration Successful");
+          setLoadLogin(true);
+          setLoadRegister(false);
+        }
       } catch (error) {
         setMessage(error);
       }

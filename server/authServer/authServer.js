@@ -12,10 +12,10 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const { sendMail } = require("./mailService");
 const crypto = require("crypto");
+const serverless = require("serverless-http");
 require("dotenv").config();
 const { OAuth2Client } = require("google-auth-library");
 
-const PORT = process.env.PORT;
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
 const secretRefresh = process.env.JWT_REFRESH_SECRET;
@@ -27,8 +27,23 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 // MongoDB connection
-mongoose.connect(mongoStr);
+let cachedDb = null;
+const connectToDatabase = async () => {
+  if (cachedDb) {
+    return cachedDb;
+  }
 
+  try {
+    // Establish a new connection to MongoDB
+    const db = await mongoose.connect(mongoStr);
+    console.log('Connection Successul')
+    cachedDb = db; // Store the connection in the cache for reuse
+    return cachedDb;
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+    throw error;
+  }
+};
 // Middleware to verify access token and handle refresh token if needed
 const verifyTokens = async (req, res, next) => {
   const accessToken = req.cookies.token;
@@ -46,6 +61,7 @@ const verifyTokens = async (req, res, next) => {
         try {
           const decodedRefreshToken = jwt.verify(refreshToken, secretRefresh);
 
+          await connectToDatabase();
           // Check if the refresh token exists in the database
           const storedRefreshToken = await RefreshToken.findOne({
             userId: decodedRefreshToken.id,
@@ -104,6 +120,8 @@ app.post("/auth/google/token", async (req, res) => {
     });
     const payload = ticket.getPayload();
 
+    await connectToDatabase();
+
     // Find or create user
     let user = await User.findOne({ googleId: payload.sub });
     if (!user) {
@@ -146,6 +164,7 @@ app.post("/auth/google/token", async (req, res) => {
     );
 
     try {
+      await connectToDatabase();
       await RefreshToken.findOneAndDelete({ userId: user._id });
       await RefreshToken.create({ userId: user._id, token: refreshToken });
     } catch (error) {
@@ -179,6 +198,7 @@ app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   const email = req.body.email.toLowerCase();
   try {
+    await connectToDatabase();
     const userDoc = await User.create({
       email,
       username,
@@ -205,13 +225,14 @@ app.post("/register", async (req, res) => {
     });
     res.json(userDoc);
   } catch (e) {
-    res.status(400).send(e);
+    res.status(400).send("Sorry, we had trouble registering your account.");
   }
 });
 
 app.post("/login", async (req, res) => {
   const { password } = req.body;
   const email = req.body.email.toLowerCase();
+  await connectToDatabase();
   const userDoc = await User.findOne({ email });
 
   if (!userDoc) {
@@ -223,6 +244,18 @@ app.post("/login", async (req, res) => {
   if (!passOk) {
     return res.status(400).send("Password is incorrect.");
   }
+
+  // Generate JWTs
+  const accessToken = jwt.sign(
+    { id: userDoc._id, username: userDoc.username },
+    secret,
+    { expiresIn: "15m" }
+  );
+  const refreshToken = jwt.sign(
+    { id: userDoc._id, username: userDoc.username },
+    secretRefresh,
+    { expiresIn: "2d" }
+  );
 
   // Delete previous refresh tokens and store new one
   try {
@@ -239,12 +272,12 @@ app.post("/login", async (req, res) => {
 
   res.cookie("token", accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production", // Only set secure flag in production
+    // secure: process.env.NODE_ENV === "production", // Only set secure flag in production
     sameSite: "Strict",
   });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production", // Only set secure flag in production
+    // secure: process.env.NODE_ENV === "production", // Only set secure flag in production
     sameSite: "Strict",
     maxAge: 2 * 24 * 60 * 60 * 1000,
   });
@@ -255,6 +288,7 @@ app.post("/login", async (req, res) => {
 
 app.get("/profile", verifyTokens, async (req, res) => {
   try {
+    await connectToDatabase();
     // Fetch user information based on decoded token
     const user = await User.findOne({ _id: req.user.id });
     if (!user) {
@@ -276,6 +310,7 @@ app.post("/logout", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
   try {
+    await connectToDatabase();
     // Delete the refresh token from the database
     await RefreshToken.findOneAndDelete({ token: refreshToken });
 
@@ -293,7 +328,7 @@ app.post("/reset-password-request", async (req, res) => {
   const email = req.body.email.toLowerCase();
 
   const resetToken = crypto.randomBytes(20).toString("hex");
-
+  await connectToDatabase();
   const user = await User.findOne({ email });
   if (!user) {
     return res
@@ -343,6 +378,7 @@ app.post("/reset-password/:token", async (req, res) => {
     return res.status(400).send("Invalid or expired token");
   }
 
+  await connectToDatabase();
   const user = User.findOne({ _id: tokenDoc.userId });
 
   tokenDoc.deleteOne();
@@ -357,6 +393,6 @@ app.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
-});
+app.listen(4000);
+
+//module.exports.handler = serverless(app);

@@ -7,8 +7,8 @@ const randomBytes = crypto.randomBytes;
 
 const region = "us-east-2";
 const bucketName = "writers-buddy-img";
-const accessKeyId = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_SECRET_KEY;
+const accessKeyId = process.env.UPLOAD_ACCESS;
+const secretAccessKey = process.env.UPLOAD_SECRET;
 
 // Create an S3 client with v3
 const s3 = new S3Client({
